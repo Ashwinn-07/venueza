@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
-export interface IVendors extends Document {
+export interface IVendor extends Document {
   _id: ObjectId;
   Name: string;
   Email: string;
@@ -14,7 +14,7 @@ export interface IVendors extends Document {
   UpdatedAt: Date;
 }
 
-const VendorsSchema: Schema = new Schema(
+const VendorSchema: Schema = new Schema(
   {
     Name: { type: String, required: true, trim: true },
     Email: {
@@ -38,5 +38,5 @@ const VendorsSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-const Vendors = mongoose.model<IVendors>("Vendors", VendorsSchema);
+const Vendors = mongoose.model<IVendor>("Vendor", VendorSchema);
 export default Vendors;
