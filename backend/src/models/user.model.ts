@@ -2,27 +2,33 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface IUsers extends Document {
   _id: ObjectId;
-  Name: String | null;
-  Email: String | null;
-  Password: String | null;
-  Phone: String | null;
-  UpdatedAt: Date | null;
-  Bookings: ObjectId | null;
-  CreatedAt: Date | null;
-  Status: String | null;
+  Name: string;
+  Email: string;
+  Password: string;
+  Phone?: string;
+  Bookings?: ObjectId;
+  Status: "active" | "blocked";
+  CreatedAt: Date;
+  UpdatedAt: Date;
 }
 
-const UsersSchema: Schema = new Schema({
-  Name: { type: String },
-  Email: { type: String },
-  Password: { type: String },
-  Phone: { type: String },
-  UpdatedAt: { type: Date },
-  Bookings: { type: Schema.Types.ObjectId },
-  CreatedAt: { type: Date },
-  Status: { type: String, enum: ["active", "blocked"] },
-});
+const UsersSchema: Schema = new Schema(
+  {
+    Name: { type: String, required: true, trim: true },
+    Email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    Password: { type: String, required: true },
+    Phone: { type: String, trim: true, default: null },
+    Bookings: { type: Schema.Types.ObjectId, ref: "Bookings", default: null },
+    Status: { type: String, enum: ["active", "blocked"], default: "active" },
+  },
+  { timestamps: true }
+);
 
 const Users = mongoose.model<IUsers>("Users", UsersSchema);
-
 export default Users;

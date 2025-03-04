@@ -2,19 +2,20 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface IAdmin extends Document {
   _id: ObjectId;
-  Email: String | null;
-  Name: String | null;
-  Password: String | null;
-  CreatedAt: Date | null;
+  Name: string;
+  Email: string;
+  Password: string;
+  CreatedAt: Date;
 }
 
-const AdminSchema: Schema = new Schema({
-  Email: { type: String },
-  Name: { type: String },
-  Password: { type: String },
-  CreatedAt: { type: Date },
-});
+const AdminSchema: Schema = new Schema(
+  {
+    Name: { type: String, required: true, trim: true },
+    Email: { type: String, required: true, unique: true, trim: true },
+    Password: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
 const Admin = mongoose.model<IAdmin>("Admin", AdminSchema);
-
 export default Admin;
