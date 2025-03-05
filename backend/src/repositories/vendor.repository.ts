@@ -11,7 +11,7 @@ class VendorRepository
   }
 
   async findByEmail(email: string): Promise<IVendor | null> {
-    return await Vendor.findOne({ Email: email });
+    return await Vendor.findOne({ email: email });
   }
 }
 

@@ -2,30 +2,34 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface IUser extends Document {
   _id: ObjectId;
-  Name: string;
-  Email: string;
-  Password: string;
-  Phone?: string;
-  Bookings?: ObjectId;
-  Status: "active" | "blocked";
-  CreatedAt: Date;
-  UpdatedAt: Date;
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  bookings?: ObjectId;
+  status: "active" | "blocked";
+  isVerified: boolean;
+  otp?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema: Schema = new Schema(
   {
-    Name: { type: String, required: true, trim: true },
-    Email: {
+    name: { type: String, required: true, trim: true },
+    email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
       lowercase: true,
     },
-    Password: { type: String, required: true },
-    Phone: { type: String, trim: true, default: null },
-    Bookings: { type: Schema.Types.ObjectId, ref: "Bookings", default: null },
-    Status: { type: String, enum: ["active", "blocked"], default: "active" },
+    password: { type: String, required: true },
+    phone: { type: String, trim: true, default: null },
+    bookings: { type: Schema.Types.ObjectId, ref: "Bookings", default: null },
+    status: { type: String, enum: ["active", "blocked"], default: "active" },
+    isVerified: { type: Boolean, default: false },
+    otp: { type: String, default: null },
   },
   { timestamps: true }
 );

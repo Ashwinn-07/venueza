@@ -16,7 +16,9 @@ class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.model.findOne(condition).lean<T>().exec();
   }
   async update(id: string, updateData: Partial<T>): Promise<T | null> {
-    return await this.model.findByIdAndUpdate(id, updateData, { new: true });
+    return await this.model.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
   }
 }
 

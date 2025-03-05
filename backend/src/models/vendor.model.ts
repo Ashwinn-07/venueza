@@ -2,34 +2,34 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface IVendor extends Document {
   _id: ObjectId;
-  Name: string;
-  Email: string;
-  Phone: string;
-  Password: string;
-  BusinessAddress: string;
-  BusinessName: string;
-  Venues?: ObjectId;
-  Status: "pending" | "blocked" | "active";
-  CreatedAt: Date;
-  UpdatedAt: Date;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  businessAddress: string;
+  businessName: string;
+  venues?: ObjectId;
+  status: "pending" | "blocked" | "active";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const VendorSchema: Schema = new Schema(
+const vendorSchema: Schema = new Schema(
   {
-    Name: { type: String, required: true, trim: true },
-    Email: {
+    name: { type: String, required: true, trim: true },
+    email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
       lowercase: true,
     },
-    Phone: { type: String, required: true, trim: true },
-    Password: { type: String, required: true },
-    BusinessAddress: { type: String, required: true, trim: true },
-    BusinessName: { type: String, required: true, trim: true },
-    Venues: { type: Schema.Types.ObjectId, ref: "Venues", default: null },
-    Status: {
+    phone: { type: String, required: true, trim: true },
+    password: { type: String, required: true },
+    businessAddress: { type: String, required: true, trim: true },
+    businessName: { type: String, required: true, trim: true },
+    venues: { type: Schema.Types.ObjectId, ref: "Venues", default: null },
+    status: {
       type: String,
       enum: ["pending", "blocked", "active"],
       default: "pending",
@@ -38,5 +38,5 @@ const VendorSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-const Vendors = mongoose.model<IVendor>("Vendor", VendorSchema);
+const Vendors = mongoose.model<IVendor>("Vendor", vendorSchema);
 export default Vendors;
