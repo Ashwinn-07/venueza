@@ -36,6 +36,13 @@ class VendorController implements IVendorController {
     try {
       const { email, password } = req.body;
       const result = await vendorService.loginVendor(email, password);
+      res.cookie("auth-token", result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 3600000,
+        path: "/",
+      });
       res.status(result.status).json({
         message: result.message,
         user: {
@@ -45,7 +52,6 @@ class VendorController implements IVendorController {
           phone: result.vendor.phone,
           status: result.vendor.status,
         },
-        token: result.token,
       });
     } catch (error) {
       console.error(error);
@@ -53,6 +59,18 @@ class VendorController implements IVendorController {
         error: error instanceof Error ? error.message : "Login Failed",
       });
     }
+  }
+  async logout(req: Request, res: Response): Promise<void> {
+    res.clearCookie("auth-token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
+
+    res.status(STATUS_CODES.OK).json({
+      message: "Logged out successfully",
+    });
   }
 }
 

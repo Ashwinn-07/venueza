@@ -20,4 +20,6 @@ userRoutes.get(
   }),
   userController.googleCallback
 );
+userRoutes.post("/logout", userController.logout);
+
 export default userRoutes;

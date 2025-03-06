@@ -6,7 +6,6 @@ type AuthType = "user" | "vendor" | "admin";
 
 interface AuthState {
   user: any | null;
-  token: string | null;
   authType: AuthType | null;
   isAuthenticated: boolean;
 
@@ -17,11 +16,10 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
-      token: sessionStorage.getItem("auth-token") || null,
       authType: sessionStorage.getItem("auth-type") as AuthType | null,
-      isAuthenticated: !!sessionStorage.getItem("auth-token"),
+      isAuthenticated: false,
 
       login: async (email, password, authType) => {
         try {
@@ -38,12 +36,10 @@ export const useAuthStore = create<AuthState>()(
               break;
           }
 
-          sessionStorage.setItem("auth-token", response.token);
           sessionStorage.setItem("auth-type", authType);
 
           set({
             user: response.user,
-            token: response.token,
             authType,
             isAuthenticated: true,
           });
@@ -74,16 +70,36 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        sessionStorage.removeItem("auth-token");
-        sessionStorage.removeItem("auth-type");
+      logout: async () => {
+        try {
+          const { authType } = get();
+          if (!authType) throw new Error("No auth type found");
 
-        set({
-          user: null,
-          token: null,
-          authType: null,
-          isAuthenticated: false,
-        });
+          switch (authType) {
+            case "user":
+              await authService.userLogout();
+              break;
+            case "vendor":
+              await authService.vendorLogout();
+              break;
+            case "admin":
+              await authService.adminLogout();
+              break;
+            default:
+              throw new Error("Invalid auth type");
+          }
+
+          sessionStorage.removeItem("auth-type");
+
+          set({
+            user: null,
+            authType: null,
+            isAuthenticated: false,
+          });
+        } catch (error) {
+          console.error("Logout failed", error);
+          throw error;
+        }
       },
     }),
     {
@@ -91,7 +107,6 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         authType: state.authType,
         isAuthenticated: state.isAuthenticated,
       }),

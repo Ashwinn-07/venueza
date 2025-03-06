@@ -8,6 +8,13 @@ class AdminController implements IAdminController {
     try {
       const { email, password } = req.body;
       const result = await adminService.loginAdmin(email, password);
+      res.cookie("auth-token", result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 3600000,
+        path: "/",
+      });
       res.status(result.status).json({
         message: result.message,
         user: {
@@ -15,7 +22,6 @@ class AdminController implements IAdminController {
           name: result.admin.name,
           email: result.admin.email,
         },
-        token: result.token,
       });
     } catch (error) {
       console.error(error);
@@ -23,6 +29,18 @@ class AdminController implements IAdminController {
         error: error instanceof Error ? error.message : "Login Failed",
       });
     }
+  }
+  async logout(req: Request, res: Response): Promise<void> {
+    res.clearCookie("auth-token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
+
+    res.status(STATUS_CODES.OK).json({
+      message: "Logged out successfully",
+    });
   }
 }
 

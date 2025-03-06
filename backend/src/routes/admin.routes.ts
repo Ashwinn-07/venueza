@@ -4,5 +4,6 @@ import adminController from "../controllers/admin.controller";
 const adminRoutes = Router();
 
 adminRoutes.post("/login", adminController.login);
+adminRoutes.post("/logout", adminController.logout);
 
 export default adminRoutes;

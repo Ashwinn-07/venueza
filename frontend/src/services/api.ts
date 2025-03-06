@@ -7,6 +7,7 @@ export const userApi = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 export const vendorApi = axios.create({
@@ -14,6 +15,7 @@ export const vendorApi = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 export const adminApi = axios.create({
@@ -21,6 +23,7 @@ export const adminApi = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 export const authService = {
@@ -36,6 +39,10 @@ export const authService = {
     const response = await userApi.post("/verify-otp", data);
     return response.data;
   },
+  userLogout: async () => {
+    const response = await userApi.post("/logout");
+    return response.data;
+  },
 
   vendorSignup: async (vendorData: any) => {
     const response = await vendorApi.post("/signup", vendorData);
@@ -49,9 +56,17 @@ export const authService = {
     const response = await vendorApi.post("/verify-otp", data);
     return response.data;
   },
+  vendorLogout: async () => {
+    const response = await vendorApi.post("/logout");
+    return response.data;
+  },
 
   adminLogin: async (credentials: { email: string; password: string }) => {
     const response = await adminApi.post("/login", credentials);
+    return response.data;
+  },
+  adminLogout: async () => {
+    const response = await adminApi.post("/logout");
     return response.data;
   },
 };
