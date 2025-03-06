@@ -82,7 +82,7 @@ class VendorService implements IVendorService {
     if (!jwtSecret) {
       throw new Error(MESSAGES.ERROR.JWT_SECRET_MISSING);
     }
-    const token = jwt.sign({ userId: vendor._id }, jwtSecret, {
+    const token = jwt.sign({ userId: vendor._id, type: "vendor" }, jwtSecret, {
       expiresIn: "1h",
     });
 

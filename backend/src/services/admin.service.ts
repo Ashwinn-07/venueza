@@ -32,7 +32,7 @@ class AdminService implements IAdminService {
     if (!jwtSecret) {
       throw new Error(MESSAGES.ERROR.JWT_SECRET_MISSING);
     }
-    const token = jwt.sign({ userId: admin._id }, jwtSecret, {
+    const token = jwt.sign({ userId: admin._id, type: "admin" }, jwtSecret, {
       expiresIn: "1h",
     });
 
