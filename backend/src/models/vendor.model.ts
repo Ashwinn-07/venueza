@@ -10,6 +10,8 @@ export interface IVendor extends Document {
   businessName: string;
   venues?: ObjectId;
   status: "pending" | "blocked" | "active";
+  isVerified: boolean;
+  otp?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +36,8 @@ const vendorSchema: Schema = new Schema(
       enum: ["pending", "blocked", "active"],
       default: "pending",
     },
+    isVerified: { type: Boolean, default: false },
+    otp: { type: String, default: null },
   },
   { timestamps: true }
 );

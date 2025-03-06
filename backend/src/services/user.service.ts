@@ -35,6 +35,8 @@ class UserService implements IUserService {
     const otp = OTPService.generateOTP();
     await OTPService.sendOTP(email, otp);
 
+    console.log(otp);
+
     await userRepository.create({
       ...userData,
       password: hashedPassword,
