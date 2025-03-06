@@ -6,4 +6,7 @@ export interface IUserService {
     email: string,
     password: string
   ): Promise<{ user: IUser; token: string }>;
+  processGoogleAuth(
+    profile: any
+  ): Promise<{ user: IUser; token: string; message: string; status: number }>;
 }

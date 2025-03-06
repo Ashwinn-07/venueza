@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import userService from "../services/user.service";
 import { IUserController } from "./interfaces/IUserController";
 import { STATUS_CODES } from "../utils/constants";
+import jwt from "jsonwebtoken";
 
 class UserController implements IUserController {
   async register(req: Request, res: Response): Promise<void> {
@@ -51,6 +52,30 @@ class UserController implements IUserController {
       console.error(error);
       res.status(STATUS_CODES.UNAUTHORIZED).json({
         error: error instanceof Error ? error.message : "Login Failed",
+      });
+    }
+  }
+  async googleCallback(req: Request, res: Response): Promise<void> {
+    try {
+      const user = req.user as any;
+      const result = await userService.processGoogleAuth(user);
+
+      res.status(result.status).json({
+        message: result.message,
+        user: {
+          id: result.user._id,
+          name: result.user.name,
+          email: result.user.email,
+        },
+        token: result.token,
+      });
+    } catch (error) {
+      console.error("Google auth error:", error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Google Authentication Failed",
       });
     }
   }

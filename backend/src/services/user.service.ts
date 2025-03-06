@@ -74,7 +74,9 @@ class UserService implements IUserService {
     if (!user.isVerified) {
       throw new Error(MESSAGES.ERROR.OTP_INVALID);
     }
-
+    if (!user.password) {
+      throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
+    }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
@@ -87,6 +89,39 @@ class UserService implements IUserService {
       expiresIn: "1h",
     });
 
+    return {
+      user: this.sanitizeUser(user),
+      token,
+      message: MESSAGES.SUCCESS.LOGIN,
+      status: STATUS_CODES.OK,
+    };
+  }
+  async processGoogleAuth(
+    profile: any
+  ): Promise<{ user: IUser; token: string; message: string; status: number }> {
+    const email = profile.email;
+    let user = await userRepository.findByEmail(email);
+    if (user) {
+      if (!user.googleId) {
+        user.googleId = profile.id;
+        await userRepository.update(user._id.toString(), user);
+      }
+    } else {
+      user = await userRepository.create({
+        googleId: profile.id,
+        name: profile.displayName,
+        email,
+        password: "",
+        isVerified: true,
+      });
+    }
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error(MESSAGES.ERROR.JWT_SECRET_MISSING);
+    }
+    const token = jwt.sign({ userId: user._id }, jwtSecret, {
+      expiresIn: "1h",
+    });
     return {
       user: this.sanitizeUser(user),
       token,
