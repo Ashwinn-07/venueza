@@ -56,6 +56,27 @@ class VendorService implements IVendorService {
 
     return { message: MESSAGES.SUCCESS.OTP_VERIFIED, status: STATUS_CODES.OK };
   }
+  async resendOTP(email: string): Promise<{ message: string; status: number }> {
+    const user = await vendorRepository.findByEmail(email);
+    if (!user) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+
+    if (user.isVerified) {
+      throw new Error(MESSAGES.ERROR.ALREADY_VERIFIED);
+    }
+
+    const newOtp = OTPService.generateOTP();
+
+    await OTPService.sendOTP(email, newOtp);
+
+    console.log(newOtp);
+
+    user.otp = newOtp;
+    await vendorRepository.update(user._id.toString(), user);
+
+    return { message: MESSAGES.SUCCESS.OTP_RESENT, status: STATUS_CODES.OK };
+  }
   async loginVendor(
     email: string,
     password: string

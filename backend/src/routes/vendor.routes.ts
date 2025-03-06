@@ -6,6 +6,7 @@ const vendorRoutes = Router();
 vendorRoutes.post("/signup", vendorController.register);
 vendorRoutes.post("/login", vendorController.login);
 vendorRoutes.post("/verify-otp", vendorController.verifyOTP);
+vendorRoutes.post("/resend-otp", vendorController.resendOTP);
 vendorRoutes.post("/logout", vendorController.logout);
 
 export default vendorRoutes;

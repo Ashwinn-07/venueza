@@ -7,6 +7,7 @@ const userRoutes = Router();
 userRoutes.post("/signup", userController.register);
 userRoutes.post("/login", userController.login);
 userRoutes.post("/verify-otp", userController.verifyOTP);
+userRoutes.post("/resend-otp", userController.resendOTP);
 
 userRoutes.get(
   "/auth/google",
