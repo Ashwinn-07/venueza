@@ -7,6 +7,9 @@ import UserSignup from "./pages/user/UserSignup";
 import UserOtpVerification from "./pages/user/UserOtpVerification";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import VendorLogin from "./pages/vendor/VendorLogin";
+import UserLogin from "./pages/user/UserLogin";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 const App = () => {
   return (
@@ -26,6 +29,9 @@ const App = () => {
         <Route element={<PublicOnlyRoute />}>
           <Route path="/vendor/signup" element={<VendorSignup />} />
           <Route path="/user/signup" element={<UserSignup />} />
+          <Route path="/vendor/login" element={<VendorLogin />} />
+          <Route path="/user/login" element={<UserLogin />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
         </Route>
 
         <Route path="/vendor/verify-otp" element={<VendorOtpVerification />} />

@@ -1,16 +1,36 @@
 import { useState } from "react";
-import { Building2, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Lock } from "lucide-react";
 
-const VendorLogin = () => {
+const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({ email: "", password: "" });
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+
+    // Validate form
+    const newErrors = { email: "", password: "" };
+    if (!email) newErrors.email = "Email is required";
+    else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
+      newErrors.email = "Invalid email address";
+    }
+
+    if (!password) newErrors.password = "Password is required";
+
+    setErrors(newErrors);
+
+    // If valid, process form
+    if (!newErrors.email && !newErrors.password) {
+      setTimeout(() => {
+        setIsLoading(false);
+        console.log("Login successful");
+      }, 1000);
+    } else {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -20,63 +40,58 @@ const VendorLogin = () => {
         <img
           className="w-full h-full object-cover"
           src="/api/placeholder/1920/1080"
-          alt="Wedding vendor background"
+          alt="Admin background"
         />
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container */}
+      {/* Card container with animation */}
       <div className="w-full max-w-md px-6 py-12">
-        <div className="bg-white/90 p-8 rounded-2xl shadow-xl">
+        <div className="bg-gray-900/70 p-8 rounded-2xl shadow-xl border border-gray-700">
           {/* Header */}
           <div className="flex flex-col items-center mb-8">
-            <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
-              <Building2 className="h-10 w-10 text-blue-600" />
+            <div className="bg-gray-800 p-3 rounded-full shadow-lg mb-4 border border-gray-700">
+              <Lock className="h-10 w-10 text-blue-500" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Vendor Login</h2>
-            <p className="mt-2 text-gray-600">
-              Sign in to your business account
+            <h2 className="text-3xl font-bold text-white">Admin Portal</h2>
+            <p className="mt-2 text-gray-400">
+              Secure login for administrators
             </p>
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Business Email
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Admin Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="business@example.com"
+                className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 text-white placeholder-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="admin@example.com"
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
-                <a
-                  href="/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-800"
-                >
-                  Forgot password?
-                </a>
-              </div>
-            </div>
-
-            <div className="pt-2">
+            <div className="pt-4">
               <button
                 type="submit"
                 className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors cursor-pointer ${
@@ -108,46 +123,15 @@ const VendorLogin = () => {
                     Loading...
                   </span>
                 ) : (
-                  "Sign In"
+                  "Access Portal"
                 )}
               </button>
             </div>
           </form>
-
-          <div className="mt-6 text-center text-sm">
-            <p className="text-gray-600">
-              Don't have a business account?{" "}
-              <Link
-                to="/vendor/signup"
-                className="font-medium text-blue-600 hover:text-blue-800 underline-offset-2 hover:underline"
-              >
-                Sign up
-              </Link>
-            </p>
-
-            <div className="mt-4">
-              <Link
-                to="/"
-                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-              >
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Back to home
-              </Link>
-            </div>
-
-            <div className="mt-2">
-              <Link
-                to="/user/login"
-                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-              >
-                Sign in as a user instead
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default VendorLogin;
+export default AdminLogin;

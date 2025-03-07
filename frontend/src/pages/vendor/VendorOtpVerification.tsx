@@ -1,6 +1,37 @@
 import { Shield, Check } from "lucide-react";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import { authService } from "../../services/api";
 
 const VendorOtpVerification = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { email } = location.state || {};
+  const [otp, setOtp] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleVerifyOtp = async () => {
+    if (otp.length != 6) {
+      notifyError("Please enter a valid 6 digit OTP");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await authService.vendorVerifyOtp({ email, otp });
+      notifySuccess("OTP Verified Successfully");
+      navigate("/vendor/login");
+    } catch (err: any) {
+      console.error("error verifying OTP", err);
+      const errMsg =
+        err.response?.data?.message ||
+        "OTP Verification failed! Please try again";
+      notifyError(errMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Background */}
@@ -29,7 +60,7 @@ const VendorOtpVerification = () => {
             </p>
           </div>
 
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
             <div className="flex flex-col space-y-2">
               <label className="text-sm font-medium text-gray-700">
                 Enter Verification Code
@@ -39,6 +70,8 @@ const VendorOtpVerification = () => {
                 <input
                   type="text"
                   maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
                   placeholder="6-digit code"
                   className="px-4 py-3 text-center text-lg tracking-widest w-full border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -48,10 +81,12 @@ const VendorOtpVerification = () => {
             <div className="pt-4">
               <button
                 type="button"
-                className="w-full flex justify-center items-center px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={isLoading}
+                onClick={handleVerifyOtp}
+                className="w-full flex justify-center items-center px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
                 <Check className="w-4 h-4 mr-2" />
-                Verify Code
+                {isLoading ? "Verifying..." : "Verify Code"}
               </button>
             </div>
 
@@ -61,7 +96,7 @@ const VendorOtpVerification = () => {
               </p>
               <button
                 type="button"
-                className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
               >
                 Resend code
               </button>
