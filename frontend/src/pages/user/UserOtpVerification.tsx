@@ -1,4 +1,4 @@
-import { Shield, Check, ArrowLeft } from "lucide-react";
+import { Shield, Check } from "lucide-react";
 
 const UserOtpVerification = () => {
   return (
@@ -25,8 +25,7 @@ const UserOtpVerification = () => {
               Verify Your User Account
             </h2>
             <p className="mt-2 text-gray-600 text-center">
-              We've sent a verification code to your email address or phone
-              number
+              We've sent a verification code to your email address
             </p>
           </div>
 
@@ -68,16 +67,6 @@ const UserOtpVerification = () => {
               </button>
             </div>
           </form>
-
-          <div className="mt-6 text-center">
-            <a
-              href="#"
-              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back to login
-            </a>
-          </div>
         </div>
       </div>
     </div>

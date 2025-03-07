@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const userApi = axios.create({
-  baseURL: `${API_URL}/user`,
+  baseURL: `${API_URL}/api/user`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -11,7 +11,7 @@ export const userApi = axios.create({
 });
 
 export const vendorApi = axios.create({
-  baseURL: `${API_URL}/vendor`,
+  baseURL: `${API_URL}/api/vendor`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,7 +19,7 @@ export const vendorApi = axios.create({
 });
 
 export const adminApi = axios.create({
-  baseURL: `${API_URL}/admin`,
+  baseURL: `${API_URL}/api/admin`,
   headers: {
     "Content-Type": "application/json",
   },
