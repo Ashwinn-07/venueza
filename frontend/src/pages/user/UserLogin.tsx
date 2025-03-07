@@ -19,7 +19,7 @@ const UserLogin = () => {
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
-          src="/api/placeholder/1920/1080"
+          src="https://images.unsplash.com/photo-1460978812857-470ed1c77af0?q=80&w=1990&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Wedding background"
         />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>

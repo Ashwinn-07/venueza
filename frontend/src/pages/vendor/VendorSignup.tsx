@@ -50,7 +50,7 @@ const VendorSignup = () => {
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
-          src="/api/placeholder/1200/800"
+          src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Wedding vendor background"
         />
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
