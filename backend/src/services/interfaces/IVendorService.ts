@@ -8,4 +8,14 @@ export interface IVendorService {
     email: string,
     password: string
   ): Promise<{ vendor: IVendor; token: string }>;
+  updateVendorProfile(
+    vendorId: string,
+    updatedData: Partial<IVendor>
+  ): Promise<{ message: string; status: number; vendor: IVendor }>;
+  changeVendorPassword(
+    vendorId: string,
+    currentPassword: string,
+    newPassword: string,
+    confirmNewPassword: string
+  ): Promise<{ message: string; status: number }>;
 }

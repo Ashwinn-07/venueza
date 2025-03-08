@@ -114,6 +114,72 @@ class VendorService implements IVendorService {
       status: STATUS_CODES.OK,
     };
   }
+
+  async updateVendorProfile(
+    vendorId: string,
+    updatedData: Partial<IVendor>
+  ): Promise<{ message: string; status: number; vendor: IVendor }> {
+    const vendor = await vendorRepository.findById(vendorId);
+    if (!vendor) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+
+    const allowedFields = ["name", "phone", "businessName", "businessAddress"];
+    const fieldsToUpdate: Partial<IVendor> = {};
+
+    for (const key in updatedData) {
+      if (allowedFields.includes(key)) {
+        fieldsToUpdate[key as keyof IVendor] =
+          updatedData[key as keyof IVendor];
+      }
+    }
+
+    const updatedVendor = await vendorRepository.update(
+      vendorId,
+      fieldsToUpdate
+    );
+    if (!updatedVendor) {
+      throw new Error("Profile update failed.");
+    }
+
+    return {
+      message: MESSAGES.SUCCESS.PROFILE_UPDATED,
+      status: STATUS_CODES.OK,
+      vendor: this.sanitizeVendor(updatedVendor),
+    };
+  }
+
+  async changeVendorPassword(
+    vendorId: string,
+    currentPassword: string,
+    newPassword: string,
+    confirmNewPassword: string
+  ): Promise<{ message: string; status: number }> {
+    if (newPassword !== confirmNewPassword) {
+      throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
+    }
+
+    const vendor = await vendorRepository.findById(vendorId);
+    if (!vendor) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      vendor.password
+    );
+    if (!isPasswordValid) {
+      throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await vendorRepository.update(vendorId, { password: hashedPassword });
+
+    return {
+      message: MESSAGES.SUCCESS.PASSWORD_UPDATED,
+      status: STATUS_CODES.OK,
+    };
+  }
 }
 
 export default new VendorService();

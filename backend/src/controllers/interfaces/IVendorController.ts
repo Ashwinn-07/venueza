@@ -6,4 +6,6 @@ export interface IVendorController {
   verifyOTP(req: Request, res: Response): Promise<void>;
   resendOTP(req: Request, res: Response): Promise<void>;
   logout(req: Request, res: Response): Promise<void>;
+  updateVendorProfile(req: Request, res: Response): Promise<void>;
+  changeVendorPassword(req: Request, res: Response): Promise<void>;
 }

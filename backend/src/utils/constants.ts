@@ -24,6 +24,8 @@ export const MESSAGES = {
     OTP_VERIFIED: "OTP verified successfully",
     OTP_RESENT: "OTP resent successfully",
     PASSWORD_RESET: "Password reset successful",
+    PROFILE_UPDATED: "Profile updated successfully.",
+    PASSWORD_UPDATED: "Password changed successfully.",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",
@@ -31,6 +33,7 @@ export const MESSAGES = {
     USER_NOT_FOUND: "User not found",
     INVALID_INPUT: "Invalid input: Email and Password are required",
     PASSWORD_MISMATCH: "Password and Confirm Password do not match",
+    PROFILE_UPDATE_FAILED: "Profile update failed.",
     JWT_SECRET_MISSING: "JWT secret is not configured",
     OTP_INVALID: "Invalid OTP",
     OTP_EXPIRED: "OTP has expired",

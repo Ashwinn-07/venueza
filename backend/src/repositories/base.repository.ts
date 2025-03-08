@@ -23,6 +23,9 @@ class BaseRepository<T extends Document> implements IBaseRepository<T> {
       new: true,
     });
   }
+  async countDocuments(filter: FilterQuery<T> = {}): Promise<number> {
+    return await this.model.countDocuments(filter).exec();
+  }
 }
 
 export default BaseRepository;

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import userController from "../controllers/user.controller";
 import passport from "../config/passport";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const userRoutes = Router();
 
@@ -22,5 +23,17 @@ userRoutes.get(
   userController.googleCallback
 );
 userRoutes.post("/logout", userController.logout);
+
+userRoutes.put(
+  "/profile",
+  authMiddleware(["user"]),
+  userController.updateUserProfile
+);
+
+userRoutes.patch(
+  "/security",
+  authMiddleware(["user"]),
+  userController.changeUserPassword
+);
 
 export default userRoutes;

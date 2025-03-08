@@ -42,6 +42,66 @@ class AdminController implements IAdminController {
       message: "Logged out successfully",
     });
   }
+  async getAdminDashboardStats(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await adminService.getAdminDashboardStats();
+      res.status(result.status).json({
+        totalUsers: result.totalUsers,
+        totalVendors: result.totalVendors,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch dashboard statistics",
+      });
+    }
+  }
+  async listUsers(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await adminService.listUsers();
+      res.status(result.status).json({
+        users: result.users,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error: error instanceof Error ? error.message : "Failed to fetch users",
+      });
+    }
+  }
+  async listAllVendors(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await adminService.listAllVendors();
+      res.status(result.status).json({
+        vendors: result.vendors,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error ? error.message : "Failed to fetch vendors",
+      });
+    }
+  }
+  async listPendingVendors(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await adminService.listPendingVendors();
+      res.status(result.status).json({
+        vendors: result.vendors,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch pending vendors",
+      });
+    }
+  }
 }
 
 export default new AdminController();

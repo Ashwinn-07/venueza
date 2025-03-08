@@ -125,6 +125,55 @@ class UserController implements IUserController {
       message: "Logged out successfully",
     });
   }
+  async updateUserProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).userId;
+      const updatedData = req.body;
+      const result = await userService.updateUserProfile(userId, updatedData);
+      res.status(result.status).json({
+        message: result.message,
+        user: {
+          id: result.user._id,
+          name: result.user.name,
+          email: result.user.email,
+          phone: result.user.phone,
+          status: result.user.status,
+        },
+      });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to update profile",
+      });
+    }
+  }
+  async changeUserPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).userId;
+      const { currentPassword, newPassword, confirmNewPassword } = req.body;
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+          error: "All password fields are required",
+        });
+        return;
+      }
+
+      const result = await userService.changeUserPassword(
+        userId,
+        currentPassword,
+        newPassword,
+        confirmNewPassword
+      );
+      res.status(result.status).json({ message: result.message });
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to change password",
+      });
+    }
+  }
 }
 
 export default new UserController();

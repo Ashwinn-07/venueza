@@ -10,4 +10,14 @@ export interface IUserService {
   processGoogleAuth(
     profile: any
   ): Promise<{ user: IUser; token: string; message: string; status: number }>;
+  updateUserProfile(
+    userId: string,
+    updatedData: Partial<IUser>
+  ): Promise<{ message: string; status: number; user: IUser }>;
+  changeUserPassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+    confirmNewPassword: string
+  ): Promise<{ message: string; status: number }>;
 }

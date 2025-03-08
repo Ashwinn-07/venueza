@@ -94,6 +94,58 @@ class VendorController implements IVendorController {
       message: "Logged out successfully",
     });
   }
+  async updateVendorProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).userId;
+      const updatedData = req.body;
+      const result = await vendorService.updateVendorProfile(
+        userId,
+        updatedData
+      );
+      res.status(result.status).json({
+        message: result.message,
+        user: {
+          id: result.vendor._id,
+          name: result.vendor.name,
+          email: result.vendor.email,
+          phone: result.vendor.phone,
+          status: result.vendor.status,
+        },
+      });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to update profile",
+      });
+    }
+  }
+  async changeVendorPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).userId;
+      const { currentPassword, newPassword, confirmNewPassword } = req.body;
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        res.status(STATUS_CODES.BAD_REQUEST).json({
+          error: "All password fields are required",
+        });
+        return;
+      }
+
+      const result = await vendorService.changeVendorPassword(
+        userId,
+        currentPassword,
+        newPassword,
+        confirmNewPassword
+      );
+      res.status(result.status).json({ message: result.message });
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to change password",
+      });
+    }
+  }
 }
 
 export default new VendorController();

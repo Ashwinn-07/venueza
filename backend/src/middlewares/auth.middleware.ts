@@ -7,9 +7,10 @@ export const authMiddleware = (allowedRoles: string[]) => {
     const token = req.cookies["auth-token"];
 
     if (!token) {
-      return res
+      res
         .status(STATUS_CODES.UNAUTHORIZED)
         .json({ message: MESSAGES.ERROR.UNAUTHORIZED });
+      return;
     }
 
     try {
@@ -19,17 +20,21 @@ export const authMiddleware = (allowedRoles: string[]) => {
       };
 
       if (!allowedRoles.includes(decoded.type)) {
-        return res
+        res
           .status(STATUS_CODES.FORBIDDEN)
           .json({ message: MESSAGES.ERROR.FORBIDDEN });
+
+        return;
       }
 
-      req.user = decoded;
+      (req as any).userId = decoded.userId;
+      (req as any).userType = decoded.type;
       next();
     } catch (error) {
-      return res
+      res
         .status(STATUS_CODES.UNAUTHORIZED)
         .json({ message: MESSAGES.ERROR.INVALID_TOKEN });
+      return;
     }
   };
 };

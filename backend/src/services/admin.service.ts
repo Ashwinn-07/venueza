@@ -4,6 +4,8 @@ import adminRepository from "../repositories/admin.repository";
 import { IAdmin } from "../models/admin.model";
 import { IAdminService } from "./interfaces/IAdminService";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
+import userRepository from "../repositories/user.repository";
+import vendorRepository from "../repositories/vendor.repository";
 
 class AdminService implements IAdminService {
   private sanitizeAdmin(admin: IAdmin) {
@@ -40,6 +42,44 @@ class AdminService implements IAdminService {
       admin: this.sanitizeAdmin(admin),
       token,
       message: MESSAGES.SUCCESS.LOGIN,
+      status: STATUS_CODES.OK,
+    };
+  }
+  async getAdminDashboardStats(): Promise<{
+    totalUsers: number;
+    totalVendors: number;
+    status: number;
+  }> {
+    const totalUsers = await userRepository.countDocuments({});
+    const totalVendors = await vendorRepository.countDocuments({});
+
+    return {
+      totalUsers,
+      totalVendors,
+      status: STATUS_CODES.OK,
+    };
+  }
+
+  async listUsers(): Promise<{ users: any[]; status: number }> {
+    const users = await userRepository.find({});
+    return {
+      users,
+      status: STATUS_CODES.OK,
+    };
+  }
+
+  async listAllVendors(): Promise<{ vendors: any[]; status: number }> {
+    const vendors = await vendorRepository.find({});
+    return {
+      vendors,
+      status: STATUS_CODES.OK,
+    };
+  }
+
+  async listPendingVendors(): Promise<{ vendors: any[]; status: number }> {
+    const vendors = await vendorRepository.find({ status: "pending" });
+    return {
+      vendors,
       status: STATUS_CODES.OK,
     };
   }

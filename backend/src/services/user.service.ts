@@ -150,6 +150,69 @@ class UserService implements IUserService {
       status: STATUS_CODES.OK,
     };
   }
+  async updateUserProfile(
+    userId: string,
+    updatedData: Partial<IUser>
+  ): Promise<{ message: string; status: number; user: IUser }> {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+
+    const allowedFields = ["name", "phone"];
+    const fieldsToUpdate: Partial<IUser> = {};
+
+    for (const key in updatedData) {
+      if (allowedFields.includes(key)) {
+        fieldsToUpdate[key as keyof IUser] = updatedData[key as keyof IUser];
+      }
+    }
+    const updateUser = await userRepository.update(userId, fieldsToUpdate);
+    if (!updateUser) {
+      throw new Error(MESSAGES.ERROR.PROFILE_UPDATE_FAILED);
+    }
+    return {
+      message: MESSAGES.SUCCESS.PROFILE_UPDATED,
+      status: STATUS_CODES.OK,
+      user: this.sanitizeUser(updateUser),
+    };
+  }
+  async changeUserPassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+    confirmNewPassword: string
+  ): Promise<{ message: string; status: number }> {
+    if (newPassword != confirmNewPassword) {
+      throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
+    }
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+    if (user.googleId && (!user.password || user.password === "")) {
+      throw new Error(
+        "You are authenticated via Google. Please use Google authentication."
+      );
+    }
+
+    if (!user.password) {
+      throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
+    }
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isPasswordValid) {
+      throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await userRepository.update(userId, { password: hashedPassword });
+    return {
+      message: MESSAGES.SUCCESS.PASSWORD_UPDATED,
+      status: STATUS_CODES.OK,
+    };
+  }
 }
 
 export default new UserService();
