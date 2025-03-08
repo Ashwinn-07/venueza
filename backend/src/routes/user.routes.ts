@@ -9,6 +9,8 @@ userRoutes.post("/signup", userController.register);
 userRoutes.post("/login", userController.login);
 userRoutes.post("/verify-otp", userController.verifyOTP);
 userRoutes.post("/resend-otp", userController.resendOTP);
+userRoutes.post("/forgot-password", userController.forgotPassword);
+userRoutes.post("/reset-password", userController.resetPassword);
 
 userRoutes.get(
   "/auth/google",

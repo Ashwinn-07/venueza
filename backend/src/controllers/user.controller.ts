@@ -113,6 +113,39 @@ class UserController implements IUserController {
       });
     }
   }
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+      const result = await userService.forgotPassword(email);
+      res.status(result.status).json({ message: result.message });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to process forgot password request",
+      });
+    }
+  }
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, otp, newPassword, confirmNewPassword } = req.body;
+      const result = await userService.resetPassword(
+        email,
+        otp,
+        newPassword,
+        confirmNewPassword
+      );
+      res.status(result.status).json({ message: result.message });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to reset password",
+      });
+    }
+  }
   async logout(req: Request, res: Response): Promise<void> {
     res.clearCookie("auth-token", {
       httpOnly: true,

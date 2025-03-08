@@ -8,6 +8,8 @@ vendorRoutes.post("/signup", vendorController.register);
 vendorRoutes.post("/login", vendorController.login);
 vendorRoutes.post("/verify-otp", vendorController.verifyOTP);
 vendorRoutes.post("/resend-otp", vendorController.resendOTP);
+vendorRoutes.post("/forgot-password", vendorController.forgotPassword);
+vendorRoutes.post("/reset-password", vendorController.resetPassword);
 vendorRoutes.post("/logout", vendorController.logout);
 
 vendorRoutes.put(

@@ -150,6 +150,46 @@ class UserService implements IUserService {
       status: STATUS_CODES.OK,
     };
   }
+  async forgotPassword(
+    email: string
+  ): Promise<{ message: string; status: number }> {
+    const user = await userRepository.findByEmail(email);
+    if (!user) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+    const otp = OTPService.generateOTP();
+    user.otp = otp;
+    await userRepository.update(user._id.toString(), user);
+    await OTPService.sendOTP(email, otp);
+    console.log(otp);
+    return { message: MESSAGES.SUCCESS.OTP_SENT, status: STATUS_CODES.OK };
+  }
+  async resetPassword(
+    email: string,
+    otp: string,
+    newPassword: string,
+    confirmPassword: string
+  ): Promise<{ message: string; status: number }> {
+    if (newPassword != confirmPassword) {
+      throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
+    }
+    const user = await userRepository.findByEmail(email);
+    if (!user) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+    if (user.otp !== otp) {
+      throw new Error(MESSAGES.ERROR.OTP_INVALID);
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.otp = undefined;
+    await userRepository.update(user._id.toString(), user);
+
+    return {
+      message: MESSAGES.SUCCESS.PASSWORD_RESET,
+      status: STATUS_CODES.OK,
+    };
+  }
   async updateUserProfile(
     userId: string,
     updatedData: Partial<IUser>
