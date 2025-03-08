@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 const AdminSidebar = () => {
   const menuItems = [
-    { icon: "🏠", text: "Dashboard", path: "/" },
-    { icon: "👥", text: "Users", path: "/users" },
-    { icon: "🚚", text: "Vendors", path: "/vendors" },
+    { icon: "🏠", text: "Dashboard", path: "/admin/dashboard" },
+    { icon: "👥", text: "Users", path: "/admin/users" },
+    { icon: "🚚", text: "Vendors", path: "/admin/vendors" },
     { icon: "📅", text: "Bookings", path: "/bookings" },
   ];
 

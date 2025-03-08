@@ -17,6 +17,9 @@ import UserProfile from "./pages/user/UserProfile";
 import UserProfileSecurity from "./pages/user/UserProfileSecurity";
 import VendorProfile from "./pages/vendor/VendorProfile";
 import VendorProfileSecurity from "./pages/vendor/VendorProfileSecurity";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminVendors from "./pages/admin/AdminVendors";
+import AdminVendorsPending from "./pages/admin/AdminVendorsPending";
 
 const App = () => {
   return (
@@ -43,6 +46,12 @@ const App = () => {
           element={<VendorProfileSecurity />}
         />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/vendors" element={<AdminVendors />} />
+        <Route
+          path="/admin/vendors/pending"
+          element={<AdminVendorsPending />}
+        />
         <Route element={<PublicOnlyRoute />}>
           <Route path="/vendor/signup" element={<VendorSignup />} />
           <Route path="/user/signup" element={<UserSignup />} />
