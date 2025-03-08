@@ -1,16 +1,41 @@
 import { useState } from "react";
 import { User, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
+import { notifySuccess, notifyError } from "../../utils/notifications";
 
 const UserLogin = () => {
+  const navigate = useNavigate();
+  const { login } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  const handleSubmit = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+    setError("");
+
+    try {
+      await login(formData.email, formData.password, "user");
+      notifySuccess("Login successful!");
+      navigate("/user/home");
+    } catch (err: any) {
+      const errMsg =
+        err.response?.data?.message || "Failed to login. Please try again.";
+      setError(errMsg);
+      notifyError(errMsg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -37,6 +62,12 @@ const UserLogin = () => {
             <p className="mt-2 text-gray-600">Sign in to your user account</p>
           </div>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -44,10 +75,12 @@ const UserLogin = () => {
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="john@example.com"
+                required
               />
             </div>
 
@@ -57,28 +90,31 @@ const UserLogin = () => {
               </label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="text-sm">
-                <a
-                  href="/forgot-password"
+                <Link
+                  to="/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-800"
                 >
                   Forgot password?
-                </a>
+                </Link>
               </div>
             </div>
 
             <div className="pt-2">
               <button
                 type="submit"
-                className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors cursor-pointer ${
-                  isLoading ? "opacity-70 cursor-wait" : ""
+                disabled={isLoading}
+                className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors ${
+                  isLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
                 }`}
               >
                 {isLoading ? (
@@ -103,7 +139,7 @@ const UserLogin = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Loading...
+                    Signing in...
                   </span>
                 ) : (
                   "Sign In"

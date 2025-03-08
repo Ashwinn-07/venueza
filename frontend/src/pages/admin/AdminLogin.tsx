@@ -1,34 +1,39 @@
 import { useState } from "react";
 import { Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
+import { notifySuccess, notifyError } from "../../utils/notifications";
 
 const AdminLogin = () => {
+  const navigate = useNavigate();
+  const { login } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  const handleSubmit = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // Validate form
-    const newErrors = { email: "", password: "" };
-    if (!email) newErrors.email = "Email is required";
-    else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
-      newErrors.email = "Invalid email address";
-    }
-
-    if (!password) newErrors.password = "Password is required";
-
-    setErrors(newErrors);
-
-    // If valid, process form
-    if (!newErrors.email && !newErrors.password) {
-      setTimeout(() => {
-        setIsLoading(false);
-        console.log("Login successful");
-      }, 1000);
-    } else {
+    try {
+      await login(formData.email, formData.password, "admin");
+      notifySuccess("Login successful!");
+      navigate("/admin/dashboard");
+    } catch (err: any) {
+      const errMsg =
+        err.response?.data?.message || "Failed to login. Please try again.";
+      setError(errMsg);
+      notifyError(errMsg);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -45,7 +50,7 @@ const AdminLogin = () => {
         <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container with animation */}
+      {/* Card container */}
       <div className="w-full max-w-md px-6 py-12">
         <div className="bg-gray-900/70 p-8 rounded-2xl shadow-xl border border-gray-700">
           {/* Header */}
@@ -59,6 +64,12 @@ const AdminLogin = () => {
             </p>
           </div>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-900/50 text-red-200 rounded-lg text-sm border border-red-800">
+              {error}
+            </div>
+          )}
+
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -66,14 +77,13 @@ const AdminLogin = () => {
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 text-white placeholder-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="admin@example.com"
+                required
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-              )}
             </div>
 
             <div>
@@ -82,20 +92,31 @@ const AdminLogin = () => {
               </label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
-              )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <a
+                  href="/admin/forgot-password"
+                  className="font-medium text-blue-400 hover:text-blue-300"
+                >
+                  Forgot password?
+                </a>
+              </div>
             </div>
 
             <div className="pt-4">
               <button
                 type="submit"
-                className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors cursor-pointer ${
-                  isLoading ? "opacity-70 cursor-wait" : ""
+                disabled={isLoading}
+                className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors ${
+                  isLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
                 }`}
               >
                 {isLoading ? (
@@ -120,7 +141,7 @@ const AdminLogin = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Loading...
+                    Authenticating...
                   </span>
                 ) : (
                   "Access Portal"
