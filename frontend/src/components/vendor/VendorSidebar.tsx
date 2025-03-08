@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 
 const VendorSidebar = () => {
   const menuItems = [
-    { icon: "🏠", text: "Dashboard", path: "/" },
+    { icon: "🏠", text: "Dashboard", path: "/vendor/dashboard" },
     { icon: "🏢", text: "Venue Management", path: "/venue" },
     { icon: "📅", text: "Bookings Management", path: "/bookings" },
     { icon: "💰", text: "Payments & Earnings", path: "/payments" },
     { icon: "💬", text: "Messages", path: "/messages" },
-    { icon: "⚙️", text: "Settings", path: "/settings" },
+    { icon: "⚙️", text: "Settings", path: "/vendor/settings/profile" },
   ];
 
   return (

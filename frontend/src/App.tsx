@@ -13,6 +13,10 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import UserHomePage from "./pages/user/UserHomePage";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserProfile from "./pages/user/UserProfile";
+import UserProfileSecurity from "./pages/user/UserProfileSecurity";
+import VendorProfile from "./pages/vendor/VendorProfile";
+import VendorProfileSecurity from "./pages/vendor/VendorProfileSecurity";
 
 const App = () => {
   return (
@@ -30,7 +34,14 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/user/home" element={<UserHomePage />} />
+        <Route path="/user/profile" element={<UserProfile />} />
+        <Route path="/user/security" element={<UserProfileSecurity />} />
         <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+        <Route path="/vendor/settings/profile" element={<VendorProfile />} />
+        <Route
+          path="/vendor/settings/security"
+          element={<VendorProfileSecurity />}
+        />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route element={<PublicOnlyRoute />}>
           <Route path="/vendor/signup" element={<VendorSignup />} />
