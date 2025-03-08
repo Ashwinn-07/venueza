@@ -11,7 +11,9 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Heart className="text-[#F4A261]" />
-            <span className="text-xl font-semibold text-gray-800">Venueza</span>
+            <span className="text-xl font-semibold text-gray-800 cursor-pointer">
+              Venueza
+            </span>
           </div>
 
           <button
