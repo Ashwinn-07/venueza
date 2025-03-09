@@ -39,8 +39,29 @@ export const authService = {
     const response = await userApi.post("/verify-otp", data);
     return response.data;
   },
+  userResendOtp: async (email: string) => {
+    const response = await userApi.post("/resend-otp", { email });
+    return response.data;
+  },
+  userForgotPassword: async (email: string) => {
+    const response = await userApi.post("/forgot-password", { email });
+    return response.data;
+  },
+  userResetPassword: async (data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    const response = await userApi.post("/reset-password", data);
+    return response.data;
+  },
   userLogout: async () => {
     const response = await userApi.post("/logout");
+    return response.data;
+  },
+  googleAuth: async (token: string) => {
+    const response = await userApi.post("/auth/google", { token });
     return response.data;
   },
 
@@ -56,6 +77,23 @@ export const authService = {
     const response = await vendorApi.post("/verify-otp", data);
     return response.data;
   },
+  vendorResendOtp: async (email: string) => {
+    const response = await vendorApi.post("/resend-otp", { email });
+    return response.data;
+  },
+  vendorForgotPassword: async (email: string) => {
+    const response = await vendorApi.post("/forgot-password", { email });
+    return response.data;
+  },
+  vendorResetPassword: async (data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    const response = await vendorApi.post("/reset-password", data);
+    return response.data;
+  },
   vendorLogout: async () => {
     const response = await vendorApi.post("/logout");
     return response.data;
@@ -67,6 +105,55 @@ export const authService = {
   },
   adminLogout: async () => {
     const response = await adminApi.post("/logout");
+    return response.data;
+  },
+};
+
+export const userService = {
+  updateProfile: async (profileData: any) => {
+    const response = await userApi.put(`/profile`, profileData);
+    return response.data;
+  },
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+  }) => {
+    const response = await userApi.patch(`/security`, data);
+    return response.data;
+  },
+};
+
+export const vendorService = {
+  updateProfile: async (profileData: any) => {
+    const response = await vendorApi.put(`/settings/profile`, profileData);
+    return response.data;
+  },
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+  }) => {
+    const response = await vendorApi.patch(`/settings/security`, data);
+    return response.data;
+  },
+};
+
+export const adminService = {
+  getDashboardStats: async () => {
+    const response = await adminApi.get("/dashboard");
+    return response.data;
+  },
+  listAllUsers: async () => {
+    const response = await adminApi.get("/users");
+    return response.data;
+  },
+  listAllVendors: async () => {
+    const response = await adminApi.get("/vendors");
+    return response.data;
+  },
+  listPendingVendors: async () => {
+    const response = await adminApi.get("/vendors/pending");
     return response.data;
   },
 };

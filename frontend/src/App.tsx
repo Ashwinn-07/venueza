@@ -24,6 +24,7 @@ import VendorForgotPassword from "./pages/vendor/VendorForgotPassword";
 import VendorResetPassword from "./pages/vendor/VendorResetPassword";
 import UserForgotPassword from "./pages/user/UserForgotPassword";
 import UserResetPassword from "./pages/user/UserResetPassword";
+import { ProtectedRoute } from "./components/auth/ProtectedRoutes";
 
 const App = () => {
   return (
@@ -40,22 +41,7 @@ const App = () => {
       />
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/user/home" element={<UserHomePage />} />
-        <Route path="/user/profile" element={<UserProfile />} />
-        <Route path="/user/security" element={<UserProfileSecurity />} />
-        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-        <Route path="/vendor/settings/profile" element={<VendorProfile />} />
-        <Route
-          path="/vendor/settings/security"
-          element={<VendorProfileSecurity />}
-        />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/vendors" element={<AdminVendors />} />
-        <Route
-          path="/admin/vendors/pending"
-          element={<AdminVendorsPending />}
-        />
+
         <Route element={<PublicOnlyRoute />}>
           <Route path="/vendor/signup" element={<VendorSignup />} />
           <Route path="/user/signup" element={<UserSignup />} />
@@ -63,7 +49,13 @@ const App = () => {
           <Route path="/user/login" element={<UserLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
         </Route>
+
+        <Route path="/user/verify-otp" element={<UserOtpVerification />} />
         <Route path="/vendor/verify-otp" element={<VendorOtpVerification />} />
+
+        <Route path="/user/forgot-password" element={<UserForgotPassword />} />
+        <Route path="/user/reset-password" element={<UserResetPassword />} />
+
         <Route
           path="/vendor/forgot-password"
           element={<VendorForgotPassword />}
@@ -72,25 +64,32 @@ const App = () => {
           path="/vendor/reset-password"
           element={<VendorResetPassword />}
         />
-        <Route path="/user/verify-otp" element={<UserOtpVerification />} />
-        <Route path="/user/forgot-password" element={<UserForgotPassword />} />
-        <Route path="/user/reset-password" element={<UserResetPassword />} />
+
         {/* Protected user routes */}
-        {/* <Route element={<ProtectedRoute allowedTypes={["user"]} />}>
-          <Route path="/user/home" element={<UserHomePage />} /> */}
-        {/* Other user routes */}
-        {/* </Route> */}
+        <Route element={<ProtectedRoute allowedTypes={["user"]} />}>
+          <Route path="/user/home" element={<UserHomePage />} />
+          <Route path="/user/profile" element={<UserProfile />} />
+          <Route path="/user/security" element={<UserProfileSecurity />} />
+        </Route>
         {/* Protected vendor routes */}
-        {/* <Route element={<ProtectedRoute allowedTypes={["vendor"]} />}>
-          <Route path="/vendor/dashboard" element={<VendorDashboard />} /> */}{" "}
-        */
-        {/* Other vendor routes
-        {/* </Route> */}
+        <Route element={<ProtectedRoute allowedTypes={["vendor"]} />}>
+          <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+          <Route path="/vendor/settings/profile" element={<VendorProfile />} />
+          <Route
+            path="/vendor/settings/security"
+            element={<VendorProfileSecurity />}
+          />
+        </Route>
         {/* Protected admin routes */}
-        {/* <Route element={<ProtectedRoute allowedTypes={["admin"]} />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
-        {/* Other admin routes */}
-        {/* </Route> */}
+        <Route element={<ProtectedRoute allowedTypes={["admin"]} />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/vendors" element={<AdminVendors />} />
+          <Route
+            path="/admin/vendors/pending"
+            element={<AdminVendorsPending />}
+          />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
