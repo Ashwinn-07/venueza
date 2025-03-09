@@ -20,6 +20,10 @@ import VendorProfileSecurity from "./pages/vendor/VendorProfileSecurity";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminVendors from "./pages/admin/AdminVendors";
 import AdminVendorsPending from "./pages/admin/AdminVendorsPending";
+import VendorForgotPassword from "./pages/vendor/VendorForgotPassword";
+import VendorResetPassword from "./pages/vendor/VendorResetPassword";
+import UserForgotPassword from "./pages/user/UserForgotPassword";
+import UserResetPassword from "./pages/user/UserResetPassword";
 
 const App = () => {
   return (
@@ -60,7 +64,17 @@ const App = () => {
           <Route path="/admin/login" element={<AdminLogin />} />
         </Route>
         <Route path="/vendor/verify-otp" element={<VendorOtpVerification />} />
+        <Route
+          path="/vendor/forgot-password"
+          element={<VendorForgotPassword />}
+        />
+        <Route
+          path="/vendor/reset-password"
+          element={<VendorResetPassword />}
+        />
         <Route path="/user/verify-otp" element={<UserOtpVerification />} />
+        <Route path="/user/forgot-password" element={<UserForgotPassword />} />
+        <Route path="/user/reset-password" element={<UserResetPassword />} />
         {/* Protected user routes */}
         {/* <Route element={<ProtectedRoute allowedTypes={["user"]} />}>
           <Route path="/user/home" element={<UserHomePage />} /> */}
