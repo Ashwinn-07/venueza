@@ -10,7 +10,7 @@ export const PublicOnlyRoute = () => {
         ? "/vendor/dashboard"
         : authType === "admin"
         ? "/admin/dashboard"
-        : "/user/dashboard";
+        : "/user/home";
 
     return <Navigate to={dashboardPath} replace />;
   }

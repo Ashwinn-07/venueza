@@ -16,13 +16,11 @@ const UserProfile = () => {
   });
 
   useEffect(() => {
-    // Redirect if not authenticated
     if (!isAuthenticated) {
       navigate("/user/login");
       return;
     }
 
-    // Populate form with existing user data if available
     if (user) {
       setFormData({
         name: user.name || "",
