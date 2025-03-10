@@ -26,6 +26,9 @@ import UserForgotPassword from "./pages/user/UserForgotPassword";
 import UserResetPassword from "./pages/user/UserResetPassword";
 import { ProtectedRoute } from "./components/auth/ProtectedRoutes";
 import GoogleAuthCallback from "./components/user/GoogleAuthCallback";
+import VendorLayout from "./layouts/VendorLayout";
+import UserLayout from "./layouts/UserLayout";
+import AdminLayout from "./layouts/AdminLayout";
 
 const App = () => {
   return (
@@ -70,28 +73,37 @@ const App = () => {
 
         {/* Protected user routes */}
         <Route element={<ProtectedRoute allowedTypes={["user"]} />}>
-          <Route path="/user/home" element={<UserHomePage />} />
-          <Route path="/user/profile" element={<UserProfile />} />
-          <Route path="/user/security" element={<UserProfileSecurity />} />
+          <Route element={<UserLayout />}>
+            <Route path="/user/home" element={<UserHomePage />} />
+            <Route path="/user/profile" element={<UserProfile />} />
+            <Route path="/user/security" element={<UserProfileSecurity />} />
+          </Route>
         </Route>
         {/* Protected vendor routes */}
         <Route element={<ProtectedRoute allowedTypes={["vendor"]} />}>
-          <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-          <Route path="/vendor/settings/profile" element={<VendorProfile />} />
-          <Route
-            path="/vendor/settings/security"
-            element={<VendorProfileSecurity />}
-          />
+          <Route element={<VendorLayout />}>
+            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+            <Route
+              path="/vendor/settings/profile"
+              element={<VendorProfile />}
+            />
+            <Route
+              path="/vendor/settings/security"
+              element={<VendorProfileSecurity />}
+            />
+          </Route>
         </Route>
         {/* Protected admin routes */}
         <Route element={<ProtectedRoute allowedTypes={["admin"]} />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/vendors" element={<AdminVendors />} />
-          <Route
-            path="/admin/vendors/pending"
-            element={<AdminVendorsPending />}
-          />
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/vendors" element={<AdminVendors />} />
+            <Route
+              path="/admin/vendors/pending"
+              element={<AdminVendorsPending />}
+            />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import VendorSidebar from "../../components/vendor/VendorSidebar";
 import ProfileTabs from "../../components/vendor/ProfileTabs";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
@@ -61,8 +60,6 @@ const VendorProfileSecurity = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <VendorSidebar />
-
       <div className="flex-1 p-8 overflow-auto">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
           Security Settings

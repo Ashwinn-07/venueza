@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UserProfileNavigation from "../../components/user/UserProfileNavigation";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidPhone } from "../../utils/validators";
@@ -72,7 +70,6 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
       <div className="flex-grow container mx-auto px-4 py-8 mt-16">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
@@ -166,7 +163,6 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

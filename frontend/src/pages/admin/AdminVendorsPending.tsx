@@ -1,5 +1,4 @@
 import { useState } from "react";
-import AdminSidebar from "../../components/admin/AdminSidebar";
 import VendorNavigation from "../../components/admin/VendorNavigation";
 
 const AdminVendorsPending = () => {
@@ -67,8 +66,6 @@ const AdminVendorsPending = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <AdminSidebar />
-
       <div className="flex-1 p-8 overflow-auto">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 mb-6">Vendors</h1>

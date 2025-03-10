@@ -1,4 +1,3 @@
-import VendorSidebar from "../../components/vendor/VendorSidebar";
 import VendorStatCard from "../../components/vendor/VendorStatCard";
 import VendorBookingsHeatmap from "../../components/vendor/VendorBookingsHeatMap";
 import VendorRevenueChart from "../../components/vendor/VendorRevenueChart";
@@ -30,7 +29,6 @@ const VendorDashboard = () => {
 
   return (
     <div className="flex h-screen">
-      <VendorSidebar />
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-gray-800">Dashboard</h2>

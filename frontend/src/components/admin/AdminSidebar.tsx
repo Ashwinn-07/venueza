@@ -1,15 +1,16 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuthStore();
   const menuItems = [
     { icon: "🏠", text: "Dashboard", path: "/admin/dashboard" },
     { icon: "👥", text: "Users", path: "/admin/users" },
     { icon: "🚚", text: "Vendors", path: "/admin/vendors" },
-    { icon: "📅", text: "Bookings", path: "/bookings" },
+    { icon: "📅", text: "Bookings", path: "/admin/bookings" },
   ];
   const handleLogout = async () => {
     try {
@@ -53,7 +54,7 @@ const AdminSidebar = () => {
             key={index}
             to={item.path}
             className={`flex items-center px-6 py-3 hover:bg-gray-800 transition-colors ${
-              item.text === "Dashboard" ? "bg-gray-800" : ""
+              location.pathname === item.path ? "bg-gray-800" : ""
             }`}
           >
             <span className="mr-3 text-lg">{item.icon}</span>

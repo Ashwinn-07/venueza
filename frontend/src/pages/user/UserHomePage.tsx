@@ -1,7 +1,5 @@
 import { Users, MapPin, DollarSign } from "lucide-react";
 import VenueSearch from "../../components/VenueSearch";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 
 const VenueCard = ({
   title,
@@ -86,8 +84,6 @@ const UserHomePage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
-
       <main className="flex-grow pt-16">
         <div className="container mx-auto px-4 py-12">
           {/* Hero Search Section */}
@@ -150,8 +146,6 @@ const UserHomePage = () => {
           </section>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import UserProfileNavigation from "../../components/user/UserProfileNavigation";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
@@ -76,19 +74,15 @@ const UserProfileSecurity = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
       <div className="flex-grow container mx-auto px-4 py-8 mt-16">
         <div className="max-w-3xl mx-auto">
-          {/* Security Card */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
             <div className="px-6">
               <UserProfileNavigation />
             </div>
 
-            {/* Security Form */}
             <div className="p-6">
               <div className="space-y-6">
-                {/* Current Password */}
                 <div>
                   <label
                     htmlFor="currentPassword"
@@ -121,7 +115,6 @@ const UserProfileSecurity = () => {
                   </div>
                 </div>
 
-                {/* New Password */}
                 <div>
                   <label
                     htmlFor="newPassword"
@@ -152,7 +145,6 @@ const UserProfileSecurity = () => {
                   </div>
                 </div>
 
-                {/* Confirm New Password */}
                 <div>
                   <label
                     htmlFor="confirmPassword"
@@ -185,7 +177,6 @@ const UserProfileSecurity = () => {
                   </div>
                 </div>
 
-                {/* Buttons */}
                 <div className="flex items-center justify-between pt-6">
                   <button
                     onClick={handleLogout}
@@ -234,7 +225,6 @@ const UserProfileSecurity = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import AdminRevenueChart from "../../components/admin/AdminRevenueChart";
-import AdminSidebar from "../../components/admin/AdminSidebar";
 import AdminStatCard from "../../components/admin/AdminStatCard";
 
 const AdminDashboard = () => {
@@ -78,7 +77,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <AdminSidebar />
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-800">Dashboard</h2>
