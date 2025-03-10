@@ -8,6 +8,7 @@ import {
   isValidPassword,
   isValidPhone,
 } from "../../utils/validators";
+import { authService } from "../../services/api";
 
 const UserSignup = () => {
   const navigate = useNavigate();
@@ -77,6 +78,16 @@ const UserSignup = () => {
       setIsLoading(false);
     }
   };
+  const handleGoogleSignup = () => {
+    try {
+      const googleAuthUrl = authService.getGoogleAuthUrl();
+      window.location.href = googleAuthUrl;
+    } catch (error) {
+      console.error("Error retrieving Google auth URL:", error);
+      notifyError("Failed to initiate Google authentication.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
@@ -195,6 +206,7 @@ const UserSignup = () => {
               </div>
 
               <button
+                onClick={handleGoogleSignup}
                 type="button"
                 className="w-full flex justify-center items-center px-4 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
               >

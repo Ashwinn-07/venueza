@@ -166,6 +166,7 @@ class UserService implements IUserService {
     if (!jwtSecret) {
       throw new Error(MESSAGES.ERROR.JWT_SECRET_MISSING);
     }
+
     const token = jwt.sign({ userId: user._id, type: "user" }, jwtSecret, {
       expiresIn: "1h",
     });

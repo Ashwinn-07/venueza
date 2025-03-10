@@ -75,16 +75,13 @@ const UserProfile = () => {
       <Navbar />
       <div className="flex-grow container mx-auto px-4 py-8 mt-16">
         <div className="max-w-3xl mx-auto">
-          {/* Profile Card */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
             <div className="px-6">
               <UserProfileNavigation />
             </div>
 
-            {/* Profile Form */}
             <div className="p-6">
               <div className="space-y-6">
-                {/* Name Input */}
                 <div>
                   <label
                     htmlFor="name"
@@ -103,7 +100,6 @@ const UserProfile = () => {
                   />
                 </div>
 
-                {/* Phone Input */}
                 <div>
                   <label
                     htmlFor="phone"
@@ -122,7 +118,6 @@ const UserProfile = () => {
                   />
                 </div>
 
-                {/* Buttons */}
                 <div className="flex items-center justify-between pt-6">
                   <button
                     onClick={handleLogout}

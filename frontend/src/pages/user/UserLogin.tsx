@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidEmail } from "../../utils/validators";
+import { authService } from "../../services/api";
 
 const UserLogin = () => {
   const navigate = useNavigate();
@@ -49,6 +50,16 @@ const UserLogin = () => {
       notifyError(errMsg);
     } finally {
       setIsLoading(false);
+    }
+  };
+  const handleGoogleSignin = () => {
+    try {
+      const googleAuthUrl = authService.getGoogleAuthUrl();
+      // Redirect to the Google auth endpoint
+      window.location.href = googleAuthUrl;
+    } catch (error) {
+      console.error("Error retrieving Google auth URL:", error);
+      notifyError("Failed to initiate Google authentication.");
     }
   };
 
@@ -166,9 +177,9 @@ const UserLogin = () => {
               </div>
 
               <button
+                onClick={handleGoogleSignin}
                 type="button"
                 className="w-full bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 border border-gray-300 rounded-md transition-colors flex items-center justify-center cursor-pointer"
-                onClick={() => console.log("Google signin")}
               >
                 <svg
                   className="w-4 h-4 mr-2"

@@ -60,9 +60,8 @@ export const authService = {
     const response = await userApi.post("/logout");
     return response.data;
   },
-  googleAuth: async (token: string) => {
-    const response = await userApi.post("/auth/google", { token });
-    return response.data;
+  getGoogleAuthUrl: () => {
+    return `${API_URL}/api/user/auth/google`;
   },
 
   vendorSignup: async (vendorData: any) => {

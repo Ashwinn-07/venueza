@@ -95,22 +95,14 @@ class UserController implements IUserController {
         path: "/",
       });
 
-      res.status(result.status).json({
-        message: result.message,
-        user: {
-          id: result.user._id,
-          name: result.user.name,
-          email: result.user.email,
-        },
-      });
+      res.redirect(
+        `${process.env.FRONTEND_URL}/auth/google/callback?token=${result.token}`
+      );
     } catch (error) {
       console.error("Google auth error:", error);
-      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-        error:
-          error instanceof Error
-            ? error.message
-            : "Google Authentication Failed",
-      });
+      res.redirect(
+        `${process.env.FRONTEND_URL}/user/login?error=google_auth_failed`
+      );
     }
   }
   async forgotPassword(req: Request, res: Response): Promise<void> {

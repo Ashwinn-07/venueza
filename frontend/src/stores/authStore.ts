@@ -37,7 +37,7 @@ interface AuthState {
     confirmNewPassword: string;
   }) => Promise<void>;
 
-  googleLogin: (token: string) => Promise<void>;
+  setUserFromToken: (token: string, authType: AuthType) => void;
   getDashboardStats: () => Promise<any>;
   listAllUsers: () => Promise<any>;
   listAllVendors: () => Promise<any>;
@@ -244,19 +244,21 @@ export const useAuthStore = create<AuthState>()(
           throw error;
         }
       },
-      googleLogin: async (token) => {
+      setUserFromToken: (token, authType) => {
         try {
-          const response = await authService.googleAuth(token);
-
-          sessionStorage.setItem("auth-type", "user");
-
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const decodedPayload = JSON.parse(
+            decodeURIComponent(escape(window.atob(base64)))
+          ); // Here we decode the token to extract user info.
           set({
-            user: response.user,
-            authType: "user",
+            user: decodedPayload,
+            authType,
             isAuthenticated: true,
           });
+          sessionStorage.setItem("auth-type", authType);
         } catch (error) {
-          console.error("Google login failed", error);
+          console.error("Failed to decode token", error);
           throw error;
         }
       },

@@ -25,6 +25,7 @@ import VendorResetPassword from "./pages/vendor/VendorResetPassword";
 import UserForgotPassword from "./pages/user/UserForgotPassword";
 import UserResetPassword from "./pages/user/UserResetPassword";
 import { ProtectedRoute } from "./components/auth/ProtectedRoutes";
+import GoogleAuthCallback from "./components/user/GoogleAuthCallback";
 
 const App = () => {
   return (
@@ -49,6 +50,8 @@ const App = () => {
           <Route path="/user/login" element={<UserLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
         </Route>
+
+        <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
 
         <Route path="/user/verify-otp" element={<UserOtpVerification />} />
         <Route path="/vendor/verify-otp" element={<VendorOtpVerification />} />
