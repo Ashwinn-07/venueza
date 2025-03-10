@@ -105,6 +105,8 @@ class VendorController implements IVendorController {
           name: result.vendor.name,
           email: result.vendor.email,
           phone: result.vendor.phone,
+          businessName: result.vendor.businessName,
+          businessAddress: result.vendor.businessAddress,
           status: result.vendor.status,
         },
       });
@@ -142,6 +144,8 @@ class VendorController implements IVendorController {
           name: result.vendor.name,
           email: result.vendor.email,
           phone: result.vendor.phone,
+          businessName: result.vendor.businessName,
+          businessAddress: result.vendor.businessAddress,
           status: result.vendor.status,
         },
       });

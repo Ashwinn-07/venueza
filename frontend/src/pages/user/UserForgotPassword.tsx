@@ -34,7 +34,7 @@ const UserForgotPassword = () => {
 
     // Navigate to reset password page with the email
     setTimeout(() => {
-      navigate("/user-reset-password", {
+      navigate("/user/reset-password", {
         state: { email: email },
       });
     }, 1500);
@@ -85,7 +85,7 @@ const UserForgotPassword = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
-                  placeholder="john@example.com"
+                  placeholder="Enter your email address"
                 />
                 {emailError && (
                   <p className="mt-1 text-sm text-red-600">{emailError}</p>

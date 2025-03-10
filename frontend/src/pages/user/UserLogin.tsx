@@ -79,7 +79,7 @@ const UserLogin = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="john@example.com"
+                placeholder="Enter you email address"
                 required
               />
             </div>
@@ -94,6 +94,7 @@ const UserLogin = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter your password"
                 required
               />
             </div>
@@ -101,7 +102,7 @@ const UserLogin = () => {
             <div className="flex items-center justify-between">
               <div className="text-sm">
                 <Link
-                  to="/forgot-password"
+                  to="/user/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-800"
                 >
                   Forgot password?

@@ -1,23 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import VendorSidebar from "../../components/vendor/VendorSidebar";
 import ProfileTabs from "../../components/vendor/ProfileTabs";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import { useAuthStore } from "../../stores/authStore";
+import { useNavigate } from "react-router-dom";
 
 const VendorProfile = () => {
-  const [name, setName] = useState("Jane Smith");
-  const [businessName, setBusinessName] = useState("Elegant Events LLC");
-  const [phone, setPhone] = useState("(123) 456-7890");
-  const [businessAddress, setBusinessAddress] = useState(
-    "123 Wedding Lane, Suite 101"
-  );
+  const navigate = useNavigate();
+  const { user, updateProfile, isAuthenticated, authType } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    businessName: "",
+    phone: "",
+    businessAddress: "",
+  });
 
-  const handleSaveProfile = () => {
+  useEffect(() => {
+    if (!isAuthenticated || authType !== "vendor") {
+      navigate("/vendor/login");
+      return;
+    }
+
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        businessName: user.businessName || "",
+        phone: user.phone || "",
+        businessAddress: user.businessAddress || "",
+      });
+    }
+  }, [user, isAuthenticated, authType, navigate]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveProfile = async () => {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await updateProfile(formData);
+      notifySuccess("Profile updated successfully!");
+    } catch (err: any) {
+      const errMsg =
+        err.response?.data?.message ||
+        "Failed to update profile. Please try again.";
+      notifyError(errMsg);
+    } finally {
       setIsLoading(false);
-      alert("Profile updated successfully");
-    }, 1000);
+    }
   };
 
   return (
@@ -41,13 +73,13 @@ const VendorProfile = () => {
               <div className="space-y-6">
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Name
+                    Name
                   </label>
                   <input
+                    name="name"
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter contact name"
+                    value={formData.name}
+                    onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -57,10 +89,10 @@ const VendorProfile = () => {
                     Business Name
                   </label>
                   <input
+                    name="businessName"
                     type="text"
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="Enter business name"
+                    value={formData.businessName}
+                    onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -70,10 +102,10 @@ const VendorProfile = () => {
                     Phone
                   </label>
                   <input
+                    name="phone"
                     type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter phone number"
+                    value={formData.phone}
+                    onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -83,10 +115,10 @@ const VendorProfile = () => {
                     Business Address
                   </label>
                   <input
+                    name="businessAddress"
                     type="text"
-                    value={businessAddress}
-                    onChange={(e) => setBusinessAddress(e.target.value)}
-                    placeholder="Enter business address"
+                    value={formData.businessAddress}
+                    onChange={handleChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -95,7 +127,7 @@ const VendorProfile = () => {
                   <button
                     onClick={handleSaveProfile}
                     disabled={isLoading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50"
                   >
                     {isLoading ? "Saving..." : "Save Changes"}
                   </button>

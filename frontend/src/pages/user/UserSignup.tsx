@@ -83,7 +83,7 @@ const UserSignup = () => {
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Jane Smith"
+                placeholder="Enter your name"
                 required
               />
             </div>
@@ -99,7 +99,7 @@ const UserSignup = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="business@example.com"
+                placeholder="Enter your email address"
                 required
               />
             </div>
@@ -115,7 +115,7 @@ const UserSignup = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="(123) 456-7890"
+                placeholder="Enter your phone"
                 required
               />
             </div>
@@ -131,6 +131,7 @@ const UserSignup = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your password"
                 required
               />
             </div>
@@ -146,6 +147,7 @@ const UserSignup = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your password again"
                 required
               />
             </div>

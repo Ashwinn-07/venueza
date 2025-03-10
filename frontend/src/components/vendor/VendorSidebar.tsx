@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import { useAuthStore } from "../../stores/authStore";
 
 const VendorSidebar = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const menuItems = [
     { icon: "🏠", text: "Dashboard", path: "/vendor/dashboard" },
     { icon: "🏢", text: "Venue Management", path: "/venue" },
@@ -9,6 +13,17 @@ const VendorSidebar = () => {
     { icon: "💬", text: "Messages", path: "/messages" },
     { icon: "⚙️", text: "Settings", path: "/vendor/settings/profile" },
   ];
+  const handleLogout = async () => {
+    try {
+      await logout();
+      notifySuccess("Logged out successfully!");
+      navigate("/vendor/login");
+    } catch (err: any) {
+      const errMsg =
+        err.response?.data?.message || "Failed to logout. Please try again.";
+      notifyError(errMsg);
+    }
+  };
 
   return (
     <div className="w-64 bg-white h-screen border-r border-gray-200 flex flex-col">
@@ -34,14 +49,11 @@ const VendorSidebar = () => {
         ))}
       </div>
 
-      <div className="py-4 border-t border-gray-200">
-        <Link
-          to="/logout"
-          className="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <span className="mr-3 text-lg">🚪</span>
-          <span className="text-sm">Logout</span>
-        </Link>
+      <div className="py-4 border-t border-gray-200 flex items-center px-6  text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
+        <span className="mr-3 text-lg">🚪</span>
+        <span onClick={handleLogout} className="text-sm">
+          Logout
+        </span>
       </div>
     </div>
   );
