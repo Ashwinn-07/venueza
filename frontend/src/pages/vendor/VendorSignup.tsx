@@ -3,6 +3,11 @@ import { Building2, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
+import {
+  isValidEmail,
+  isValidPassword,
+  isValidPhone,
+} from "../../utils/validators";
 
 const VendorSignup = () => {
   const navigate = useNavigate();
@@ -25,6 +30,41 @@ const VendorSignup = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const { name, businessName, businessAddress, email, phone, password } =
+      formData;
+    if (
+      !name ||
+      !businessName ||
+      !businessAddress ||
+      !email ||
+      !phone ||
+      !password
+    ) {
+      const msg = "All fields are required.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
+    if (!isValidEmail(email)) {
+      const msg = "Invalid email format.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      const msg = "Invalid phone number format.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
+    if (!isValidPassword(password)) {
+      const msg =
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -46,7 +86,6 @@ const VendorSignup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background with different wedding vendor image */}
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
@@ -56,10 +95,8 @@ const VendorSignup = () => {
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container with animation */}
       <div className="w-full max-w-md px-6 py-12">
         <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl">
-          {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               <Building2 className="h-10 w-10 text-blue-500" />
@@ -77,7 +114,6 @@ const VendorSignup = () => {
           )}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* Contact Person Input */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Name
@@ -89,11 +125,9 @@ const VendorSignup = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your name"
-                required
               />
             </div>
 
-            {/* Business Name Input */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Business Name
@@ -105,11 +139,9 @@ const VendorSignup = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your business name"
-                required
               />
             </div>
 
-            {/* Business Address Input */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Business Address
@@ -121,11 +153,9 @@ const VendorSignup = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your business address"
-                required
               />
             </div>
 
-            {/* Email Input */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Email Address
@@ -137,11 +167,9 @@ const VendorSignup = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your email address"
-                required
               />
             </div>
 
-            {/* Phone Input */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Phone Number
@@ -153,11 +181,9 @@ const VendorSignup = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your phone"
-                required
               />
             </div>
 
-            {/* Password Input */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Password
@@ -169,12 +195,10 @@ const VendorSignup = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your password"
-                required
               />
             </div>
 
             <div className="pt-2">
-              {/* Create Vendor Account Button */}
               <button
                 type="submit"
                 disabled={isLoading}

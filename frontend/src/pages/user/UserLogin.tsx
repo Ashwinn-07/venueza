@@ -3,6 +3,7 @@ import { User, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
+import { isValidEmail } from "../../utils/validators";
 
 const UserLogin = () => {
   const navigate = useNavigate();
@@ -21,11 +22,24 @@ const UserLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const { email, password } = formData;
+    if (!email || !password) {
+      const msg = "Email and password are required.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
+    if (!isValidEmail(email)) {
+      const msg = "Invalid email format.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
     setIsLoading(true);
     setError("");
 
     try {
-      await login(formData.email, formData.password, "user");
+      await login(email, password, "user");
       notifySuccess("Login successful!");
       navigate("/user/home");
     } catch (err: any) {
@@ -40,7 +54,6 @@ const UserLogin = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
@@ -50,10 +63,8 @@ const UserLogin = () => {
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container */}
       <div className="w-full max-w-md px-6 py-12">
         <div className="bg-white/90 p-8 rounded-2xl shadow-xl">
-          {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               <User className="h-10 w-10 text-blue-600" />
@@ -80,7 +91,6 @@ const UserLogin = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter you email address"
-                required
               />
             </div>
 
@@ -95,7 +105,6 @@ const UserLogin = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your password"
-                required
               />
             </div>
 

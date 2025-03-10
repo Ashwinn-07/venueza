@@ -4,6 +4,7 @@ import ProfileTabs from "../../components/vendor/ProfileTabs";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
+import { isValidPhone } from "../../utils/validators";
 
 const VendorProfile = () => {
   const navigate = useNavigate();
@@ -38,6 +39,22 @@ const VendorProfile = () => {
   };
 
   const handleSaveProfile = async () => {
+    if (!formData.name.trim()) {
+      notifyError("Name cannot be empty");
+      return;
+    }
+    if (!formData.businessName.trim()) {
+      notifyError("Business name cannot be empty");
+      return;
+    }
+    if (!formData.businessAddress.trim()) {
+      notifyError("Business address cannot be empty");
+      return;
+    }
+    if (!isValidPhone(formData.phone)) {
+      notifyError("Invalid phone number format");
+      return;
+    }
     setIsLoading(true);
     try {
       await updateProfile(formData);

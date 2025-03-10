@@ -3,6 +3,7 @@ import { ArrowLeft, KeyRound, Check } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
+import { isValidPassword } from "../../utils/validators";
 
 const UserResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +19,7 @@ const UserResetPassword = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { resetPassword, resendOtp } = useAuthStore();
+  const { resetPassword } = useAuthStore();
   const email = location.state?.email || "";
 
   const handleOtpChange = (index: number, value: string) => {
@@ -58,12 +59,46 @@ const UserResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrors({ otp: "", password: "", confirmPassword: "" });
+
+    const joinedOtp = otp.join("");
+
+    if (joinedOtp.length !== 6) {
+      setErrors((prev) => ({ ...prev, otp: "OTP must be exactly 6 digits." }));
+      notifyError("OTP must be exactly 6 digits.");
+      return;
+    }
+
+    if (!password) {
+      setErrors((prev) => ({ ...prev, password: "New password is required." }));
+      notifyError("New password is required.");
+      return;
+    }
+    if (!isValidPassword(password)) {
+      setErrors((prev) => ({
+        ...prev,
+        password:
+          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+      }));
+      notifyError(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+      );
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: "Passwords do not match.",
+      }));
+      notifyError("Passwords do not match.");
+      return;
+    }
 
     setIsLoading(true);
     try {
       const resetData = {
         email,
-        otp: otp.join(""),
+        otp: joinedOtp,
         password,
         confirmPassword,
       };
@@ -88,18 +123,9 @@ const UserResetPassword = () => {
       setIsLoading(false);
     }
   };
-  const handleResendOtp = async () => {
-    try {
-      await resendOtp(email, "user");
-      notifySuccess("New verification code sent");
-    } catch (err: any) {
-      notifyError(err.response?.data?.message || "Failed to resend code");
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
@@ -109,10 +135,8 @@ const UserResetPassword = () => {
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container with animation */}
       <div className="w-full max-w-md px-6 py-12 animate-fade-in">
         <div className="glass-morphism p-8 rounded-2xl shadow-xl">
-          {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               {isSubmitted ? (
@@ -133,7 +157,6 @@ const UserResetPassword = () => {
 
           {!isSubmitted ? (
             <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* OTP Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Verification Code
@@ -158,17 +181,9 @@ const UserResetPassword = () => {
                 )}
                 <p className="text-xs text-gray-500 mt-1">
                   We've sent a 6-digit code to {email}
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    className="ml-2 text-brand hover:text-brand-dark"
-                  >
-                    Resend code
-                  </button>
                 </p>
               </div>
 
-              {/* Password Fields */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   New Password

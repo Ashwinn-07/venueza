@@ -3,6 +3,7 @@ import { Building2, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
+import { isValidEmail } from "../../utils/validators";
 
 const VendorLogin = () => {
   const navigate = useNavigate();
@@ -21,6 +22,18 @@ const VendorLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!formData.email || !formData.password) {
+      const msg = "Both email and password are required.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
+    if (!isValidEmail(formData.email)) {
+      const msg = "Invalid email format.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
     setIsLoading(true);
     setError("");
 
@@ -40,7 +53,6 @@ const VendorLogin = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
@@ -50,10 +62,8 @@ const VendorLogin = () => {
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container */}
       <div className="w-full max-w-md px-6 py-12">
         <div className="bg-white/90 p-8 rounded-2xl shadow-xl">
-          {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               <Building2 className="h-10 w-10 text-blue-600" />
@@ -82,7 +92,6 @@ const VendorLogin = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter you email address"
-                required
               />
             </div>
 
@@ -97,7 +106,6 @@ const VendorLogin = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your password"
-                required
               />
             </div>
 

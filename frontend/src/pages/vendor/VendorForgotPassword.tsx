@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifyError, notifySuccess } from "../../utils/notifications";
+import { isValidEmail } from "../../utils/validators";
 
 const VendorForgotPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,14 +15,26 @@ const VendorForgotPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) {
+      const msg = "Email is required";
+      setEmailError(msg);
+      notifyError(msg);
+      return;
+    }
+    if (!isValidEmail(email)) {
+      const msg = "Invalid email format";
+      setEmailError(msg);
+      notifyError(msg);
+      return;
+    }
 
     setIsLoading(true);
     try {
       await forgotPassword(email, "vendor");
       notifySuccess("Verification code sent to your email");
       setIsSubmitted(true);
+      setEmailError("");
 
-      // Navigate after short delay
       setTimeout(() => {
         navigate("/vendor/reset-password", { state: { email } });
       }, 1500);
@@ -37,7 +50,6 @@ const VendorForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
@@ -47,10 +59,8 @@ const VendorForgotPassword = () => {
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container with animation */}
       <div className="w-full max-w-md px-6 py-12 animate-fade-in">
         <div className="glass-morphism p-8 rounded-2xl shadow-xl">
-          {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               {isSubmitted ? (

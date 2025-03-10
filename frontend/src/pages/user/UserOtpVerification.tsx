@@ -2,7 +2,7 @@ import { Shield, Check } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import { authService } from "../../services/api";
+import { useAuthStore } from "../../stores/authStore";
 
 const UserOtpVerification = () => {
   const location = useLocation();
@@ -10,6 +10,7 @@ const UserOtpVerification = () => {
   const { email } = location.state || {};
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { verifyOtp, resendOtp } = useAuthStore();
 
   const handleVerifyOtp = async () => {
     if (otp.length != 6) {
@@ -18,7 +19,7 @@ const UserOtpVerification = () => {
     }
     setIsLoading(true);
     try {
-      await authService.userVerifyOtp({ email, otp });
+      await verifyOtp(email, otp, "user");
       notifySuccess("OTP Verified Successfully");
       navigate("/user/login");
     } catch (err: any) {
@@ -31,10 +32,17 @@ const UserOtpVerification = () => {
       setIsLoading(false);
     }
   };
+  const handleResendOtp = async () => {
+    try {
+      await resendOtp(email, "user");
+      notifySuccess("New verification code sent");
+    } catch (err: any) {
+      notifyError(err.response?.data?.message || "Failed to resend code");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
@@ -44,10 +52,8 @@ const UserOtpVerification = () => {
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container with animation */}
       <div className="w-full max-w-md px-6 py-12">
         <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl">
-          {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               <Shield className="h-10 w-10 text-blue-500" />
@@ -95,6 +101,7 @@ const UserOtpVerification = () => {
                 Didn't receive the code?
               </p>
               <button
+                onClick={handleResendOtp}
                 type="button"
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
               >

@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
+import { isValidEmail } from "../../utils/validators";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -21,6 +22,18 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!formData.email || !formData.password) {
+      const msg = "Both email and password are required.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
+    if (!isValidEmail(formData.email)) {
+      const msg = "Invalid email format.";
+      setError(msg);
+      notifyError(msg);
+      return;
+    }
     setIsLoading(true);
     setError("");
 
@@ -40,7 +53,6 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <img
           className="w-full h-full object-cover"
@@ -50,10 +62,8 @@ const AdminLogin = () => {
         <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Card container */}
       <div className="w-full max-w-md px-6 py-12">
         <div className="bg-gray-900/70 p-8 rounded-2xl shadow-xl border border-gray-700">
-          {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="bg-gray-800 p-3 rounded-full shadow-lg mb-4 border border-gray-700">
               <Lock className="h-10 w-10 text-blue-500" />
@@ -81,8 +91,7 @@ const AdminLogin = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 text-white placeholder-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="admin@example.com"
-                required
+                placeholder="Enter your email"
               />
             </div>
 
@@ -96,19 +105,8 @@ const AdminLogin = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                placeholder="Enter your password"
               />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
-                <a
-                  href="/admin/forgot-password"
-                  className="font-medium text-blue-400 hover:text-blue-300"
-                >
-                  Forgot password?
-                </a>
-              </div>
             </div>
 
             <div className="pt-4">

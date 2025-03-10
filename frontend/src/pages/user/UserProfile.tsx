@@ -5,6 +5,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
+import { isValidPhone } from "../../utils/validators";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -35,6 +36,14 @@ const UserProfile = () => {
   };
 
   const handleSave = async () => {
+    if (!formData.name.trim()) {
+      notifyError("Name cannot be empty");
+      return;
+    }
+    if (!isValidPhone(formData.phone)) {
+      notifyError("Invalid phone number format");
+      return;
+    }
     setIsLoading(true);
     try {
       await updateProfile(formData);

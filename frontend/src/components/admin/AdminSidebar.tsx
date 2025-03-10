@@ -1,12 +1,27 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import { useAuthStore } from "../../stores/authStore";
 
 const AdminSidebar = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const menuItems = [
     { icon: "🏠", text: "Dashboard", path: "/admin/dashboard" },
     { icon: "👥", text: "Users", path: "/admin/users" },
     { icon: "🚚", text: "Vendors", path: "/admin/vendors" },
     { icon: "📅", text: "Bookings", path: "/bookings" },
   ];
+  const handleLogout = async () => {
+    try {
+      await logout();
+      notifySuccess("Logged out successfully!");
+      navigate("/admin/login");
+    } catch (err: any) {
+      const errMsg =
+        err.response?.data?.message || "Failed to logout. Please try again.";
+      notifyError(errMsg);
+    }
+  };
 
   return (
     <div className="w-72 bg-gray-900 h-screen flex flex-col text-white">
@@ -47,14 +62,11 @@ const AdminSidebar = () => {
         ))}
       </div>
 
-      <div className="py-4 mt-auto">
-        <Link
-          to="/logout"
-          className="flex items-center px-6 py-3 hover:bg-gray-800 transition-colors"
-        >
-          <span className="mr-3 text-lg">↩️</span>
-          <span className="text-base font-medium">Logout</span>
-        </Link>
+      <div className="py-4 mt-auto flex items-center px-6 hover:bg-gray-800 transition-colors cursor-pointer">
+        <span className="mr-3 text-lg">↩️</span>
+        <span onClick={handleLogout} className="text-base font-medium">
+          Logout
+        </span>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import Footer from "../../components/Footer";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
+import { isValidPassword } from "../../utils/validators";
 
 const UserProfileSecurity = () => {
   const navigate = useNavigate();
@@ -25,8 +26,18 @@ const UserProfileSecurity = () => {
   }, [isAuthenticated, navigate]);
 
   const handleUpdatePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      notifyError("All password fields are required.");
+      return;
+    }
     if (newPassword !== confirmPassword) {
-      notifyError("New passwords do not match");
+      notifyError("New password and confirmation do not match.");
+      return;
+    }
+    if (!isValidPassword(newPassword)) {
+      notifyError(
+        "New password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+      );
       return;
     }
 
