@@ -1,56 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { notifyError } from "../../utils/notifications";
+import { useAuthStore } from "../../stores/authStore";
 
 const AdminUsers = () => {
-  // Sample users data
-  const initialUsersData = [
-    {
-      id: 1,
-      name: "Jane Cooper",
-      email: "jane.cooper@example.com",
-      bookings: 5,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Cody Fisher",
-      email: "cody.fisher@example.com",
-      bookings: 8,
-      status: "Blocked",
-    },
-    {
-      id: 3,
-      name: "Esther Howard",
-      email: "esther.howard@example.com",
-      bookings: 17,
-      status: "Active",
-    },
-    {
-      id: 4,
-      name: "Jenny Wilson",
-      email: "jenny.wilson@example.com",
-      bookings: 9,
-      status: "Active",
-    },
-    {
-      id: 5,
-      name: "Kristin Watson",
-      email: "kristin.watson@example.com",
-      bookings: 5,
-      status: "Active",
-    },
-    {
-      id: 6,
-      name: "Cameron Williamson",
-      email: "cameron.williamson@example.com",
-      bookings: 3,
-      status: "Active",
-    },
-  ];
-
-  const [users, setUsers] = useState(initialUsersData);
+  const { listAllUsers } = useAuthStore();
+  const [users, setUsers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSearch = (e: any) => {
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await listAllUsers();
+        setUsers(response.users);
+      } catch (error) {
+        console.error("Failed to load users:", error);
+        notifyError("Failed to load users.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadUsers();
+  }, [listAllUsers]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
@@ -60,23 +33,11 @@ const AdminUsers = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleToggleBlock = (userId: any) => {
-    setUsers(
-      users.map((user) => {
-        if (user.id === userId) {
-          const newStatus = user.status === "Active" ? "Blocked" : "Active";
-          // Simple alert instead of toast
-          alert(
-            `User ${user.name} ${
-              newStatus === "Active" ? "unblocked" : "blocked"
-            } successfully`
-          );
-          return { ...user, status: newStatus };
-        }
-        return user;
-      })
-    );
+  const handleToggleBlock = () => {
+    alert(`coming soon`);
   };
+
+  if (isLoading) return <div>Loading users...</div>;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -131,8 +92,7 @@ const AdminUsers = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                          ${
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             user.status === "Active"
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
@@ -143,14 +103,14 @@ const AdminUsers = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          className={`px-3 py-1 border rounded text-sm font-medium ${
+                          className={`px-3 py-1 border rounded text-sm font-medium cursor-pointer ${
                             user.status === "Active"
                               ? "border-red-300 text-red-600 hover:bg-red-50"
                               : "border-green-300 text-green-600 hover:bg-green-50"
                           }`}
-                          onClick={() => handleToggleBlock(user.id)}
+                          onClick={() => handleToggleBlock()}
                         >
-                          {user.status === "Active" ? "Block" : "Unblock"}
+                          Block
                         </button>
                       </td>
                     </tr>
@@ -172,16 +132,16 @@ const AdminUsers = () => {
                   className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                   aria-label="Pagination"
                 >
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <button className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 cursor-pointer">
                     &lt;
                   </button>
-                  <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-orange-500 text-sm font-medium text-white">
+                  <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-orange-500 text-sm font-medium text-white cursor-pointer">
                     1
                   </button>
-                  <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 cursor-pointer ">
                     2
                   </button>
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <button className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 cursor-pointer">
                     &gt;
                   </button>
                 </nav>
