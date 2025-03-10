@@ -6,6 +6,7 @@ import { IAdminService } from "./interfaces/IAdminService";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
 import userRepository from "../repositories/user.repository";
 import vendorRepository from "../repositories/vendor.repository";
+import { isValidEmail } from "../utils/validators";
 
 class AdminService implements IAdminService {
   private sanitizeAdmin(admin: IAdmin) {
@@ -21,6 +22,12 @@ class AdminService implements IAdminService {
     message: string;
     status: number;
   }> {
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email format");
+    }
+    if (!password) {
+      throw new Error("Password is required");
+    }
     const admin = await adminRepository.findByEmail(email);
     if (!admin) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);

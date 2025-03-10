@@ -5,6 +5,12 @@ import { IUser } from "../models/user.model";
 import { IUserService } from "./interfaces/IUserService";
 import OTPService from "../utils/OTPService";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
+import {
+  isValidEmail,
+  isValidPassword,
+  isValidPhone,
+  isValidOTP,
+} from "../utils/validators";
 
 interface SignupData extends Partial<IUser> {
   confirmPassword?: string;
@@ -21,6 +27,17 @@ class UserService implements IUserService {
     const { name, email, password, confirmPassword, phone } = userData;
     if (!name || !email || !password || !confirmPassword) {
       throw new Error(MESSAGES.ERROR.INVALID_INPUT);
+    }
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email format");
+    }
+    if (!isValidPassword(password)) {
+      throw new Error(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+      );
+    }
+    if (phone && !isValidPhone(phone)) {
+      throw new Error("Invalid phone number format");
     }
     if (password !== confirmPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
@@ -49,6 +66,9 @@ class UserService implements IUserService {
     email: string,
     otp: string
   ): Promise<{ message: string; status: number }> {
+    if (!isValidOTP(otp)) {
+      throw new Error("OTP must be a 6-digit number");
+    }
     const user = await userRepository.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
@@ -87,6 +107,12 @@ class UserService implements IUserService {
     email: string,
     password: string
   ): Promise<{ user: IUser; token: string; message: string; status: number }> {
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email format");
+    }
+    if (!password) {
+      throw new Error("Password is required");
+    }
     const user = await userRepository.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
@@ -153,6 +179,9 @@ class UserService implements IUserService {
   async forgotPassword(
     email: string
   ): Promise<{ message: string; status: number }> {
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email format");
+    }
     const user = await userRepository.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
@@ -170,6 +199,14 @@ class UserService implements IUserService {
     password: string,
     confirmPassword: string
   ): Promise<{ message: string; status: number }> {
+    if (!isValidOTP(otp)) {
+      throw new Error("OTP must be a 6-digit number");
+    }
+    if (!isValidPassword(password)) {
+      throw new Error(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+      );
+    }
     if (password != confirmPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
@@ -204,7 +241,18 @@ class UserService implements IUserService {
 
     for (const key in updatedData) {
       if (allowedFields.includes(key)) {
-        fieldsToUpdate[key as keyof IUser] = updatedData[key as keyof IUser];
+        if (key === "name" && typeof updatedData.name === "string") {
+          if (updatedData.name.trim().length === 0) {
+            throw new Error("Name cannot be empty");
+          }
+          fieldsToUpdate.name = updatedData.name.trim();
+        }
+        if (key === "phone" && typeof updatedData.phone === "string") {
+          if (!isValidPhone(updatedData.phone)) {
+            throw new Error("Invalid phone number format");
+          }
+          fieldsToUpdate.phone = updatedData.phone;
+        }
       }
     }
     const updateUser = await userRepository.update(userId, fieldsToUpdate);
@@ -223,6 +271,11 @@ class UserService implements IUserService {
     newPassword: string,
     confirmNewPassword: string
   ): Promise<{ message: string; status: number }> {
+    if (!isValidPassword(newPassword)) {
+      throw new Error(
+        "New password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+      );
+    }
     if (newPassword != confirmNewPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
