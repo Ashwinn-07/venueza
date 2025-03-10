@@ -50,7 +50,7 @@ export const authService = {
   userResetPassword: async (data: {
     email: string;
     otp: string;
-    newPassword: string;
+    password: string;
     confirmPassword: string;
   }) => {
     const response = await userApi.post("/reset-password", data);
@@ -88,7 +88,7 @@ export const authService = {
   vendorResetPassword: async (data: {
     email: string;
     otp: string;
-    newPassword: string;
+    password: string;
     confirmPassword: string;
   }) => {
     const response = await vendorApi.post("/reset-password", data);

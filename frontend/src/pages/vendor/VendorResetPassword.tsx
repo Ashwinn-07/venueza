@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ArrowLeft, KeyRound, Check } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 
 const VendorResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +18,7 @@ const VendorResetPassword = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { resetPassword, resendOtp } = useAuthStore();
   const email = location.state?.email || "";
 
   const handleOtpChange = (index: number, value: string) => {
@@ -53,62 +56,45 @@ const VendorResetPassword = () => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {
-      otp: "",
-      password: "",
-      confirmPassword: "",
-    };
-    let isValid = true;
-
-    // Validate OTP: all digits must be entered
-    if (otp.some((digit) => !digit)) {
-      newErrors.otp = "Please enter all digits of the OTP";
-      isValid = false;
-    }
-
-    // Validate password requirements
-    if (!password) {
-      newErrors.password = "Password is required";
-      isValid = false;
-    } else if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-      isValid = false;
-    } else if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-        password
-      )
-    ) {
-      newErrors.password =
-        "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character";
-      isValid = false;
-    }
-
-    // Validate confirm password
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = "The passwords do not match";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
     setIsLoading(true);
-    // Simulate an API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitted(true);
-    setIsLoading(false);
+    try {
+      const resetData = {
+        email,
+        otp: otp.join(""),
+        password,
+        confirmPassword,
+      };
 
-    // Redirect to login after 2 seconds
-    setTimeout(() => {
-      navigate("/vendor-login");
-    }, 2000);
+      await resetPassword(resetData, "vendor");
+      notifySuccess("Password reset successfully!");
+      setIsSubmitted(true);
+
+      setTimeout(() => {
+        navigate("/vendor/login");
+      }, 2000);
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "Password reset failed";
+
+      if (errorMessage.toLowerCase().includes("otp")) {
+        setErrors((prev) => ({ ...prev, otp: errorMessage }));
+      } else {
+        notifyError(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleResendOtp = async () => {
+    try {
+      await resendOtp(email, "vendor");
+      notifySuccess("New verification code sent");
+    } catch (err: any) {
+      notifyError(err.response?.data?.message || "Failed to resend code");
+    }
   };
 
   return (
@@ -174,6 +160,13 @@ const VendorResetPassword = () => {
                 )}
                 <p className="text-xs text-gray-500 mt-1">
                   We've sent a 6-digit code to {email}
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    className="ml-2 text-brand hover:text-brand-dark"
+                  >
+                    Resend code
+                  </button>
                 </p>
               </div>
 

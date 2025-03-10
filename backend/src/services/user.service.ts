@@ -167,10 +167,10 @@ class UserService implements IUserService {
   async resetPassword(
     email: string,
     otp: string,
-    newPassword: string,
+    password: string,
     confirmPassword: string
   ): Promise<{ message: string; status: number }> {
-    if (newPassword != confirmPassword) {
+    if (password != confirmPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
     const user = await userRepository.findByEmail(email);
@@ -180,7 +180,7 @@ class UserService implements IUserService {
     if (user.otp !== otp) {
       throw new Error(MESSAGES.ERROR.OTP_INVALID);
     }
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.otp = undefined;
     await userRepository.update(user._id.toString(), user);

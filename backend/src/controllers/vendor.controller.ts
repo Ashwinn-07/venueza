@@ -71,12 +71,12 @@ class VendorController implements IVendorController {
   }
   async resetPassword(req: Request, res: Response): Promise<void> {
     try {
-      const { email, otp, newPassword, confirmNewPassword } = req.body;
+      const { email, otp, password, confirmPassword } = req.body;
       const result = await vendorService.resetPassword(
         email,
         otp,
-        newPassword,
-        confirmNewPassword
+        password,
+        confirmPassword
       );
       res.status(result.status).json({ message: result.message });
     } catch (error) {

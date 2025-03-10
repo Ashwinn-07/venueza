@@ -24,7 +24,7 @@ interface AuthState {
     data: {
       email: string;
       otp: string;
-      newPassword: string;
+      password: string;
       confirmPassword: string;
     },
     authType: AuthType

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ArrowLeft, Building2, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 
 const VendorForgotPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -8,36 +10,29 @@ const VendorForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
+  const { forgotPassword } = useAuthStore();
 
-  const validateEmail = (email: any) => {
-    const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-    if (!email) {
-      setEmailError("Email is required");
-      return false;
-    } else if (!regex.test(email)) {
-      setEmailError("Invalid email address");
-      return false;
-    }
-    setEmailError("");
-    return true;
-  };
-
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateEmail(email)) return;
 
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitted(true);
-    setIsLoading(false);
+    try {
+      await forgotPassword(email, "vendor");
+      notifySuccess("Verification code sent to your email");
+      setIsSubmitted(true);
 
-    // Navigate to reset password page with the email
-    setTimeout(() => {
-      navigate("/vendor/reset-password", {
-        state: { email: email },
-      });
-    }, 1500);
+      // Navigate after short delay
+      setTimeout(() => {
+        navigate("/vendor/reset-password", { state: { email } });
+      }, 1500);
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "Failed to send verification code";
+      notifyError(errorMessage);
+      setEmailError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
