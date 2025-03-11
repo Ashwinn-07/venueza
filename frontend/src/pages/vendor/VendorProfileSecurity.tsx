@@ -66,12 +66,10 @@ const VendorProfileSecurity = () => {
         </h1>
 
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
-          {/* Navigation Tabs */}
           <div className="px-6 pt-6">
             <ProfileTabs />
           </div>
 
-          {/* Security Form */}
           <div className="p-6">
             <div className="max-w-lg">
               <div className="space-y-6">

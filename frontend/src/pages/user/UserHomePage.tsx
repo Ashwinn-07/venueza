@@ -86,7 +86,6 @@ const UserHomePage = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <main className="flex-grow pt-16">
         <div className="container mx-auto px-4 py-12">
-          {/* Hero Search Section */}
           <section className="relative bg-gradient-to-r from-[#F4A261]/10 to-[#E76F51]/10 rounded-2xl p-8 md:p-12 text-center mb-16 overflow-hidden">
             <div className="relative z-10">
               <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 leading-tight">
@@ -103,7 +102,6 @@ const UserHomePage = () => {
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80')] opacity-5" />
           </section>
 
-          {/* Featured Venues */}
           <section className="mb-16">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
               <div>
@@ -126,7 +124,6 @@ const UserHomePage = () => {
             </div>
           </section>
 
-          {/* Stats Section */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {[
               { number: "500+", label: "Unique Venues" },
