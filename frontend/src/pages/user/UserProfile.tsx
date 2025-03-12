@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import UserProfileNavigation from "../../components/user/UserProfileNavigation";
 import { useAuthStore } from "../../stores/authStore";
+import { useNavigate } from "react-router-dom";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidPhone } from "../../utils/validators";
+import { uploadImageToCloudinary } from "../../utils/cloudinary";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -12,25 +13,43 @@ const UserProfile = () => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    profileImage: "",
   });
+  const [imagePreview, setImagePreview] = useState("");
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/user/login");
       return;
     }
-
     if (user) {
       setFormData({
         name: user.name || "",
         phone: user.phone || "",
+        profileImage: user.profileImage || "",
       });
+      setImagePreview(user.profileImage || "");
     }
   }, [user, isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const imageUrl = await uploadImageToCloudinary(file);
+        setFormData((prev) => ({ ...prev, profileImage: imageUrl }));
+        setImagePreview(imageUrl);
+        notifySuccess("Profile image uploaded successfully!");
+      } catch (error: any) {
+        console.error("Image upload failed", error);
+        notifyError("Failed to upload image. Please try again.");
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -79,6 +98,33 @@ const UserProfile = () => {
 
             <div className="p-6">
               <div className="space-y-6">
+                <div>
+                  <label
+                    htmlFor="profileImage"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Profile Image
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Profile Preview"
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500">No Image</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label
                     htmlFor="name"

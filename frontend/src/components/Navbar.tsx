@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { Heart, Menu, X, User, LogOut, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { Heart, Menu, X, User, LogOut, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../stores/authStore";
 
 const Navbar = () => {
@@ -66,9 +66,17 @@ const Navbar = () => {
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                   className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition"
                 >
-                  <div className="bg-[#F4A261] text-white p-2 rounded-full">
-                    <User className="h-5 w-5 cursor-pointer" />
-                  </div>
+                  {user?.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt="Avatar"
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="bg-[#F4A261] text-white p-2 rounded-full">
+                      <User className="h-5 w-5 cursor-pointer" />
+                    </div>
+                  )}
                   <span className="font-medium cursor-pointer">
                     {user?.name || "Account"}
                   </span>
