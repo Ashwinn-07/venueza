@@ -237,7 +237,7 @@ class UserService implements IUserService {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
 
-    const allowedFields = ["name", "phone"];
+    const allowedFields = ["name", "phone", "profileImage"];
     const fieldsToUpdate: Partial<IUser> = {};
 
     for (const key in updatedData) {
@@ -253,6 +253,12 @@ class UserService implements IUserService {
             throw new Error("Invalid phone number format");
           }
           fieldsToUpdate.phone = updatedData.phone;
+        }
+        if (
+          key === "profileImage" &&
+          typeof updatedData.profileImage === "string"
+        ) {
+          fieldsToUpdate.profileImage = updatedData.profileImage;
         }
       }
     }

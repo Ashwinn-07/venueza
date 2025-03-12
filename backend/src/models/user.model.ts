@@ -6,6 +6,7 @@ export interface IUser extends Document {
   email: string;
   password?: string;
   phone?: string;
+  profileImage?: string;
   bookings?: ObjectId;
   status: "active" | "blocked";
   isVerified: boolean;
@@ -32,6 +33,7 @@ const UserSchema: Schema = new Schema(
       },
     },
     phone: { type: String, trim: true, default: null },
+    profileImage: { type: String, default: null },
     bookings: { type: Schema.Types.ObjectId, ref: "Bookings", default: null },
     status: { type: String, enum: ["active", "blocked"], default: "active" },
     isVerified: { type: Boolean, default: false },

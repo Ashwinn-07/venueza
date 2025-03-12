@@ -73,6 +73,7 @@ class UserController implements IUserController {
           name: result.user.name,
           email: result.user.email,
           phone: result.user.phone,
+          profileImage: result.user.profileImage,
           status: result.user.status,
         },
       });
@@ -162,6 +163,7 @@ class UserController implements IUserController {
           name: result.user.name,
           email: result.user.email,
           phone: result.user.phone,
+          profileImage: result.user.profileImage,
           status: result.user.status,
         },
       });

@@ -198,7 +198,13 @@ class VendorService implements IVendorService {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
 
-    const allowedFields = ["name", "phone", "businessName", "businessAddress"];
+    const allowedFields = [
+      "name",
+      "phone",
+      "businessName",
+      "businessAddress",
+      "profileImage",
+    ];
     const fieldsToUpdate: Partial<IVendor> = {};
 
     for (const key in updatedData) {
@@ -232,6 +238,12 @@ class VendorService implements IVendorService {
             throw new Error("Business address cannot be empty");
           }
           fieldsToUpdate.businessAddress = updatedData.businessAddress.trim();
+        }
+        if (
+          key === "profileImage" &&
+          typeof updatedData.profileImage === "string"
+        ) {
+          fieldsToUpdate.profileImage = updatedData.profileImage;
         }
       }
     }

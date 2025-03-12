@@ -5,6 +5,7 @@ export interface IVendor extends Document {
   name: string;
   email: string;
   phone: string;
+  profileImage?: string;
   password: string;
   businessAddress: string;
   businessName: string;
@@ -27,6 +28,7 @@ const vendorSchema: Schema = new Schema(
       lowercase: true,
     },
     phone: { type: String, required: true, trim: true },
+    profileImage: { type: String, default: null },
     password: { type: String, required: true },
     businessAddress: { type: String, required: true, trim: true },
     businessName: { type: String, required: true, trim: true },
