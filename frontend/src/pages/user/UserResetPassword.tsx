@@ -135,28 +135,34 @@ const UserResetPassword = () => {
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
       </div>
 
-      <div className="w-full max-w-md px-6 py-12 animate-fade-in">
-        <div className="glass-morphism p-8 rounded-2xl shadow-xl">
+      <div className="w-full max-w-md px-6 py-12">
+        <div className="bg-white/90 p-8 rounded-2xl shadow-xl">
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               {isSubmitted ? (
                 <Check className="h-10 w-10 text-green-500" />
               ) : (
-                <KeyRound className="h-10 w-10 text-brand" />
+                <KeyRound className="h-10 w-10 text-blue-600" />
               )}
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 text-shadow-sm animate-slide-up">
+            <h2 className="text-3xl font-bold text-gray-900">
               {isSubmitted ? "Password Reset Complete" : "Set New Password"}
             </h2>
-            <p className="mt-2 text-gray-600 animate-slide-up delay-100">
+            <p className="mt-2 text-gray-600">
               {isSubmitted
                 ? "Your password has been reset successfully"
                 : "Enter the verification code and create a new password"}
             </p>
           </div>
 
+          {(errors.otp || errors.password || errors.confirmPassword) && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+              {errors.otp || errors.password || errors.confirmPassword}
+            </div>
+          )}
+
           {!isSubmitted ? (
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Verification Code
@@ -172,13 +178,10 @@ const UserResetPassword = () => {
                       value={digit}
                       onChange={(e) => handleOtpChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
-                      className="w-10 h-12 text-center text-xl font-bold border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+                      className="w-10 h-12 text-center text-xl font-bold border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ))}
                 </div>
-                {errors.otp && (
-                  <p className="text-sm text-red-600">{errors.otp}</p>
-                )}
                 <p className="text-xs text-gray-500 mt-1">
                   We've sent a 6-digit code to {email}
                 </p>
@@ -192,12 +195,9 @@ const UserResetPassword = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="••••••••"
                 />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
               </div>
 
               <div>
@@ -208,23 +208,48 @@ const UserResetPassword = () => {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="••••••••"
                 />
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.confirmPassword}
-                  </p>
-                )}
               </div>
 
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full bg-brand text-white py-2 px-4 rounded-md shadow-sm hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand cursor-pointer"
+                  className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors ${
+                    isLoading
+                      ? "opacity-70 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
                   disabled={isLoading}
                 >
-                  {isLoading ? "Resetting..." : "Reset Password"}
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Resetting...
+                    </span>
+                  ) : (
+                    "Reset Password"
+                  )}
                 </button>
               </div>
             </form>
@@ -241,7 +266,7 @@ const UserResetPassword = () => {
             <div className="mt-4">
               <Link
                 to="/user/login"
-                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
+                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 Back to login
