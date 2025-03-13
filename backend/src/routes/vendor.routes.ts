@@ -1,6 +1,7 @@
 import { Router } from "express";
 import vendorController from "../controllers/vendor.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import venueController from "../controllers/venue.controller";
 
 const vendorRoutes = Router();
 
@@ -26,6 +27,23 @@ vendorRoutes.post(
   "/settings/documents",
   authMiddleware(["vendor"]),
   vendorController.uploadDocuments
+);
+
+vendorRoutes.get(
+  "/venues",
+  authMiddleware(["vendor"]),
+  venueController.getVenuesByVendor
+);
+vendorRoutes.post(
+  "/venues",
+  authMiddleware(["vendor"]),
+  venueController.createVenue
+);
+// vendorRoutes.get("/venues/:id", venueController.getVenue);
+vendorRoutes.put(
+  "/venues/:id",
+  authMiddleware(["vendor"]),
+  venueController.updateVenue
 );
 
 export default vendorRoutes;

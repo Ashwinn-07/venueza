@@ -26,6 +26,9 @@ export const MESSAGES = {
     PASSWORD_RESET: "Password reset successful",
     PROFILE_UPDATED: "Profile updated successfully.",
     PASSWORD_UPDATED: "Password changed successfully.",
+    VENUE_CREATED: "Venue added successfully",
+    VENUE_UPDATED: "Venue updated successfully",
+    VENUE_FETCHED: "Venues fetched successfully",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",

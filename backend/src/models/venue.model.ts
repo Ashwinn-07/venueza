@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, ObjectId } from "mongoose";
 
 export interface IVenue extends Document {
-  vendor: ObjectId;
+  vendor: mongoose.Types.ObjectId;
   name: string;
   address: string;
   location: {
