@@ -9,7 +9,7 @@ export interface IVendor extends Document {
   password: string;
   businessAddress: string;
   businessName: string;
-  venues?: ObjectId;
+  documents: string[];
   status: "pending" | "blocked" | "active";
   isVerified: boolean;
   otp?: string;
@@ -32,7 +32,7 @@ const vendorSchema: Schema = new Schema(
     password: { type: String, required: true },
     businessAddress: { type: String, required: true, trim: true },
     businessName: { type: String, required: true, trim: true },
-    venues: { type: Schema.Types.ObjectId, ref: "Venues", default: null },
+    documents: { type: [String], default: [] },
     status: {
       type: String,
       enum: ["pending", "blocked", "active"],

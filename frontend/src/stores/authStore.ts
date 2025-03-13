@@ -36,6 +36,7 @@ interface AuthState {
     newPassword: string;
     confirmNewPassword: string;
   }) => Promise<void>;
+  uploadDocuments: (documentUrls: string[]) => Promise<void>;
 
   setUserFromToken: (token: string, authType: AuthType) => void;
   getDashboardStats: () => Promise<any>;
@@ -241,6 +242,27 @@ export const useAuthStore = create<AuthState>()(
           }
         } catch (error) {
           console.error("Password change failed", error);
+          throw error;
+        }
+      },
+      uploadDocuments: async (documentUrls) => {
+        try {
+          const { user, authType } = get();
+          if (!user || !authType) {
+            throw new Error("Not authenticated");
+          }
+          if (authType !== "vendor") {
+            throw new Error("Only vendors can upload documents");
+          }
+          const response = await vendorService.uploadDocuments(documentUrls);
+          if (response.vendor) {
+            set({
+              user: response.vendor,
+            });
+          }
+          return response;
+        } catch (error) {
+          console.error("upload failed", error);
           throw error;
         }
       },

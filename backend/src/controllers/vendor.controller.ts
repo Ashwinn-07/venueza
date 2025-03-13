@@ -185,6 +185,46 @@ class VendorController implements IVendorController {
       });
     }
   }
+  async uploadDocuments(req: Request, res: Response): Promise<void> {
+    try {
+      const vendorId = (req as any).userId;
+      const { documentUrls } = req.body;
+      if (
+        !documentUrls ||
+        !Array.isArray(documentUrls) ||
+        documentUrls.length === 0
+      ) {
+        res
+          .status(STATUS_CODES.BAD_REQUEST)
+          .json({ error: "Documents are required." });
+        return;
+      }
+      const result = await vendorService.uploadDocuments(
+        vendorId,
+        documentUrls
+      );
+      res.status(result.status).json({
+        message: result.message,
+        user: {
+          id: result.vendor._id,
+          name: result.vendor.name,
+          email: result.vendor.email,
+          phone: result.vendor.phone,
+          profileImage: result.vendor.profileImage,
+          businessName: result.vendor.businessName,
+          businessAddress: result.vendor.businessAddress,
+          status: result.vendor.status,
+          documents: result.vendor.documents,
+        },
+      });
+    } catch (error) {
+      console.error("documents upload error", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to upload documents",
+      });
+    }
+  }
 }
 
 export default new VendorController();

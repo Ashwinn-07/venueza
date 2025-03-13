@@ -25,4 +25,8 @@ export interface IVendorService {
     newPassword: string,
     confirmNewPassword: string
   ): Promise<{ message: string; status: number }>;
+  uploadDocuments(
+    vendorId: string,
+    documentUrls: string[]
+  ): Promise<{ message: string; status: number; vendor: IVendor }>;
 }

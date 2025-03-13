@@ -22,5 +22,10 @@ vendorRoutes.patch(
   authMiddleware(["vendor"]),
   vendorController.changeVendorPassword
 );
+vendorRoutes.post(
+  "/settings/documents",
+  authMiddleware(["vendor"]),
+  vendorController.uploadDocuments
+);
 
 export default vendorRoutes;

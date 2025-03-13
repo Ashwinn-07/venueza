@@ -136,6 +136,12 @@ export const vendorService = {
     const response = await vendorApi.patch(`/settings/security`, data);
     return response.data;
   },
+  uploadDocuments: async (documentUrls: string[]) => {
+    const response = await vendorApi.post("/settings/documents", {
+      documentUrls: documentUrls,
+    });
+    return response.data;
+  },
 };
 
 export const adminService = {

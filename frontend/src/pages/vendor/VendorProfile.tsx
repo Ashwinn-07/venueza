@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ProfileTabs from "../../components/vendor/ProfileTabs";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,8 @@ import { uploadImageToCloudinary } from "../../utils/cloudinary";
 
 const VendorProfile = () => {
   const navigate = useNavigate();
-  const { user, updateProfile, isAuthenticated } = useAuthStore();
+  const { user, updateProfile, uploadDocuments, isAuthenticated } =
+    useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -18,6 +19,12 @@ const VendorProfile = () => {
     profileImage: "",
   });
   const [imagePreview, setImagePreview] = useState("");
+
+  const [selectedDocuments, setSelectedDocuments] = useState<FileList | null>(
+    null
+  );
+  const [documentUrls, setDocumentUrls] = useState<string[]>([]);
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -53,6 +60,36 @@ const VendorProfile = () => {
         console.error("Image upload failed", error);
         notifyError("Failed to upload image. Please try again.");
       }
+    }
+  };
+
+  const handleDocumentChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedDocuments(e.target.files);
+    }
+  };
+
+  const handleUploadDocuments = async () => {
+    if (!selectedDocuments || selectedDocuments.length === 0) {
+      notifyError("Please select document(s) to upload");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const filesArray = Array.from(selectedDocuments);
+      const urls = await Promise.all(
+        filesArray.map((file) => uploadImageToCloudinary(file))
+      );
+      setDocumentUrls(urls);
+      await uploadDocuments(urls);
+      notifySuccess("Verification documents uploaded successfully");
+    } catch (error: any) {
+      console.error("error uploading documents", error);
+      notifyError("Failed to upload documents. Please try again");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,115 +137,172 @@ const VendorProfile = () => {
           </div>
 
           <div className="p-6">
-            <div className="max-w-lg space-y-6">
-              <div>
-                <label
-                  htmlFor="profileImage"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Profile Image
-                </label>
-                <div className="flex items-center space-x-4">
-                  {imagePreview ? (
-                    <img
-                      src={imagePreview}
-                      alt="Profile Preview"
-                      className="w-20 h-20 rounded-full object-cover"
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <div>
+                  <label
+                    htmlFor="profileImage"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Profile Image
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Profile Preview"
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500">No Image</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
                     />
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-500">No Image</span>
-                    </div>
-                  )}
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Name
+                  </label>
                   <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Enter your name"
+                    className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="businessName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Business Name
+                  </label>
+                  <input
+                    id="businessName"
+                    name="businessName"
+                    type="text"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                    placeholder="Enter your business name"
+                    className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="businessAddress"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Business Address
+                  </label>
+                  <input
+                    id="businessAddress"
+                    name="businessAddress"
+                    type="text"
+                    value={formData.businessAddress}
+                    onChange={handleChange}
+                    placeholder="Enter your business address"
+                    className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Phone
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your phone number"
+                    className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
                   />
                 </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Name
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter your name"
-                  className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
-                />
-              </div>
+              <div className="lg:col-span-1">
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <h3 className="font-medium text-gray-800 mb-3">
+                    Verification Documents
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Upload documents for account verification. Images and PDFs
+                    supported.
+                  </p>
 
-              <div>
-                <label
-                  htmlFor="businessName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Name
-                </label>
-                <input
-                  id="businessName"
-                  name="businessName"
-                  type="text"
-                  value={formData.businessName}
-                  onChange={handleChange}
-                  placeholder="Enter your business name"
-                  className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
-                />
-              </div>
+                  <div className="border border-dashed border-gray-300 rounded-md p-4 text-center mb-4 bg-white">
+                    <svg
+                      className="mx-auto h-10 w-10 text-gray-400"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <div className="text-sm text-gray-600 mt-2">
+                      <label
+                        htmlFor="document-upload"
+                        className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                      >
+                        <span>Click to upload</span>
+                        <input
+                          id="document-upload"
+                          name="document-upload"
+                          type="file"
+                          className="sr-only"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          multiple
+                          onChange={handleDocumentChange}
+                          ref={documentInputRef}
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Up to 10MB</p>
+                  </div>
 
-              <div>
-                <label
-                  htmlFor="businessAddress"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Address
-                </label>
-                <input
-                  id="businessAddress"
-                  name="businessAddress"
-                  type="text"
-                  value={formData.businessAddress}
-                  onChange={handleChange}
-                  placeholder="Enter your business address"
-                  className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
-                />
+                  <button
+                    onClick={handleUploadDocuments}
+                    className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+                  >
+                    Upload Documents
+                  </button>
+                </div>
               </div>
+            </div>
 
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Phone
-                </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Enter your phone number"
-                  className="w-full p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F4A261] focus:border-[#F4A261] transition duration-200"
-                />
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <button
-                  onClick={handleSaveProfile}
-                  disabled={isLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50"
-                >
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
+            <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">
+              <button
+                onClick={handleSaveProfile}
+                disabled={isLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50"
+              >
+                {isLoading ? "Saving..." : "Save Changes"}
+              </button>
             </div>
           </div>
         </div>

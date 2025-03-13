@@ -10,4 +10,5 @@ export interface IVendorController {
   logout(req: Request, res: Response): Promise<void>;
   updateVendorProfile(req: Request, res: Response): Promise<void>;
   changeVendorPassword(req: Request, res: Response): Promise<void>;
+  uploadDocuments(req: Request, res: Response): Promise<void>;
 }

@@ -299,6 +299,34 @@ class VendorService implements IVendorService {
       status: STATUS_CODES.OK,
     };
   }
+  async uploadDocuments(
+    vendorId: string,
+    documentUrls: string[]
+  ): Promise<{ message: string; status: number; vendor: IVendor }> {
+    const vendor = await vendorRepository.findById(vendorId);
+    if (!vendor) {
+      throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
+    }
+    vendor.documents = [...vendor.documents, ...documentUrls];
+    if (vendor.status === "blocked") {
+      throw new Error("Your account is blocked, please contact admin");
+    }
+    vendor.status = "pending";
+
+    const updatedVendor = await vendorRepository.update(vendorId, {
+      documents: vendor.documents,
+      status: vendor.status,
+    });
+    if (!updatedVendor) {
+      throw new Error("Failed to upload documents");
+    }
+    return {
+      message:
+        "Documents uploaded successfully and pending verification from admin",
+      status: STATUS_CODES.OK,
+      vendor: this.sanitizeVendor(updatedVendor),
+    };
+  }
 }
 
 export default new VendorService();
