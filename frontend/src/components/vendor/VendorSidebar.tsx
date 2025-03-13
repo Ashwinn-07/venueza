@@ -7,7 +7,7 @@ const VendorSidebar = () => {
   const { logout } = useAuthStore();
   const menuItems = [
     { icon: "🏠", text: "Dashboard", path: "/vendor/dashboard" },
-    { icon: "🏢", text: "Venue Management", path: "/venue" },
+    { icon: "🏢", text: "Venue Management", path: "/vendor/venues" },
     { icon: "📅", text: "Bookings Management", path: "/bookings" },
     { icon: "💰", text: "Payments & Earnings", path: "/payments" },
     { icon: "💬", text: "Messages", path: "/messages" },

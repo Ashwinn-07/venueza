@@ -29,6 +29,9 @@ import GoogleAuthCallback from "./components/user/GoogleAuthCallback";
 import VendorLayout from "./layouts/VendorLayout";
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import VenueList from "./pages/vendor/VenueList";
+import AddVenue from "./pages/vendor/AddVenue";
+import EditVenue from "./pages/vendor/EditVenue";
 
 const App = () => {
   return (
@@ -91,6 +94,9 @@ const App = () => {
               path="/vendor/settings/security"
               element={<VendorProfileSecurity />}
             />
+            <Route path="/vendor/venues" element={<VenueList />} />
+            <Route path="/vendor/venues/add" element={<AddVenue />} />
+            <Route path="/vendor/venues/:id" element={<EditVenue />} />
           </Route>
         </Route>
         {/* Protected admin routes */}
