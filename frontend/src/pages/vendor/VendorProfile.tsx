@@ -23,7 +23,7 @@ const VendorProfile = () => {
   const [selectedDocuments, setSelectedDocuments] = useState<FileList | null>(
     null
   );
-  const [documentUrls, setDocumentUrls] = useState<string[]>([]);
+  // const [documentUrls, setDocumentUrls] = useState<string[]>([]);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const VendorProfile = () => {
       const urls = await Promise.all(
         filesArray.map((file) => uploadImageToCloudinary(file))
       );
-      setDocumentUrls(urls);
+      // setDocumentUrls(urls);
       await uploadDocuments(urls);
       notifySuccess("Verification documents uploaded successfully");
     } catch (error: any) {
