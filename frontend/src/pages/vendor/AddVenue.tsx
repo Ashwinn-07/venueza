@@ -116,7 +116,7 @@ const AddVenue = () => {
         <h1 className="text-2xl font-bold text-gray-800">Add New Venue</h1>
         <button
           onClick={() => navigate("/vendor/venues")}
-          className="text-gray-600 hover:text-gray-800"
+          className="text-gray-600 hover:text-gray-800 cursor-pointer"
         >
           Cancel
         </button>
@@ -359,7 +359,7 @@ const AddVenue = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
         >
           Add Venue
         </button>
