@@ -60,7 +60,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     [onChange]
   );
 
-  const searchAddress = async () => {
+  const searchAddress = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!searchQuery.trim()) return;
     try {
       const response = await fetch(

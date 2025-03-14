@@ -53,6 +53,7 @@ interface AuthState {
 
   createVenue: (venueData: any) => Promise<any>;
   getVenues: () => Promise<any>;
+  getVenue: (venueId: string) => Promise<any>;
   updateVenue: (venueId: string, venueData: any) => Promise<any>;
 }
 
@@ -415,6 +416,18 @@ export const useAuthStore = create<AuthState>()(
           return await vendorService.getVenues();
         } catch (error) {
           console.error("Failed to get venues", error);
+          throw error;
+        }
+      },
+      getVenue: async (venueId) => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "vendor") {
+            throw new Error("Not authorized as vendor");
+          }
+          return await vendorService.getVenue(venueId);
+        } catch (error) {
+          console.error("failed to fetch venue", error);
           throw error;
         }
       },

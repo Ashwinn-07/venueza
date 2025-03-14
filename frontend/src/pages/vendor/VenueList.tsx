@@ -81,12 +81,12 @@ const VenueList = () => {
                 <div className="flex justify-between items-center">
                   <span
                     className={`px-2 py-1 rounded-full text-sm ${
-                      venue.status === "closed"
+                      venue.status === "open"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {venue.status === "closed" ? "Open" : "Closed"}
+                    {venue.status === "open" ? "Open" : "Closed"}
                   </span>
                   <button
                     className="text-blue-600 hover:text-blue-700 cursor-pointer"

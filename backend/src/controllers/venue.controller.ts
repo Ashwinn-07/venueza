@@ -22,7 +22,7 @@ class VenueController implements IVenueController {
   }
   async updateVenue(req: Request, res: Response): Promise<void> {
     try {
-      const vendorId = (req as any).user._id;
+      const vendorId = (req as any).userId;
       const { id: venueId } = req.params;
       const updateData = req.body;
       const result = await venueService.updateVenue(

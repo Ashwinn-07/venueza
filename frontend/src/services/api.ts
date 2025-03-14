@@ -150,6 +150,10 @@ export const vendorService = {
     const response = await vendorApi.get("/venues");
     return response.data;
   },
+  getVenue: async (venueId: string) => {
+    const response = await vendorApi.get(`/venues/${venueId}`);
+    return response.data.result.venue;
+  },
   updateVenue: async (venueId: string, venueData: any) => {
     const response = await vendorApi.put(`/venues/${venueId}`, venueData);
     return response.data;
