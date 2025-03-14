@@ -44,7 +44,7 @@ class VenueController implements IVenueController {
   }
   async getVenuesByVendor(req: Request, res: Response): Promise<void> {
     try {
-      const vendorId = (req as any).user._id;
+      const vendorId = (req as any).userId;
       const result = await venueService.getVenuesByVendor(vendorId);
       res.status(result.status).json({
         message: result.message,

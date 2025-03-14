@@ -1,105 +1,105 @@
-interface Venue {
-  id: string;
-  name: string;
-  address: string;
-  photos: string[];
-  services: string[];
-  pricing: number;
-  capacity: number;
-  isOpen: boolean;
-}
-
-const initialVenues: Venue[] = [
-  {
-    id: "1",
-    name: "Elegant Wedding Hall",
-    address: "123 Wedding Lane, New York, NY",
-    photos: [
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    ],
-    services: ["Catering", "Decoration", "Photography"],
-    pricing: 5000,
-    capacity: 200,
-    isOpen: true,
-  },
-  {
-    id: "2",
-    name: "Lakeside Retreat",
-    address: "456 Lake View Road, Seattle, WA",
-    photos: [
-      "https://images.unsplash.com/photo-1464366400160-e82894203e3b?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    ],
-    services: ["Catering", "Sound System", "Outdoor Setup"],
-    pricing: 3500,
-    capacity: 150,
-    isOpen: false,
-  },
-];
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
 
 const VenueList = () => {
+  const navigate = useNavigate();
+  const { getVenues } = useAuthStore();
+  const [venues, setVenues] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const response = await getVenues();
+        setVenues(response.result?.venues || []);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch venues.");
+        console.error("Fetch error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVenues();
+  }, [getVenues]);
+
+  if (isLoading) {
+    return <div className="p-8 text-center">Loading venues...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-600">{error}</div>;
+  }
+
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">My Venues</h1>
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          onClick={() => (window.location.href = "/vendor/venues/add")}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+          onClick={() => navigate("/vendor/venues/add")}
         >
           Add New Venue
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {initialVenues.map((venue) => (
-          <div
-            key={venue.id}
-            className="bg-white rounded-lg shadow-sm overflow-hidden"
-          >
-            <img
-              src={venue.photos[0]}
-              alt={venue.name}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">{venue.name}</h3>
-              <p className="text-gray-600 mb-2">{venue.address}</p>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-700">${venue.pricing}</span>
-                <span className="text-gray-700">{venue.capacity} guests</span>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {venue.services.map((service, index) => (
+      {venues.length === 0 ? (
+        <p className="text-gray-600">
+          No venues found. Add a new venue to get started.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {venues.map((venue) => (
+            <div
+              key={venue._id}
+              className="bg-white rounded-lg shadow-sm overflow-hidden"
+            >
+              <img
+                src={venue.images[0]}
+                alt={venue.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-semibold mb-2">{venue.name}</h3>
+                <p className="text-gray-600 mb-2">{venue.address}</p>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-gray-700">₹{venue.price}</span>
+                  <span className="text-gray-700">{venue.capacity} guests</span>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {venue.services &&
+                    venue.services.map((service: any, index: number) => (
+                      <span
+                        key={index}
+                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm"
+                      >
+                        {service}
+                      </span>
+                    ))}
+                </div>
+                <div className="flex justify-between items-center">
                   <span
-                    key={index}
-                    className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm"
+                    className={`px-2 py-1 rounded-full text-sm ${
+                      venue.status === "closed"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
                   >
-                    {service}
+                    {venue.status === "closed" ? "Open" : "Closed"}
                   </span>
-                ))}
-              </div>
-              <div className="flex justify-between items-center">
-                <span
-                  className={`px-2 py-1 rounded-full text-sm ${
-                    venue.isOpen
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {venue.isOpen ? "Open" : "Closed"}
-                </span>
-                <button
-                  className="text-blue-600 hover:text-blue-700"
-                  onClick={() =>
-                    (window.location.href = `/vendor/venues/${venue.id}`)
-                  }
-                >
-                  Edit Venue
-                </button>
+                  <button
+                    className="text-blue-600 hover:text-blue-700 cursor-pointer"
+                    onClick={() => navigate(`/vendor/venues/${venue._id}`)}
+                  >
+                    Edit Venue
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
