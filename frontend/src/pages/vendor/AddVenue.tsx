@@ -15,7 +15,7 @@ const AddVenue = () => {
     services: "",
     pricing: "",
     capacity: "",
-    isOpen: true,
+    status: "",
   });
 
   const [coordinates, setCoordinates] = useState({
@@ -95,7 +95,7 @@ const AddVenue = () => {
           type: "Point",
           coordinates: [coordinates.lng, coordinates.lat],
         },
-        status: formData.isOpen ? "open" : "closed",
+        status: "closed",
         images: imageUrls,
         documents: documentUrls,
       };
