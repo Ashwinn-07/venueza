@@ -7,6 +7,9 @@ import { MESSAGES, STATUS_CODES } from "../utils/constants";
 import userRepository from "../repositories/user.repository";
 import vendorRepository from "../repositories/vendor.repository";
 import { isValidEmail } from "../utils/validators";
+import { IVenue } from "../models/venue.model";
+import venueRepository from "../repositories/venue.repository";
+import Vendors from "../models/vendor.model";
 
 class AdminService implements IAdminService {
   private sanitizeAdmin(admin: IAdmin) {
@@ -88,6 +91,194 @@ class AdminService implements IAdminService {
     return {
       vendors,
       status: STATUS_CODES.OK,
+    };
+  }
+  async listPendingVenues(): Promise<{
+    status: number;
+    venues: IVenue[];
+  }> {
+    const venues = await venueRepository.find({
+      verificationStatus: "pending",
+    });
+    return {
+      venues,
+      status: STATUS_CODES.OK,
+    };
+  }
+  async approveVendor(
+    vendorId: string
+  ): Promise<{ message: string; status: number; vendor: any }> {
+    const vendor = await vendorRepository.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+    if (vendor.status !== "pending") {
+      throw new Error("this vendor is not pending for approval");
+    }
+    const updatedVendor = await vendorRepository.update(vendorId, {
+      status: "active",
+    });
+    if (!updatedVendor) {
+      throw new Error("Could not approve vendor");
+    }
+    return {
+      message: "Vendor approved successfully",
+      status: STATUS_CODES.OK,
+      vendor: updatedVendor,
+    };
+  }
+  async rejectVendor(
+    vendorId: string
+  ): Promise<{ message: string; status: number; vendor: any }> {
+    const vendor = await vendorRepository.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+    if (vendor.status !== "pending") {
+      throw new Error("this vendor is not pending for approval");
+    }
+    const updatedVendor = await vendorRepository.update(vendorId, {
+      status: "blocked",
+    });
+    if (!updatedVendor) {
+      throw new Error("could not reject vendor");
+    }
+    return {
+      message: "vendor rejected successfully",
+      status: STATUS_CODES.OK,
+      vendor: updatedVendor,
+    };
+  }
+  async blockVendor(
+    vendorId: string
+  ): Promise<{ message: string; status: number; vendor: any }> {
+    const vendor = await vendorRepository.findById(vendorId);
+    if (!vendor) {
+      throw new Error("vendor not found");
+    }
+    if (vendor.status === "blocked") {
+      throw new Error("vendor is already blocked");
+    }
+    const updatedVendor = await vendorRepository.update(vendorId, {
+      status: "blocked",
+    });
+    if (!updatedVendor) {
+      throw new Error("could not block vendor");
+    }
+    return {
+      message: "Vendor blocked successfully",
+      status: STATUS_CODES.OK,
+      vendor: updatedVendor,
+    };
+  }
+  async unblockVendor(
+    vendorId: string
+  ): Promise<{ message: string; status: number; vendor: any }> {
+    const vendor = await vendorRepository.findById(vendorId);
+    if (!vendor) {
+      throw new Error("vendor not found");
+    }
+    if (vendor.status === "active") {
+      throw new Error("vendor is already active");
+    }
+    const updatedVendor = await vendorRepository.update(vendorId, {
+      status: "active",
+    });
+    if (!updatedVendor) {
+      throw new Error("could not unblock vendor");
+    }
+    return {
+      message: "vendor unblocked successfully",
+      status: STATUS_CODES.OK,
+      vendor: updatedVendor,
+    };
+  }
+  async blockUser(
+    userId: string
+  ): Promise<{ message: string; status: number; user: any }> {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new Error("user not found");
+    }
+    if (user.status === "blocked") {
+      throw new Error("user is already blocked");
+    }
+    const updatedUser = await userRepository.update(userId, {
+      status: "blocked",
+    });
+    if (!updatedUser) {
+      throw new Error("could not block user");
+    }
+    return {
+      message: "User blocked successfully",
+      status: STATUS_CODES.OK,
+      user: updatedUser,
+    };
+  }
+  async unblockUser(
+    userId: string
+  ): Promise<{ message: string; status: number; user: any }> {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new Error("user not found");
+    }
+    if (user.status === "active") {
+      throw new Error("user is already active");
+    }
+    const updatedUser = await userRepository.update(userId, {
+      status: "active",
+    });
+    if (!updatedUser) {
+      throw new Error("could not unblock user");
+    }
+    return {
+      message: "User unblocked successfully",
+      status: STATUS_CODES.OK,
+      user: updatedUser,
+    };
+  }
+  async approveVenue(
+    venueId: string
+  ): Promise<{ message: string; status: number; venue: IVenue }> {
+    const venue = await venueRepository.findById(venueId);
+    if (!venue) {
+      throw new Error("venue not found");
+    }
+    if (venue.verificationStatus !== "pending") {
+      throw new Error("venue is not pending approval");
+    }
+    const updatedVenue = await venueRepository.update(venueId, {
+      verificationStatus: "approved",
+    });
+    if (!updatedVenue) {
+      throw new Error("could not approve venue");
+    }
+    return {
+      message: "venue approved successfully",
+      status: STATUS_CODES.OK,
+      venue: updatedVenue,
+    };
+  }
+  async rejectVenue(
+    venueId: string
+  ): Promise<{ message: string; status: number; venue: IVenue }> {
+    const venue = await venueRepository.findById(venueId);
+    if (!venue) {
+      throw new Error("venue not found");
+    }
+    if (venue.verificationStatus !== "pending") {
+      throw new Error("venue not pending for approval");
+    }
+    const updatedVenue = await venueRepository.update(venueId, {
+      verificationStatus: "rejected",
+    });
+    if (!updatedVenue) {
+      throw new Error("could not reject venue");
+    }
+    return {
+      message: "venue rejected successfully",
+      status: STATUS_CODES.OK,
+      venue: updatedVenue,
     };
   }
 }

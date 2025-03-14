@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import adminService from "../services/admin.service";
 import { IAdminController } from "./interfaces/IAdminController";
 import { STATUS_CODES } from "../utils/constants";
+import vendorRepository from "../repositories/vendor.repository";
 
 class AdminController implements IAdminController {
   async login(req: Request, res: Response): Promise<void> {
@@ -99,6 +100,109 @@ class AdminController implements IAdminController {
           error instanceof Error
             ? error.message
             : "Failed to fetch pending vendors",
+      });
+    }
+  }
+  async listPendingVenues(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await adminService.listPendingVenues();
+      res.status(result.status).json({
+        venues: result.venues,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch pending venues",
+      });
+    }
+  }
+  async updateVendorStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { id: vendorId } = req.params;
+      const { status } = req.body;
+      const currentVendor = await vendorRepository.findById(vendorId);
+      if (!currentVendor) {
+        throw new Error("vendor not found");
+      }
+      let result;
+      if (currentVendor.status === "pending") {
+        if (status === "active") {
+          result = await adminService.approveVendor(vendorId);
+        } else if (status === "blocked") {
+          result = await adminService.rejectVendor(vendorId);
+        } else {
+          throw new Error("Invalid status update for a pending vendor");
+        }
+      } else {
+        if (status === "active") {
+          result = await adminService.unblockVendor(vendorId);
+        } else if (status === "blocked") {
+          result = await adminService.blockVendor(vendorId);
+        } else {
+          throw new Error("Invalid status update");
+        }
+      }
+      res.status(result.status).json({
+        message: result.message,
+        vendor: result.vendor,
+      });
+    } catch (error) {}
+  }
+  async updateUserStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { id: userId } = req.params;
+      const { status } = req.body;
+      let result;
+      if (status === "active") {
+        result = await adminService.unblockUser(userId);
+      } else if (status === "blocked") {
+        result = await adminService.blockUser(userId);
+      } else {
+        throw new Error("Invalid status");
+      }
+      res.status(result.status).json({
+        message: result.message,
+        user: result.user,
+      });
+    } catch (error) {
+      console.error("Update user status error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to update user status",
+      });
+    }
+  }
+  async updateVenueVerificationStatus(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id: venueId } = req.params;
+      const { verificationStatus } = req.body;
+      let result;
+      if (verificationStatus === "approved") {
+        result = await adminService.approveVenue(venueId);
+      } else if (verificationStatus === "rejected") {
+        result = await adminService.rejectVenue(venueId);
+      } else {
+        throw new Error("Invalid verification status update");
+      }
+      res.status(result.status).json({
+        message: result.message,
+        venue: result.venue,
+      });
+    } catch (error) {
+      console.error("Update venue verification status error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to update venue verification status",
       });
     }
   }

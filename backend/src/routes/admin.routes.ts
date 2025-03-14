@@ -13,15 +13,34 @@ adminRoutes.get(
   adminController.getAdminDashboardStats
 );
 adminRoutes.get("/users", authMiddleware(["admin"]), adminController.listUsers);
+adminRoutes.patch(
+  "/users/:id",
+  authMiddleware(["admin"]),
+  adminController.updateUserStatus
+);
 adminRoutes.get(
   "/vendors",
   authMiddleware(["admin"]),
   adminController.listAllVendors
+);
+adminRoutes.patch(
+  "/vendors/:id",
+  authMiddleware(["admin"]),
+  adminController.updateVendorStatus
 );
 adminRoutes.get(
   "/vendors/pending",
   authMiddleware(["admin"]),
   adminController.listPendingVendors
 );
-
+adminRoutes.get(
+  "/venues/pending",
+  authMiddleware(["admin"]),
+  adminController.listPendingVenues
+);
+adminRoutes.patch(
+  "/venues/:id",
+  authMiddleware(["admin"]),
+  adminController.updateVenueVerificationStatus
+);
 export default adminRoutes;
