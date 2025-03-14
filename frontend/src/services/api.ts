@@ -142,6 +142,18 @@ export const vendorService = {
     });
     return response.data;
   },
+  createVenue: async (venueData: any) => {
+    const response = await vendorApi.post("/venues", venueData);
+    return response.data;
+  },
+  getVenues: async () => {
+    const response = await vendorApi.get("/venues");
+    return response.data;
+  },
+  updateVenue: async (venueId: string, venueData: any) => {
+    const response = await vendorApi.put(`/venues/${venueId}`, venueData);
+    return response.data;
+  },
 };
 
 export const adminService = {
@@ -159,6 +171,27 @@ export const adminService = {
   },
   listPendingVendors: async () => {
     const response = await adminApi.get("/vendors/pending");
+    return response.data;
+  },
+  listPendingVenues: async () => {
+    const response = await adminApi.get("/venues/pending");
+    return response.data;
+  },
+  updateUserStatus: async (userId: string, status: string) => {
+    const response = await adminApi.patch(`/users/${userId}`, { status });
+    return response.data;
+  },
+  updateVendorStatus: async (vendorId: string, status: string) => {
+    const response = await adminApi.patch(`/vendors/${vendorId}`, { status });
+    return response.data;
+  },
+  updateVenueVerificationStatus: async (
+    venueId: string,
+    verificationStatus: string
+  ) => {
+    const response = await adminApi.patch(`/venues/${venueId}`, {
+      verificationStatus,
+    });
     return response.data;
   },
 };

@@ -6,7 +6,7 @@ import { IVenueController } from "./interfaces/IVenueController";
 class VenueController implements IVenueController {
   async createVenue(req: Request, res: Response): Promise<void> {
     try {
-      const vendorId = (req as any).user._id;
+      const vendorId = (req as any).userId;
       const venueData = req.body;
       const result = await venueService.createVenue(vendorId, venueData);
       res.status(result.status).json({

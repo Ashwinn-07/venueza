@@ -1,111 +1,113 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LocationPicker from "../../components/maps/LocationPicker";
+import { uploadImageToCloudinary } from "../../utils/cloudinary";
+import { useAuthStore } from "../../stores/authStore";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 
 const AddVenue = () => {
   const navigate = useNavigate();
+  const { createVenue } = useAuthStore();
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
     services: "",
     pricing: "",
     capacity: "",
-    isOpen: true, // Default value, but not editable in Add mode
+    isOpen: true,
   });
 
-  // State for file uploads
-  const [images, setImages] = useState<File[]>([]);
-  const [documents, setDocuments] = useState<File[]>([]);
-
-  // State for map location
   const [coordinates, setCoordinates] = useState({
     lat: 40.7128,
-    lng: -74.006, // Default to NYC coordinates
+    lng: -74.006,
   });
 
-  // Preview images
+  const [images, setImages] = useState<File[]>([]);
+  const [documents, setDocuments] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      setImages([...images, ...newFiles]);
-
-      // Generate previews for the new images
+      setImages((prev) => [...prev, ...newFiles]);
       const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-      setImagePreviews([...imagePreviews, ...newPreviews]);
+      setImagePreviews((prev) => [...prev, ...newPreviews]);
     }
   };
 
   const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setDocuments([...documents, ...Array.from(e.target.files)]);
-    }
+    const files = e.target.files;
+    if (!files) return;
+
+    setDocuments((prev) => [...prev, ...Array.from(files)]);
   };
 
   const removeImage = (index: number) => {
-    const newImages = [...images];
-    const newPreviews = [...imagePreviews];
-
-    // Revoke the object URL to avoid memory leaks
-    URL.revokeObjectURL(newPreviews[index]);
-
-    newImages.splice(index, 1);
-    newPreviews.splice(index, 1);
-
-    setImages(newImages);
-    setImagePreviews(newPreviews);
+    setImages((prev) => {
+      const newArr = [...prev];
+      newArr.splice(index, 1);
+      return newArr;
+    });
+    setImagePreviews((prev) => {
+      const newArr = [...prev];
+      URL.revokeObjectURL(newArr[index]);
+      newArr.splice(index, 1);
+      return newArr;
+    });
   };
 
   const removeDocument = (index: number) => {
-    const newDocuments = [...documents];
-    newDocuments.splice(index, 1);
-    setDocuments(newDocuments);
-  };
-
-  // Mock function to simulate selecting location from Google Maps
-  const handleMapSelection = () => {
-    // In a real implementation, this would open a Google Maps component
-    // and allow the user to select a location, then update coordinates and address
-    alert("This would open a Google Maps interface to select a location");
-
-    // For demo purposes, we'll just update with sample data
-    setCoordinates({ lat: 40.7127, lng: -74.0059 });
-    setFormData({
-      ...formData,
-      address: "123 Sample Street, New York, NY 10001",
+    setDocuments((prev) => {
+      const newArr = [...prev];
+      newArr.splice(index, 1);
+      return newArr;
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLocationChange = (
+    coords: { lat: number; lng: number },
+    address: string
+  ) => {
+    setCoordinates(coords);
+    setFormData((prev) => ({ ...prev, address }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // In a real app, you would create a FormData object to handle the file uploads
-    const submissionData = new FormData();
+    try {
+      const imageUrls = await Promise.all(
+        images.map(async (file) => await uploadImageToCloudinary(file))
+      );
 
-    // Append all the form fields
-    Object.entries(formData).forEach(([key, value]) => {
-      submissionData.append(key, value.toString());
-    });
+      const documentUrls = await Promise.all(
+        documents.map(async (file) => await uploadImageToCloudinary(file))
+      );
 
-    // Append coordinates
-    submissionData.append("latitude", coordinates.lat.toString());
-    submissionData.append("longitude", coordinates.lng.toString());
+      const venueData = {
+        name: formData.name,
+        address: formData.address,
+        services: formData.services.split(",").map((s) => s.trim()),
+        price: Number(formData.pricing),
+        capacity: Number(formData.capacity),
+        location: {
+          type: "Point",
+          coordinates: [coordinates.lng, coordinates.lat],
+        },
+        status: formData.isOpen ? "open" : "closed",
+        images: imageUrls,
+        documents: documentUrls,
+      };
 
-    // Append all images
-    images.forEach((image, index) => {
-      submissionData.append(`images[${index}]`, image);
-    });
+      await createVenue(venueData);
+      notifySuccess("Venue created successfully!");
 
-    // Append all documents
-    documents.forEach((doc, index) => {
-      submissionData.append(`documents[${index}]`, doc);
-    });
-
-    // Here you would send the submissionData to your API
-    console.log("Submission data:", submissionData);
-
-    // Navigate back to venues page
-    navigate("/venues");
+      navigate("/vendor/venues");
+    } catch (error: any) {
+      console.error("Failed to create venue:", error);
+      notifyError("Failed to create venue. Please try again.");
+    }
   };
 
   return (
@@ -113,7 +115,7 @@ const AddVenue = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Add New Venue</h1>
         <button
-          onClick={() => navigate("/venues")}
+          onClick={() => navigate("/vendor/venues")}
           className="text-gray-600 hover:text-gray-800"
         >
           Cancel
@@ -139,74 +141,15 @@ const AddVenue = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Location
           </label>
-          <div className="flex flex-col space-y-2">
-            <div className="relative">
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-                placeholder="Search or select from map"
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-100 p-1 rounded-md hover:bg-gray-200"
-                onClick={handleMapSelection}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* This would be replaced with actual Google Maps component */}
-            <div
-              className="h-40 bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer"
-              onClick={handleMapSelection}
-            >
-              <div className="text-gray-500 text-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-8 h-8 mx-auto mb-1"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
-                  />
-                </svg>
-                Click to select location on map
-              </div>
-            </div>
-
-            <div className="text-xs text-gray-500">
-              Coordinates: {coordinates.lat.toFixed(6)},{" "}
-              {coordinates.lng.toFixed(6)}
-            </div>
+          <LocationPicker
+            initialCoordinates={coordinates}
+            initialAddress={formData.address}
+            onChange={handleLocationChange}
+            height="300px"
+          />
+          <div className="text-xs text-gray-500 mt-1">
+            Coordinates: {coordinates.lat.toFixed(6)},{" "}
+            {coordinates.lng.toFixed(6)}
           </div>
         </div>
 
@@ -241,13 +184,9 @@ const AddVenue = () => {
               <p className="text-sm text-gray-500">
                 Click to upload venue images
               </p>
-              <p className="text-xs text-gray-400">
-                JPG, PNG, or GIF (max. 5MB each)
-              </p>
+              <p className="text-xs text-gray-400">JPG, PNG, or GIF</p>
             </label>
           </div>
-
-          {/* Image previews */}
           {imagePreviews.length > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-4">
               {imagePreviews.map((preview, index) => (
@@ -291,7 +230,7 @@ const AddVenue = () => {
             <input
               type="file"
               multiple
-              accept=".pdf,.doc,.docx,.txt"
+              accept=".pdf,.jpg,.jpeg,.png"
               onChange={handleDocumentUpload}
               className="hidden"
               id="document-upload"
@@ -308,19 +247,15 @@ const AddVenue = () => {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                  d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
                 />
               </svg>
               <p className="text-sm text-gray-500">
                 Click to upload venue documents
               </p>
-              <p className="text-xs text-gray-400">
-                PDF, DOC, or TXT (max. 10MB each)
-              </p>
+              <p className="text-xs text-gray-400">PDF, DOC, or IMAGES</p>
             </label>
           </div>
-
-          {/* Document list */}
           {documents.length > 0 && (
             <div className="mt-4 space-y-2">
               {documents.map((doc, index) => (
@@ -376,7 +311,7 @@ const AddVenue = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Pricing ($)
+              Pricing (₹)
             </label>
             <input
               type="number"
@@ -389,7 +324,6 @@ const AddVenue = () => {
               required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Capacity
@@ -422,8 +356,6 @@ const AddVenue = () => {
             placeholder="e.g. Catering, Decoration, Photography"
           />
         </div>
-
-        {/* Note: Venue status selector removed from Add page as requested */}
 
         <button
           type="submit"

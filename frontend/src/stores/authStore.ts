@@ -43,6 +43,17 @@ interface AuthState {
   listAllUsers: () => Promise<any>;
   listAllVendors: () => Promise<any>;
   listPendingVendors: () => Promise<any>;
+  listPendingVenues: () => Promise<any>;
+  updateUserStatus: (userId: string, status: string) => Promise<any>;
+  updateVendorStatus: (vendorId: string, status: string) => Promise<any>;
+  updateVenueVerificationStatus: (
+    venueId: string,
+    verificationStatus: string
+  ) => Promise<any>;
+
+  createVenue: (venueData: any) => Promise<any>;
+  getVenues: () => Promise<any>;
+  updateVenue: (venueId: string, venueData: any) => Promise<any>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -329,6 +340,93 @@ export const useAuthStore = create<AuthState>()(
           return await adminService.listPendingVendors();
         } catch (error) {
           console.error("Failed to list pending vendors", error);
+          throw error;
+        }
+      },
+      listPendingVenues: async () => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "admin")
+            throw new Error("Not authorized as admin");
+
+          return await adminService.listPendingVenues();
+        } catch (error) {
+          console.error("Failed to list pending venues", error);
+          throw error;
+        }
+      },
+      updateUserStatus: async (userId, status) => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "admin")
+            throw new Error("Not authorized as admin");
+
+          return await adminService.updateUserStatus(userId, status);
+        } catch (error) {
+          console.error("Failed to update user status", error);
+          throw error;
+        }
+      },
+      updateVendorStatus: async (vendorId, status) => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "admin")
+            throw new Error("Not authorized as admin");
+
+          return await adminService.updateVendorStatus(vendorId, status);
+        } catch (error) {
+          console.error("Failed to update vendor status", error);
+          throw error;
+        }
+      },
+      updateVenueVerificationStatus: async (venueId, verificationStatus) => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "admin")
+            throw new Error("Not authorized as admin");
+
+          return await adminService.updateVenueVerificationStatus(
+            venueId,
+            verificationStatus
+          );
+        } catch (error) {
+          console.error("Failed to update venue verification status", error);
+          throw error;
+        }
+      },
+      createVenue: async (venueData) => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "vendor")
+            throw new Error("Not authorized as vendor");
+
+          return await vendorService.createVenue(venueData);
+        } catch (error) {
+          console.error("Failed to create venue", error);
+          throw error;
+        }
+      },
+      getVenues: async () => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "vendor")
+            throw new Error("Not authorized as vendor");
+
+          return await vendorService.getVenues();
+        } catch (error) {
+          console.error("Failed to get venues", error);
+          throw error;
+        }
+      },
+      updateVenue: async (venueId, venueData) => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "vendor")
+            throw new Error("Not authorized as vendor");
+
+          return await vendorService.updateVenue(venueId, venueData);
+        } catch (error) {
+          console.error("Failed to update venue", error);
           throw error;
         }
       },
