@@ -32,6 +32,8 @@ import AdminLayout from "./layouts/AdminLayout";
 import VenueList from "./pages/vendor/VenueList";
 import AddVenue from "./pages/vendor/AddVenue";
 import EditVenue from "./pages/vendor/EditVenue";
+import AdminVenues from "./pages/admin/AdminVenues";
+import AdminVenuesPending from "./pages/admin/AdminVenuesPending";
 
 const App = () => {
   return (
@@ -105,6 +107,11 @@ const App = () => {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/vendors" element={<AdminVendors />} />
+            <Route path="/admin/venues" element={<AdminVenues />} />
+            <Route
+              path="/admin/venues/pending"
+              element={<AdminVenuesPending />}
+            />
             <Route
               path="/admin/vendors/pending"
               element={<AdminVendorsPending />}
