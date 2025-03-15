@@ -12,11 +12,12 @@ interface LocationData {
 interface LocationPickerProps {
   initialCoordinates: { lat: number; lng: number };
   initialAddress?: string;
-  onChange: (
+  onChange?: (
     coordinates: { lat: number; lng: number },
     address: string
   ) => void;
   height?: string;
+  readOnly?: boolean;
 }
 
 const LocationPicker: React.FC<LocationPickerProps> = ({
@@ -24,6 +25,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   initialAddress = "",
   onChange,
   height = "300px",
+  readOnly = false,
 }) => {
   const [coordinates, setCoordinates] =
     useState<LocationData>(initialCoordinates);
@@ -51,13 +53,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
   const handleMapClick = useCallback(
     async (e: L.LeafletMouseEvent) => {
+      if (readOnly) return;
       const newCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
       const newAddress = await reverseGeocode(newCoords.lat, newCoords.lng);
       setCoordinates({ ...newCoords, address: newAddress });
       setAddress(newAddress);
-      onChange(newCoords, newAddress);
+      onChange && onChange(newCoords, newAddress);
     },
-    [onChange]
+    [onChange, readOnly]
   );
 
   const searchAddress = async (e: React.MouseEvent) => {
@@ -79,7 +82,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         const newAddress = result.display_name;
         setCoordinates({ ...newCoords, address: newAddress });
         setAddress(newAddress);
-        onChange(newCoords, newAddress);
+        onChange && onChange(newCoords, newAddress);
         if (mapRef.current) {
           mapRef.current.setView(newCoords, 13);
         }
@@ -92,7 +95,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   const MapClickHandler = () => {
     const map = useMap();
     mapRef.current = map;
-    map.on("click", handleMapClick);
+    if (!readOnly) {
+      map.on("click", handleMapClick);
+    }
     return null;
   };
 
@@ -107,21 +112,23 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex space-x-2">
-        <input
-          type="text"
-          placeholder="Search location"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={searchAddress}
-          className="px-3 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
-        >
-          Search
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            placeholder="Search location"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={searchAddress}
+            className="px-3 py-2 bg-blue-600 text-white rounded-lg cursor-pointer"
+          >
+            Search
+          </button>
+        </div>
+      )}
 
       <div className="rounded-lg overflow-hidden" style={{ height }}>
         <MapContainer

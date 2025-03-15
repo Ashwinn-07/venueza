@@ -1,4 +1,4 @@
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Users, IndianRupee } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const VenueCard = ({
@@ -42,7 +42,8 @@ const VenueCard = ({
             <span className="text-gray-700">Up to {venue.capacity}</span>
           </div>
           <div className="flex items-center font-medium text-[#E76F51]">
-            ₹{venue.price}/day
+            <IndianRupee className="w-4 h-4 mr-1" />
+            {venue.price}/day
           </div>
         </div>
       </div>
