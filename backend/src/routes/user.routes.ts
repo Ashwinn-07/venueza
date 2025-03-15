@@ -2,6 +2,7 @@ import { Router } from "express";
 import userController from "../controllers/user.controller";
 import passport from "../config/passport";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import venueController from "../controllers/venue.controller";
 
 const userRoutes = Router();
 
@@ -36,6 +37,17 @@ userRoutes.patch(
   "/security",
   authMiddleware(["user"]),
   userController.changeUserPassword
+);
+
+userRoutes.get(
+  "/home",
+  authMiddleware(["user"]),
+  venueController.getFeaturedVenues
+);
+userRoutes.get(
+  "/venues",
+  authMiddleware(["user"]),
+  venueController.getAllVenues
 );
 
 export default userRoutes;

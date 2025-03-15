@@ -85,6 +85,37 @@ class VenueService implements IVenueService {
       venue,
     };
   }
+  async getAllVenues(): Promise<{
+    message: string;
+    status: number;
+    venues: IVenue[];
+  }> {
+    const venues = await venueRepository.find({
+      verificationStatus: "approved",
+    });
+    const sortedVenues = venues.sort((a, b) => a.name.localeCompare(b.name));
+    return {
+      message: MESSAGES.SUCCESS.VENUE_FETCHED,
+      status: STATUS_CODES.OK,
+      venues: sortedVenues,
+    };
+  }
+  async getFeaturedVenues(): Promise<{
+    message: string;
+    status: number;
+    venues: IVenue[];
+  }> {
+    const venues = await venueRepository.find({
+      verificationStatus: "approved",
+    });
+    const sortedVenues = venues.sort((a, b) => a.name.localeCompare(b.name));
+    const featuredVenues = sortedVenues.slice(0, 3);
+    return {
+      message: MESSAGES.SUCCESS.VENUE_FETCHED,
+      status: STATUS_CODES.OK,
+      venues: featuredVenues,
+    };
+  }
 }
 
 export default new VenueService();

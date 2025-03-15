@@ -73,6 +73,38 @@ class VenueController implements IVenueController {
       });
     }
   }
+  async getAllVenues(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await venueService.getAllVenues();
+      res.status(result.status).json({
+        message: result.message,
+        result,
+      });
+    } catch (error) {
+      console.error("Error fetching venues", error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error ? error.message : "Failed to fetch venues",
+      });
+    }
+  }
+  async getFeaturedVenues(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await venueService.getFeaturedVenues();
+      res.status(result.status).json({
+        message: result.message,
+        result,
+      });
+    } catch (error) {
+      console.error("Error fetching featured venues", error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch featured venues",
+      });
+    }
+  }
 }
 
 export default new VenueController();

@@ -16,4 +16,14 @@ export interface IVenueService {
   getVenueById(
     venueId: string
   ): Promise<{ message: string; status: number; venue: IVenue }>;
+  getAllVenues(): Promise<{
+    message: string;
+    status: number;
+    venues: IVenue[];
+  }>;
+  getFeaturedVenues(): Promise<{
+    message: string;
+    status: number;
+    venues: IVenue[];
+  }>;
 }

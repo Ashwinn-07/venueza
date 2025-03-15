@@ -39,7 +39,11 @@ vendorRoutes.post(
   authMiddleware(["vendor"]),
   venueController.createVenue
 );
-vendorRoutes.get("/venues/:id", venueController.getVenue);
+vendorRoutes.get(
+  "/venues/:id",
+  authMiddleware(["vendor"]),
+  venueController.getVenue
+);
 vendorRoutes.put(
   "/venues/:id",
   authMiddleware(["vendor"]),
