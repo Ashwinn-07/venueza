@@ -56,6 +56,10 @@ interface AuthState {
   getVenues: () => Promise<any>;
   getVenue: (venueId: string) => Promise<any>;
   updateVenue: (venueId: string, venueData: any) => Promise<any>;
+
+  getUserVenues: () => Promise<any>;
+  getFeaturedVenues: () => Promise<any>;
+  getUserVenue: (venueId: string) => Promise<any>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -453,6 +457,42 @@ export const useAuthStore = create<AuthState>()(
           return await vendorService.updateVenue(venueId, venueData);
         } catch (error) {
           console.error("Failed to update venue", error);
+          throw error;
+        }
+      },
+      getUserVenues: async () => {
+        try {
+          const { authType } = get();
+          if (authType !== "user") {
+            throw new Error("Not authorized as user");
+          }
+          return await userService.getVenues();
+        } catch (error) {
+          console.error("Failed to get user venues", error);
+          throw error;
+        }
+      },
+      getFeaturedVenues: async () => {
+        try {
+          const { authType } = get();
+          if (authType !== "user") {
+            throw new Error("Not authorized as user");
+          }
+          return await userService.getFeaturedVenues();
+        } catch (error) {
+          console.error("Failed to get featured venues", error);
+          throw error;
+        }
+      },
+      getUserVenue: async (venueId: string) => {
+        try {
+          const { authType } = get();
+          if (authType !== "user") {
+            throw new Error("Not authorized as user");
+          }
+          return await userService.getVenue(venueId);
+        } catch (error) {
+          console.error("Failed to get user venue", error);
           throw error;
         }
       },

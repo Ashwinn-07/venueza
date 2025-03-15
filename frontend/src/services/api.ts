@@ -121,6 +121,18 @@ export const userService = {
     const response = await userApi.patch(`/security`, data);
     return response.data;
   },
+  getVenues: async () => {
+    const response = await userApi.get("/venues");
+    return response.data;
+  },
+  getFeaturedVenues: async () => {
+    const response = await userApi.get("/home");
+    return response.data;
+  },
+  getVenue: async (venueId: string) => {
+    const response = await userApi.get(`/venues/${venueId}`);
+    return response.data;
+  },
 };
 
 export const vendorService = {

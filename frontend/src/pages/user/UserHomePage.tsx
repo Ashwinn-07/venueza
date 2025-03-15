@@ -1,5 +1,6 @@
 import { Users, MapPin, DollarSign } from "lucide-react";
 import VenueSearch from "../../components/VenueSearch";
+import { Link } from "react-router-dom";
 
 const VenueCard = ({
   title,
@@ -112,9 +113,12 @@ const UserHomePage = () => {
                   Explore our handpicked selection of stunning venues
                 </p>
               </div>
-              <button className="px-6 py-2.5 bg-[#F4A261] text-white rounded-md font-medium transition-all duration-300 hover:bg-[#E76F51] hover:shadow-md active:transform active:scale-95 cursor-pointer">
+              <Link
+                to="/user/venues"
+                className="px-6 py-2.5 bg-[#F4A261] text-white rounded-md font-medium transition-all duration-300 hover:bg-[#E76F51] hover:shadow-md active:transform active:scale-95 cursor-pointer"
+              >
                 View All Venues
-              </button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 cursor-pointer">

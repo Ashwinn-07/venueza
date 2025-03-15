@@ -22,6 +22,8 @@ const VendorLogin = lazy(() => import("./pages/vendor/VendorLogin"));
 const UserLogin = lazy(() => import("./pages/user/UserLogin"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const UserHomePage = lazy(() => import("./pages/user/UserHomePage"));
+const ViewAllVenues = lazy(() => import("./pages/user/ViewAllVenues"));
+const VenueDetails = lazy(() => import("./pages/user/VenueDetails"));
 const VendorDashboard = lazy(() => import("./pages/vendor/VendorDashboard"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const UserProfile = lazy(() => import("./pages/user/UserProfile"));
@@ -192,6 +194,22 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <UserHomePage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/venues"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ViewAllVenues />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/venues/:id"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VenueDetails />
                 </Suspense>
               }
             />
