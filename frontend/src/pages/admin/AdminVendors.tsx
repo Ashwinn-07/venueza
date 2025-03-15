@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import VendorNavigation from "../../components/admin/VendorNavigation";
 import { useAuthStore } from "../../stores/authStore";
-import { notifyError } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import { FileText, X, Search, Ban, CheckCircle } from "lucide-react";
 
 const AdminVendors = () => {
-  const { listAllVendors } = useAuthStore();
+  const { listAllVendors, updateVendorStatus } = useAuthStore();
   const [vendors, setVendors] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
+  const [processingVendorId, setProcessingVendorId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const loadVendors = async () => {
@@ -37,8 +40,29 @@ const AdminVendors = () => {
       vendor.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleToggleBlock = () => {
-    alert("coming soon");
+  const handleToggleBlock = async (vendorId: string, currentStatus: string) => {
+    setProcessingVendorId(vendorId);
+    try {
+      const newStatus = currentStatus === "active" ? "blocked" : "active";
+      await updateVendorStatus(vendorId, newStatus);
+      const response = await listAllVendors();
+      setVendors(response.vendors);
+
+      if (newStatus === "blocked") {
+        notifySuccess("Vendor blocked successfully");
+      } else {
+        notifySuccess("Vendor unblocked successfully");
+      }
+    } catch (error) {
+      console.error("Failed to update vendor status:", error);
+      notifyError(
+        error instanceof Error
+          ? error.message
+          : "Failed to update vendor status"
+      );
+    } finally {
+      setProcessingVendorId(null);
+    }
   };
 
   const handleViewDocuments = (documents: string[]) => {
@@ -140,12 +164,12 @@ const AdminVendors = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-3 py-1 inline-flex items-center text-sm font-medium rounded-full cursor-pointer ${
-                            vendor.status === "Active"
+                            vendor.status === "active"
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {vendor.status === "Active" ? (
+                          {vendor.status === "active" ? (
                             <CheckCircle className="w-4 h-4 mr-1.5" />
                           ) : (
                             <Ban className="w-4 h-4 mr-1.5" />
@@ -156,13 +180,18 @@ const AdminVendors = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           className={`px-3.5 py-1.5 rounded-lg flex items-center text-sm font-medium transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer ${
-                            vendor.status === "Active"
+                            vendor.status === "active"
                               ? "bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
                               : "bg-green-500 text-white hover:bg-green-600 focus:ring-green-500"
                           }`}
-                          onClick={() => handleToggleBlock()}
+                          onClick={() =>
+                            handleToggleBlock(vendor._id, vendor.status)
+                          }
+                          disabled={processingVendorId === vendor._id}
                         >
-                          {vendor.status === "Active" ? (
+                          {processingVendorId === vendor._id ? (
+                            <span>Processing...</span>
+                          ) : vendor.status === "active" ? (
                             <>
                               <Ban className="w-4 h-4 mr-1.5" />
                               Block

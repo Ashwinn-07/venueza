@@ -79,7 +79,9 @@ class AdminService implements IAdminService {
   }
 
   async listAllVendors(): Promise<{ vendors: any[]; status: number }> {
-    const vendors = await vendorRepository.find({});
+    const vendors = await vendorRepository.find({
+      status: { $nin: ["pending"] },
+    });
     return {
       vendors,
       status: STATUS_CODES.OK,

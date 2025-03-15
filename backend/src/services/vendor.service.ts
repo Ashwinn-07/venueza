@@ -120,6 +120,9 @@ class VendorService implements IVendorService {
     if (!vendor.isVerified) {
       throw new Error(MESSAGES.ERROR.OTP_INVALID);
     }
+    if (vendor.status === "blocked") {
+      throw new Error(MESSAGES.ERROR.BLOCKED);
+    }
 
     const isPasswordValid = await bcrypt.compare(password, vendor.password);
     if (!isPasswordValid) {

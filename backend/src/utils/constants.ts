@@ -46,5 +46,6 @@ export const MESSAGES = {
     MISSING_FIELDS: "Required fields are missing",
     INVALID_TOKEN: "Invalid or expired token",
     ALREADY_VERIFIED: "User is already verified",
+    BLOCKED: "You have been blocked by the admin",
   },
 };

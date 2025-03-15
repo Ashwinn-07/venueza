@@ -149,7 +149,15 @@ class AdminController implements IAdminController {
         message: result.message,
         vendor: result.vendor,
       });
-    } catch (error) {}
+    } catch (error) {
+      console.error("Update vendor status error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to update vendor status",
+      });
+    }
   }
   async updateUserStatus(req: Request, res: Response): Promise<void> {
     try {

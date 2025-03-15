@@ -121,6 +121,9 @@ class UserService implements IUserService {
     if (!user.isVerified) {
       throw new Error(MESSAGES.ERROR.OTP_INVALID);
     }
+    if (user.status === "blocked") {
+      throw new Error(MESSAGES.ERROR.BLOCKED);
+    }
     if (!user.password) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
     }

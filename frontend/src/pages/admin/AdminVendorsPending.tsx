@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import VendorNavigation from "../../components/admin/VendorNavigation";
 import { useAuthStore } from "../../stores/authStore";
-import { notifyError } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import { FileText, Search, Check, X } from "lucide-react";
 
 const AdminVendorsPending = () => {
-  const { listPendingVendors } = useAuthStore();
+  const { listPendingVendors, updateVendorStatus } = useAuthStore();
   const [pendingVendors, setPendingVendors] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -37,12 +37,32 @@ const AdminVendorsPending = () => {
       vendor.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleApproveVendor = () => {
-    alert("coming soon");
+  const handleApproveVendor = async (vendorId: any) => {
+    try {
+      await updateVendorStatus(vendorId, "active");
+      const response = await listPendingVendors();
+      setPendingVendors(response.vendors);
+      notifySuccess("Vendor approved successfully");
+    } catch (error) {
+      console.error("Failed to approve vendor:", error);
+      notifyError(
+        error instanceof Error ? error.message : "Failed to approve vendor"
+      );
+    }
   };
 
-  const handleRejectVendor = () => {
-    alert("coming soon");
+  const handleRejectVendor = async (vendorId: any) => {
+    try {
+      await updateVendorStatus(vendorId, "blocked");
+      const response = await listPendingVendors();
+      setPendingVendors(response.vendors);
+      notifySuccess("Vendor rejected successfully");
+    } catch (error) {
+      console.error("Failed to reject vendor:", error);
+      notifyError(
+        error instanceof Error ? error.message : "Failed to reject vendor"
+      );
+    }
   };
 
   const handleViewDocuments = (documents: string[]) => {
@@ -143,14 +163,18 @@ const AdminVendorsPending = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex space-x-3">
                           <button
-                            onClick={() => handleApproveVendor()}
+                            onClick={() =>
+                              handleApproveVendor(vendor.id || vendor._id)
+                            }
                             className="px-3.5 py-1.5 bg-green-500 text-white rounded-lg flex items-center text-sm font-medium transition duration-150 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 cursor-pointer"
                           >
                             <Check className="w-4 h-4 mr-1.5" />
                             Accept
                           </button>
                           <button
-                            onClick={() => handleRejectVendor()}
+                            onClick={() =>
+                              handleRejectVendor(vendor.id || vendor._id)
+                            }
                             className="px-3.5 py-1.5 bg-red-500 text-white rounded-lg flex items-center text-sm font-medium transition duration-150 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer"
                           >
                             <X className="w-4 h-4 mr-1.5" />
