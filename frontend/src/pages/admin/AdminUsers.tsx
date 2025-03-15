@@ -1,27 +1,30 @@
 import { useState, useEffect } from "react";
-import { notifyError } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 
 const AdminUsers = () => {
-  const { listAllUsers } = useAuthStore();
+  const { listAllUsers, updateUserStatus } = useAuthStore();
   const [users, setUsers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await listAllUsers();
-        setUsers(response.users);
-      } catch (error) {
-        console.error("Failed to load users:", error);
-        notifyError("Failed to load users.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadUsers();
   }, [listAllUsers]);
+
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await listAllUsers();
+      setUsers(response.users);
+    } catch (error) {
+      console.error("Failed to load users:", error);
+      notifyError("Failed to load users.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -33,8 +36,33 @@ const AdminUsers = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleToggleBlock = () => {
-    alert(`coming soon`);
+  const handleToggleBlock = async (userId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "active" ? "blocked" : "active";
+
+    setIsUpdating(true);
+    try {
+      await updateUserStatus(userId, newStatus);
+
+      setUsers(
+        users.map((user) =>
+          user._id === userId ? { ...user, status: newStatus } : user
+        )
+      );
+
+      notifySuccess(
+        `User ${newStatus === "blocked" ? "blocked" : "unblocked"} successfully`
+      );
+    } catch (error) {
+      console.error(
+        `Failed to ${newStatus === "blocked" ? "block" : "unblock"} user:`,
+        error
+      );
+      notifyError(
+        `Failed to ${newStatus === "blocked" ? "block" : "unblock"} user.`
+      );
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   if (isLoading) return <div>Loading users...</div>;
@@ -93,7 +121,7 @@ const AdminUsers = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.status === "Active"
+                            user.status === "active"
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
@@ -104,13 +132,16 @@ const AdminUsers = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           className={`px-3 py-1 border rounded text-sm font-medium cursor-pointer ${
-                            user.status === "Active"
+                            user.status === "active"
                               ? "border-red-300 text-red-600 hover:bg-red-50"
                               : "border-green-300 text-green-600 hover:bg-green-50"
                           }`}
-                          onClick={() => handleToggleBlock()}
+                          onClick={() =>
+                            handleToggleBlock(user._id, user.status)
+                          }
+                          disabled={isUpdating}
                         >
-                          Block
+                          {user.status === "active" ? "Block" : "Unblock"}
                         </button>
                       </td>
                     </tr>
