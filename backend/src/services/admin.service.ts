@@ -107,6 +107,15 @@ class AdminService implements IAdminService {
       status: STATUS_CODES.OK,
     };
   }
+  async listApprovedVenues(): Promise<{ status: number; venues: IVenue[] }> {
+    const venues = await venueRepository.find({
+      verificationStatus: "approved",
+    });
+    return {
+      venues,
+      status: STATUS_CODES.OK,
+    };
+  }
   async approveVendor(
     vendorId: string
   ): Promise<{ message: string; status: number; vendor: any }> {

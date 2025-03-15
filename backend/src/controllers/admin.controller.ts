@@ -119,6 +119,22 @@ class AdminController implements IAdminController {
       });
     }
   }
+  async listApprovedVenues(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await adminService.listApprovedVenues();
+      res.status(result.status).json({
+        venues: result.venues,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch approved venues",
+      });
+    }
+  }
   async updateVendorStatus(req: Request, res: Response): Promise<void> {
     try {
       const { id: vendorId } = req.params;

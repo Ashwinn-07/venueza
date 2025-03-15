@@ -181,6 +181,10 @@ export const adminService = {
     const response = await adminApi.get("/venues/pending");
     return response.data;
   },
+  listApprovedVenues: async () => {
+    const response = await adminApi.get("/venues");
+    return response.data;
+  },
   updateUserStatus: async (userId: string, status: string) => {
     const response = await adminApi.patch(`/users/${userId}`, { status });
     return response.data;

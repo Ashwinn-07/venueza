@@ -44,6 +44,7 @@ interface AuthState {
   listAllVendors: () => Promise<any>;
   listPendingVendors: () => Promise<any>;
   listPendingVenues: () => Promise<any>;
+  listApprovedVenues: () => Promise<any>;
   updateUserStatus: (userId: string, status: string) => Promise<any>;
   updateVendorStatus: (vendorId: string, status: string) => Promise<any>;
   updateVenueVerificationStatus: (
@@ -353,6 +354,18 @@ export const useAuthStore = create<AuthState>()(
           return await adminService.listPendingVenues();
         } catch (error) {
           console.error("Failed to list pending venues", error);
+          throw error;
+        }
+      },
+      listApprovedVenues: async () => {
+        try {
+          const { authType } = get();
+          if (!authType || authType !== "admin")
+            throw new Error("Not authorized as admin");
+
+          return await adminService.listApprovedVenues();
+        } catch (error) {
+          console.error("Failed to list approved venues", error);
           throw error;
         }
       },

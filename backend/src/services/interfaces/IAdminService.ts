@@ -19,6 +19,10 @@ export interface IAdminService {
     status: number;
     venues: IVenue[];
   }>;
+  listApprovedVenues(): Promise<{
+    status: number;
+    venues: IVenue[];
+  }>;
   approveVendor(
     vendorId: string
   ): Promise<{ message: string; status: number; vendor: any }>;

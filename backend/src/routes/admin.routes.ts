@@ -38,6 +38,11 @@ adminRoutes.get(
   authMiddleware(["admin"]),
   adminController.listPendingVenues
 );
+adminRoutes.get(
+  "/venues",
+  authMiddleware(["admin"]),
+  adminController.listApprovedVenues
+);
 adminRoutes.patch(
   "/venues/:id",
   authMiddleware(["admin"]),
