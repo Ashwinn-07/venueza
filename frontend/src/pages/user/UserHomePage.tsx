@@ -1,87 +1,51 @@
-import { Users, MapPin, DollarSign } from "lucide-react";
 import VenueSearch from "../../components/VenueSearch";
 import { Link } from "react-router-dom";
-
-const VenueCard = ({
-  title,
-  location,
-  capacity,
-  pricePerDay,
-  imageUrl,
-}: {
-  title: string;
-  location: string;
-  capacity: number;
-  pricePerDay: string;
-  imageUrl: string;
-}) => {
-  return (
-    <div className="flex flex-col rounded-lg overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-[#F4A261] bg-white">
-      <div className="relative h-48 overflow-hidden group">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
-      <div className="p-6">
-        <h3 className="font-semibold text-gray-800 text-lg mb-2">{title}</h3>
-        <div className="flex items-center text-gray-600 text-sm mb-4">
-          <MapPin className="w-4 h-4 mr-1 text-[#F4A261]" />
-          {location}
-        </div>
-        <div className="flex justify-between items-center text-sm">
-          <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full">
-            <Users className="w-4 h-4 mr-2 text-[#F4A261]" />
-            <span className="text-gray-700">Up to {capacity}</span>
-          </div>
-          <div className="flex items-center font-medium text-[#E76F51]">
-            <DollarSign className="w-4 h-4 mr-1" />
-            {pricePerDay}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { useAuthStore } from "../../stores/authStore";
+import { useEffect, useState } from "react";
+import VenueCard from "../../components/user/VenueCard";
 
 const UserHomePage = () => {
-  // Mock venue data
-  const venues = [
-    {
-      id: "1",
-      title: "Grand Ballroom",
-      location: "Downtown Manhattan, NY",
-      capacity: 250,
-      pricePerDay: "1,000/day",
-      imageUrl:
-        "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-      id: "2",
-      title: "Modern Conference Center",
-      location: "Midtown, Chicago",
-      capacity: 180,
-      pricePerDay: "850/day",
-      imageUrl:
-        "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?auto=format&fit=crop&q=80&w=800",
-    },
-    {
-      id: "3",
-      title: "Garden Pavilion",
-      location: "Beverly Hills, LA",
-      capacity: 120,
-      pricePerDay: "750/day",
-      imageUrl:
-        "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=800",
-    },
-  ];
+  const { getFeaturedVenues, isAuthenticated } = useAuthStore();
+  const [venues, setVenues] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFeaturedVenues = async () => {
+      try {
+        const response = await getFeaturedVenues();
+        setVenues(response.result?.venues || []);
+      } catch (err) {
+        setError("Failed to load venues");
+        console.error("Venue fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchFeaturedVenues();
+    }
+  }, [getFeaturedVenues, isAuthenticated]);
 
   const handleSearch = (criteria: any) => {
     console.log("Search criteria:", criteria);
-    // Searching functionality would go here
   };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#E76F51]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-500 text-lg">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -121,9 +85,9 @@ const UserHomePage = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 cursor-pointer">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {venues.map((venue) => (
-                <VenueCard key={venue.id} {...venue} />
+                <VenueCard key={venue._id} venue={venue} />
               ))}
             </div>
           </section>
