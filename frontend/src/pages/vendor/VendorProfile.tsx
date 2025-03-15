@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidPhone } from "../../utils/validators";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 
 const VendorProfile = () => {
   const navigate = useNavigate();
@@ -23,7 +24,6 @@ const VendorProfile = () => {
   const [selectedDocuments, setSelectedDocuments] = useState<FileList | null>(
     null
   );
-  // const [documentUrls, setDocumentUrls] = useState<string[]>([]);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -82,7 +82,6 @@ const VendorProfile = () => {
       const urls = await Promise.all(
         filesArray.map((file) => uploadImageToCloudinary(file))
       );
-      // setDocumentUrls(urls);
       await uploadDocuments(urls);
       notifySuccess("Verification documents uploaded successfully");
     } catch (error: any) {
@@ -122,6 +121,214 @@ const VendorProfile = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderVerificationSection = () => {
+    if (user?.status === "active") {
+      return (
+        <div className="flex flex-col items-center justify-center p-6 bg-green-50 rounded-lg border border-green-200">
+          <CheckCircle className="w-12 h-12 text-green-500 mb-3" />
+          <h3 className="font-medium text-green-800 mb-2">Verified Vendor</h3>
+          <p className="text-sm text-green-600 text-center">
+            Your account has been verified and is active. You can now access all
+            vendor features.
+          </p>
+        </div>
+      );
+    }
+
+    if (user?.status === "blocked") {
+      return (
+        <div className="space-y-4">
+          <div className="p-4 bg-red-50 rounded-lg border border-red-200 mb-4">
+            <div className="flex items-center mb-2">
+              <XCircle className="w-5 h-5 text-red-500 mr-2" />
+              <h3 className="font-medium text-red-800">
+                Verification Rejected
+              </h3>
+            </div>
+            <p className="text-sm text-red-600">
+              Your verification was not approved. Please upload new documents to
+              try again.
+            </p>
+          </div>
+
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <h3 className="font-medium text-gray-800 mb-3">
+              Upload New Documents
+            </h3>
+            <div className="border border-dashed border-gray-300 rounded-md p-4 text-center mb-4 bg-white">
+              <svg
+                className="mx-auto h-10 w-10 text-gray-400"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+              >
+                <path
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div className="text-sm text-gray-600 mt-2">
+                <label
+                  htmlFor="document-upload"
+                  className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                >
+                  <span>Click to upload</span>
+                  <input
+                    id="document-upload"
+                    name="document-upload"
+                    type="file"
+                    className="sr-only"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    multiple
+                    onChange={handleDocumentChange}
+                    ref={documentInputRef}
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Up to 10MB</p>
+            </div>
+
+            <button
+              onClick={handleUploadDocuments}
+              className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+            >
+              Upload Documents
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (user?.status === "pending") {
+      return (
+        <div className="space-y-4">
+          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 mb-4">
+            <div className="flex items-center mb-2">
+              <Clock className="w-5 h-5 text-yellow-500 mr-2" />
+              <h3 className="font-medium text-yellow-800">
+                Verification Pending
+              </h3>
+            </div>
+            <p className="text-sm text-yellow-600">
+              Your documents are being reviewed. We'll notify you once the
+              verification is complete.
+            </p>
+          </div>
+
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <h3 className="font-medium text-gray-800 mb-3">
+              Verification Documents
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Upload documents for account verification. Images and PDFs
+              supported.
+            </p>
+
+            <div className="border border-dashed border-gray-300 rounded-md p-4 text-center mb-4 bg-white">
+              <svg
+                className="mx-auto h-10 w-10 text-gray-400"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+              >
+                <path
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div className="text-sm text-gray-600 mt-2">
+                <label
+                  htmlFor="document-upload"
+                  className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                >
+                  <span>Click to upload</span>
+                  <input
+                    id="document-upload"
+                    name="document-upload"
+                    type="file"
+                    className="sr-only"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    multiple
+                    onChange={handleDocumentChange}
+                    ref={documentInputRef}
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Up to 10MB</p>
+            </div>
+
+            <button
+              onClick={handleUploadDocuments}
+              className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+            >
+              Upload Documents
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="border rounded-lg p-4 bg-gray-50">
+        <h3 className="font-medium text-gray-800 mb-3">
+          Verification Documents
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Upload documents for account verification. Images and PDFs supported.
+        </p>
+
+        <div className="border border-dashed border-gray-300 rounded-md p-4 text-center mb-4 bg-white">
+          <svg
+            className="mx-auto h-10 w-10 text-gray-400"
+            stroke="currentColor"
+            fill="none"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+            <path
+              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div className="text-sm text-gray-600 mt-2">
+            <label
+              htmlFor="document-upload"
+              className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+            >
+              <span>Click to upload</span>
+              <input
+                id="document-upload"
+                name="document-upload"
+                type="file"
+                className="sr-only"
+                accept=".pdf,.jpg,.jpeg,.png"
+                multiple
+                onChange={handleDocumentChange}
+                ref={documentInputRef}
+              />
+            </label>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Up to 10MB</p>
+        </div>
+
+        <button
+          onClick={handleUploadDocuments}
+          className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+        >
+          Upload Documents
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -239,60 +446,7 @@ const VendorProfile = () => {
                 </div>
               </div>
 
-              <div className="lg:col-span-1">
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <h3 className="font-medium text-gray-800 mb-3">
-                    Verification Documents
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Upload documents for account verification. Images and PDFs
-                    supported.
-                  </p>
-
-                  <div className="border border-dashed border-gray-300 rounded-md p-4 text-center mb-4 bg-white">
-                    <svg
-                      className="mx-auto h-10 w-10 text-gray-400"
-                      stroke="currentColor"
-                      fill="none"
-                      viewBox="0 0 48 48"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <div className="text-sm text-gray-600 mt-2">
-                      <label
-                        htmlFor="document-upload"
-                        className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
-                      >
-                        <span>Click to upload</span>
-                        <input
-                          id="document-upload"
-                          name="document-upload"
-                          type="file"
-                          className="sr-only"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          multiple
-                          onChange={handleDocumentChange}
-                          ref={documentInputRef}
-                        />
-                      </label>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Up to 10MB</p>
-                  </div>
-
-                  <button
-                    onClick={handleUploadDocuments}
-                    className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
-                  >
-                    Upload Documents
-                  </button>
-                </div>
-              </div>
+              <div className="lg:col-span-1">{renderVerificationSection()}</div>
             </div>
 
             <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">
