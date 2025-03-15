@@ -49,5 +49,10 @@ userRoutes.get(
   authMiddleware(["user"]),
   venueController.getAllVenues
 );
+userRoutes.get(
+  "/venues/:id",
+  authMiddleware(["user"]),
+  venueController.getVenue
+);
 
 export default userRoutes;
