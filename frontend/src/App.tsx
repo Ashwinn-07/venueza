@@ -8,6 +8,7 @@ import VendorLayout from "./layouts/VendorLayout";
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import PageLoader from "./components/PageLoader";
+import PublicLayout from "./layouts/PublicLayout";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const VendorSignup = lazy(() => import("./pages/vendor/VendorSignup"));
@@ -77,117 +78,119 @@ const App = () => {
         transition={Bounce}
       />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <Landing />
-            </Suspense>
-          }
-        />
+        <Route element={<PublicLayout />}>
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Landing />
+              </Suspense>
+            }
+          />
 
-        <Route element={<PublicOnlyRoute />}>
+          <Route element={<PublicOnlyRoute />}>
+            <Route
+              path="/vendor/signup"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorSignup />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/signup"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <UserSignup />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vendor/login"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorLogin />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/login"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <UserLogin />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/login"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <AdminLogin />
+                </Suspense>
+              }
+            />
+          </Route>
+
           <Route
-            path="/vendor/signup"
+            path="/auth/google/callback"
             element={
               <Suspense fallback={<PageLoader />}>
-                <VendorSignup />
+                <GoogleAuthCallback />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/user/verify-otp"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <UserOtpVerification />
               </Suspense>
             }
           />
           <Route
-            path="/user/signup"
+            path="/vendor/verify-otp"
             element={
               <Suspense fallback={<PageLoader />}>
-                <UserSignup />
+                <VendorOtpVerification />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/user/forgot-password"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <UserForgotPassword />
               </Suspense>
             }
           />
           <Route
-            path="/vendor/login"
+            path="/user/reset-password"
             element={
               <Suspense fallback={<PageLoader />}>
-                <VendorLogin />
+                <UserResetPassword />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/vendor/forgot-password"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <VendorForgotPassword />
               </Suspense>
             }
           />
           <Route
-            path="/user/login"
+            path="/vendor/reset-password"
             element={
               <Suspense fallback={<PageLoader />}>
-                <UserLogin />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/login"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <AdminLogin />
+                <VendorResetPassword />
               </Suspense>
             }
           />
         </Route>
-
-        <Route
-          path="/auth/google/callback"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <GoogleAuthCallback />
-            </Suspense>
-          }
-        />
-
-        <Route
-          path="/user/verify-otp"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <UserOtpVerification />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/vendor/verify-otp"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <VendorOtpVerification />
-            </Suspense>
-          }
-        />
-
-        <Route
-          path="/user/forgot-password"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <UserForgotPassword />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/user/reset-password"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <UserResetPassword />
-            </Suspense>
-          }
-        />
-
-        <Route
-          path="/vendor/forgot-password"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <VendorForgotPassword />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/vendor/reset-password"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <VendorResetPassword />
-            </Suspense>
-          }
-        />
 
         {/* Protected user routes */}
         <Route element={<ProtectedRoute allowedTypes={["user"]} />}>
