@@ -3,6 +3,7 @@ import VenueNavigation from "../../components/admin/VenueNavigation";
 import { Search, FileText, X } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { notifyError, notifySuccess } from "../../utils/notifications";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const AdminVenuesPending = () => {
   const [venues, setVenues] = useState([]);
@@ -14,6 +15,8 @@ const AdminVenuesPending = () => {
   const [processingVenueId, setProcessingVenueId] = useState(null);
 
   const { listPendingVenues, updateVenueVerificationStatus } = useAuthStore();
+
+  const [modalParent] = useAutoAnimate();
 
   useEffect(() => {
     fetchPendingVenues();
@@ -275,58 +278,60 @@ const AdminVenuesPending = () => {
           </div>
         </div>
 
-        {isDocsModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto mx-4">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Documents
-                </h3>
-                <button
-                  onClick={() => setIsDocsModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-600 transition duration-150 cursor-pointer"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {selectedDocs.map((doc: any, index: any) => (
-                  <div
-                    key={index}
-                    className="border border-gray-200 rounded-xl overflow-hidden"
+        <div ref={modalParent}>
+          {isDocsModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto mx-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Documents
+                  </h3>
+                  <button
+                    onClick={() => setIsDocsModalOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 transition duration-150 cursor-pointer"
                   >
-                    <div className="aspect-video bg-gray-50">
-                      {doc.toLowerCase().endsWith(".pdf") ? (
-                        <iframe
-                          src={doc}
-                          className="w-full h-full"
-                          title={`Document ${index + 1}`}
-                        />
-                      ) : (
-                        <img
-                          src={doc}
-                          alt={`Document ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {selectedDocs.map((doc: any, index: any) => (
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-xl overflow-hidden"
+                    >
+                      <div className="aspect-video bg-gray-50">
+                        {doc.toLowerCase().endsWith(".pdf") ? (
+                          <iframe
+                            src={doc}
+                            className="w-full h-full"
+                            title={`Document ${index + 1}`}
+                          />
+                        ) : (
+                          <img
+                            src={doc}
+                            alt={`Document ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="p-4 bg-white">
+                        <a
+                          href={doc}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center text-blue-600 hover:text-blue-800 font-medium transition duration-150 cursor-pointer"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Open in new tab
+                        </a>
+                      </div>
                     </div>
-                    <div className="p-4 bg-white">
-                      <a
-                        href={doc}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center text-blue-600 hover:text-blue-800 font-medium transition duration-150 cursor-pointer"
-                      >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Open in new tab
-                      </a>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
