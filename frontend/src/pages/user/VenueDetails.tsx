@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import LocationPicker from "../../components/maps/LocationPicker";
 import { useAuthStore } from "../../stores/authStore";
+import { useAnimation } from "../../utils/animation";
 
 const VenueDetails = () => {
   const { id }: any = useParams();
@@ -20,6 +21,8 @@ const VenueDetails = () => {
   const [venue, setVenue] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [carousalRef] = useAnimation();
 
   useEffect(() => {
     const fetchVenueData = async () => {
@@ -83,8 +86,12 @@ const VenueDetails = () => {
           <div className="space-y-8">
             {venue.images && venue.images.length > 0 ? (
               <>
-                <div className="relative rounded-lg overflow-hidden">
+                <div
+                  ref={carousalRef}
+                  className="relative rounded-lg overflow-hidden"
+                >
                   <img
+                    key={currentImageIndex}
                     src={venue.images[currentImageIndex]}
                     alt={`Venue image ${currentImageIndex + 1}`}
                     className="w-full h-[400px] object-cover"
