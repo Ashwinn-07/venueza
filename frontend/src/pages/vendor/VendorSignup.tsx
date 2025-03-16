@@ -8,6 +8,7 @@ import {
   isValidPassword,
   isValidPhone,
 } from "../../utils/validators";
+import { useAnimation } from "../../utils/animation";
 
 const VendorSignup = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const VendorSignup = () => {
     phone: "",
     password: "",
   });
+
+  const [animationParent] = useAnimation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -96,7 +99,10 @@ const VendorSignup = () => {
       </div>
 
       <div className="w-full max-w-md px-6 py-12">
-        <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl">
+        <div
+          ref={animationParent}
+          className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl"
+        >
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               <Building2 className="h-10 w-10 text-blue-500" />

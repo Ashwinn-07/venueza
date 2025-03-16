@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidEmail } from "../../utils/validators";
+import { useAnimation } from "../../utils/animation";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ const AdminLogin = () => {
     email: "",
     password: "",
   });
+
+  const [animationParent] = useAnimation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,7 +66,10 @@ const AdminLogin = () => {
       </div>
 
       <div className="w-full max-w-md px-6 py-12">
-        <div className="bg-gray-900/70 p-8 rounded-2xl shadow-xl border border-gray-700">
+        <div
+          ref={animationParent}
+          className="bg-gray-900/70 p-8 rounded-2xl shadow-xl border border-gray-700"
+        >
           <div className="flex flex-col items-center mb-8">
             <div className="bg-gray-800 p-3 rounded-full shadow-lg mb-4 border border-gray-700">
               <Lock className="h-10 w-10 text-blue-500" />

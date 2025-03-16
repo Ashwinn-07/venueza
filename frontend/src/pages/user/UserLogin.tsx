@@ -5,6 +5,7 @@ import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidEmail } from "../../utils/validators";
 import { authService } from "../../services/api";
+import { useAnimation } from "../../utils/animation";
 
 const UserLogin = () => {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ const UserLogin = () => {
     email: "",
     password: "",
   });
+
+  const [animationParent] = useAnimation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -75,7 +78,10 @@ const UserLogin = () => {
       </div>
 
       <div className="w-full max-w-md px-6 py-12">
-        <div className="bg-white/90 p-8 rounded-2xl shadow-xl">
+        <div
+          ref={animationParent}
+          className="bg-white/90 p-8 rounded-2xl shadow-xl"
+        >
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               <User className="h-10 w-10 text-blue-600" />

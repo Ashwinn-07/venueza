@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 import { isValidPassword } from "../../utils/validators";
+import { useAnimation } from "../../utils/animation";
 
 const UserResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,7 @@ const UserResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { resetPassword } = useAuthStore();
+  const [animationParent] = useAnimation();
   const email = location.state?.email || "";
 
   const handleOtpChange = (index: number, value: string) => {
@@ -136,7 +138,10 @@ const UserResetPassword = () => {
       </div>
 
       <div className="w-full max-w-md px-6 py-12">
-        <div className="bg-white/90 p-8 rounded-2xl shadow-xl">
+        <div
+          ref={animationParent}
+          className="bg-white/90 p-8 rounded-2xl shadow-xl"
+        >
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               {isSubmitted ? (

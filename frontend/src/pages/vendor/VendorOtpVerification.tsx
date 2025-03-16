@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
+import { useAnimation } from "../../utils/animation";
 
 const VendorOtpVerification = () => {
   const location = useLocation();
@@ -11,6 +12,8 @@ const VendorOtpVerification = () => {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { verifyOtp, resendOtp } = useAuthStore();
+
+  const [animationParent] = useAnimation();
 
   const handleVerifyOtp = async () => {
     if (otp.length != 6) {
@@ -53,7 +56,10 @@ const VendorOtpVerification = () => {
       </div>
 
       <div className="w-full max-w-md px-6 py-12">
-        <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl">
+        <div
+          ref={animationParent}
+          className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl"
+        >
           <div className="flex flex-col items-center mb-8">
             <div className="bg-white/80 p-3 rounded-full shadow-lg mb-4">
               <Shield className="h-10 w-10 text-blue-500" />
