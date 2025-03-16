@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { PublicOnlyRoute } from "./components/auth/PublicOnlyRoutes";
-import { ToastContainer } from "react-toastify";
+import { Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ProtectedRoute } from "./components/auth/ProtectedRoutes";
 import VendorLayout from "./layouts/VendorLayout";
@@ -64,14 +64,17 @@ const App = () => {
   return (
     <BrowserRouter>
       <ToastContainer
-        position="top-right"
+        position="bottom-center"
         autoClose={5000}
-        hideProgressBar={false}
+        hideProgressBar
         newestOnTop={false}
         closeOnClick
-        pauseOnHover
+        rtl={false}
+        pauseOnFocusLoss
         draggable
-        theme="colored"
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
       />
       <Routes>
         <Route
