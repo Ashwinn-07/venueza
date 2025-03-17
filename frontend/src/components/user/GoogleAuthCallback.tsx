@@ -15,7 +15,7 @@ const GoogleAuthCallback = () => {
       try {
         setUserFromToken(token, "user");
         notifySuccess("Logged in successfully via Google!");
-        navigate("/user/home"); // Navigate to the user home page
+        navigate("/user/home");
       } catch (error) {
         console.error("Error processing Google auth callback:", error);
         notifyError("Google authentication failed.");
