@@ -121,8 +121,14 @@ export const userService = {
     const response = await userApi.patch(`/security`, data);
     return response.data;
   },
-  getVenues: async () => {
-    const response = await userApi.get("/venues");
+  getVenues: async (params: {
+    page?: number;
+    limit?: number;
+    query?: string;
+    location?: string;
+    capacity?: number;
+  }) => {
+    const response = await userApi.get("/venues", { params });
     return response.data;
   },
   getFeaturedVenues: async () => {

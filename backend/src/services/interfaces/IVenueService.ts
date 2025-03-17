@@ -16,10 +16,15 @@ export interface IVenueService {
   getVenueById(
     venueId: string
   ): Promise<{ message: string; status: number; venue: IVenue }>;
-  getAllVenues(): Promise<{
+  getAllVenues(
+    page?: number,
+    limit?: number,
+    searchParams?: { query?: string; location?: string; capacity?: number }
+  ): Promise<{
     message: string;
     status: number;
     venues: IVenue[];
+    totalCount: number;
   }>;
   getFeaturedVenues(): Promise<{
     message: string;

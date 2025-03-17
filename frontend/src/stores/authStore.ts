@@ -57,7 +57,13 @@ interface AuthState {
   getVenue: (venueId: string) => Promise<any>;
   updateVenue: (venueId: string, venueData: any) => Promise<any>;
 
-  getUserVenues: () => Promise<any>;
+  getUserVenues: (params?: {
+    page?: number;
+    limit?: number;
+    query?: string;
+    location?: string;
+    capacity?: number;
+  }) => Promise<any>;
   getFeaturedVenues: () => Promise<any>;
   getUserVenue: (venueId: string) => Promise<any>;
 }
@@ -460,13 +466,13 @@ export const useAuthStore = create<AuthState>()(
           throw error;
         }
       },
-      getUserVenues: async () => {
+      getUserVenues: async (params = {}) => {
         try {
           const { authType } = get();
           if (authType !== "user") {
             throw new Error("Not authorized as user");
           }
-          return await userService.getVenues();
+          return await userService.getVenues(params);
         } catch (error) {
           console.error("Failed to get user venues", error);
           throw error;

@@ -26,6 +26,13 @@ class BaseRepository<T extends Document> implements IBaseRepository<T> {
   async countDocuments(filter: FilterQuery<T> = {}): Promise<number> {
     return await this.model.countDocuments(filter).exec();
   }
+  async findWithPagination(
+    condition: FilterQuery<T> = {},
+    skip: number,
+    limit: number
+  ): Promise<T[]> {
+    return await this.model.find(condition).skip(skip).limit(limit).exec();
+  }
 }
 
 export default BaseRepository;

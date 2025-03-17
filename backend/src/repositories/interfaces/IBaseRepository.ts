@@ -7,4 +7,9 @@ export interface IBaseRepository<T> {
   find(filter: FilterQuery<T>): Promise<T[]>;
   update(id: string, data: Partial<T>): Promise<T | null>;
   countDocuments(filter: FilterQuery<T>): Promise<number>;
+  findWithPagination(
+    condition: FilterQuery<T>,
+    skip: number,
+    limit: number
+  ): Promise<T[]>;
 }
