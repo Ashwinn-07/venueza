@@ -1,8 +1,8 @@
-import VenueSearch from "../../components/VenueSearch";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { useEffect, useState } from "react";
 import VenueCard from "../../components/user/VenueCard";
+import BannerCarousel from "../../components/BannerCarousel";
 
 const UserHomePage = () => {
   const { getFeaturedVenues, isAuthenticated } = useAuthStore();
@@ -28,9 +28,6 @@ const UserHomePage = () => {
     }
   }, [getFeaturedVenues, isAuthenticated]);
 
-  const handleSearch = (criteria: any) => {
-    console.log("Search criteria:", criteria);
-  };
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -51,20 +48,8 @@ const UserHomePage = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <main className="flex-grow pt-16">
         <div className="container mx-auto px-4 py-12">
-          <section className="relative bg-gradient-to-r from-[#F4A261]/10 to-[#E76F51]/10 rounded-2xl p-8 md:p-12 text-center mb-16 overflow-hidden">
-            <div className="relative z-10">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 leading-tight">
-                Find Your Perfect Venue
-              </h1>
-              <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
-                Discover unique venues for your next event, carefully curated
-                for unforgettable experiences
-              </p>
-
-              <VenueSearch onSearch={handleSearch} />
-            </div>
-
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80')] opacity-5" />
+          <section className="mb-16">
+            <BannerCarousel />
           </section>
 
           <section className="mb-16">
