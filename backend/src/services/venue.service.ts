@@ -88,7 +88,12 @@ class VenueService implements IVenueService {
   async getAllVenues(
     page: number = 1,
     limit: number = 9,
-    searchParams: { query?: string; location?: string; capacity?: number } = {}
+    searchParams: {
+      query?: string;
+      location?: string;
+      capacity?: number;
+      price?: number;
+    } = {}
   ): Promise<{
     message: string;
     status: number;
@@ -104,6 +109,9 @@ class VenueService implements IVenueService {
     }
     if (searchParams.capacity) {
       filter.capacity = { $gte: searchParams.capacity };
+    }
+    if (searchParams.price) {
+      filter.price = { $lte: searchParams.price };
     }
     const skip = (page - 1) * limit;
 

@@ -75,11 +75,19 @@ class VenueController implements IVenueController {
   }
   async getAllVenues(req: Request, res: Response): Promise<void> {
     try {
-      const { page = 1, limit = 9, query, location, capacity } = req.query;
+      const {
+        page = 1,
+        limit = 9,
+        query,
+        location,
+        capacity,
+        price,
+      } = req.query;
       const searchParams = {
         query: typeof query === "string" ? query : undefined,
         location: typeof location === "string" ? location : undefined,
         capacity: capacity ? Number(capacity) : undefined,
+        price: price ? Number(price) : undefined,
       };
       const result = await venueService.getAllVenues(
         Number(page),

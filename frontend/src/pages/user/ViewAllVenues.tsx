@@ -17,6 +17,7 @@ const ViewAllVenues = () => {
     query: "",
     location: "",
     capacity: "",
+    price: "",
   });
 
   const fetchVenues = useCallback(
@@ -30,6 +31,7 @@ const ViewAllVenues = () => {
           query: criteria.query,
           location: criteria.location,
           capacity: criteria.capacity ? Number(criteria.capacity) : undefined,
+          price: criteria.price ? Number(criteria.price) : undefined,
         };
         const response = await getUserVenues(params);
         setVenues(response.result?.venues || []);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, Users, Calendar } from "lucide-react";
+import { Search, MapPin, Users, IndianRupee } from "lucide-react";
 
 const VenueSearch = ({ onSearch }: any) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -7,7 +7,7 @@ const VenueSearch = ({ onSearch }: any) => {
     query: "",
     location: "",
     capacity: "",
-    date: "",
+    price: "",
   });
 
   const handleInputChange = (e: any) => {
@@ -76,14 +76,14 @@ const VenueSearch = ({ onSearch }: any) => {
 
             <div className="relative">
               <input
-                type="date"
-                name="date"
-                placeholder="Date"
-                value={criteria.date}
+                type="number"
+                name="price"
+                placeholder="Max Price"
+                value={criteria.price}
                 onChange={handleInputChange}
                 className="w-full py-2 pl-10 pr-4 rounded-lg border border-gray-300 focus:outline-none"
               />
-              <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
             </div>
           </div>
         )}

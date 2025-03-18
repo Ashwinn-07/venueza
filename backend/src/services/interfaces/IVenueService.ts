@@ -19,7 +19,12 @@ export interface IVenueService {
   getAllVenues(
     page?: number,
     limit?: number,
-    searchParams?: { query?: string; location?: string; capacity?: number }
+    searchParams?: {
+      query?: string;
+      location?: string;
+      capacity?: number;
+      price?: number;
+    }
   ): Promise<{
     message: string;
     status: number;

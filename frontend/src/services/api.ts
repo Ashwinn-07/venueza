@@ -127,6 +127,7 @@ export const userService = {
     query?: string;
     location?: string;
     capacity?: number;
+    price?: number;
   }) => {
     const response = await userApi.get("/venues", { params });
     return response.data;
