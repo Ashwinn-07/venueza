@@ -8,6 +8,7 @@ const VenueList = () => {
   const [venues, setVenues] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [filter, setFilter] = useState<string>("approved");
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -23,6 +24,13 @@ const VenueList = () => {
     };
     fetchVenues();
   }, [getVenues]);
+
+  const filteredVenues = venues.filter((venue) => {
+    if (filter === "approved") return venue.verificationStatus === "approved";
+    if (filter === "rejected") return venue.verificationStatus === "rejected";
+    if (filter === "pending") return venue.verificationStatus === "pending";
+    return true;
+  });
 
   if (isLoading) {
     return <div className="p-8 text-center">Loading venues...</div>;
@@ -44,13 +52,38 @@ const VenueList = () => {
         </button>
       </div>
 
-      {venues.length === 0 ? (
-        <p className="text-gray-600">
-          No venues found. Add a new venue to get started.
-        </p>
+      <div className="flex gap-4 mb-4">
+        <button
+          className={`px-4 py-2 rounded cursor-pointer ${
+            filter === "approved" ? "bg-green-600 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("approved")}
+        >
+          Approved Venues
+        </button>
+        <button
+          className={`px-4 py-2 rounded cursor-pointer ${
+            filter === "rejected" ? "bg-red-600 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("rejected")}
+        >
+          Rejected Venues
+        </button>
+        <button
+          className={`px-4 py-2 rounded cursor-pointer ${
+            filter === "pending" ? "bg-gray-600 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("pending")}
+        >
+          Pending Venues
+        </button>
+      </div>
+
+      {filteredVenues.length === 0 ? (
+        <p className="text-gray-600">No venues found for this category.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {venues.map((venue) => (
+          {filteredVenues.map((venue) => (
             <div
               key={venue._id}
               className="bg-white rounded-lg shadow-sm overflow-hidden"
@@ -95,19 +128,24 @@ const VenueList = () => {
                         Rejected
                       </span>
                     )}
-                    <button
-                      className="text-blue-600 hover:text-blue-700 cursor-pointer"
-                      onClick={() => navigate(`/vendor/venues/${venue._id}`)}
-                    >
-                      Edit Venue
-                    </button>
-                  </div>
-                  {venue.verificationStatus === "rejected" &&
-                    venue.rejectionReason && (
-                      <p className="text-red-600 text-sm mt-2">
-                        Reason: {venue.rejectionReason}
-                      </p>
+                    {venue.verificationStatus !== "rejected" && (
+                      <button
+                        className="text-blue-600 hover:text-blue-700 cursor-pointer"
+                        onClick={() => navigate(`/vendor/venues/${venue._id}`)}
+                      >
+                        Edit Venue
+                      </button>
                     )}
+                  </div>
+                  {venue.verificationStatus === "rejected" && (
+                    <div className="text-red-600 text-sm mt-2">
+                      <p>Reason: {venue.rejectionReason}</p>
+                      <p>
+                        You can try again by clicking on the add venue button on
+                        top.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
