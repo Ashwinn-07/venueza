@@ -78,22 +78,36 @@ const VenueList = () => {
                       </span>
                     ))}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span
-                    className={`px-2 py-1 rounded-full text-sm ${
-                      venue.status === "open"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {venue.status === "open" ? "Open" : "Closed"}
-                  </span>
-                  <button
-                    className="text-blue-600 hover:text-blue-700 cursor-pointer"
-                    onClick={() => navigate(`/vendor/venues/${venue._id}`)}
-                  >
-                    Edit Venue
-                  </button>
+                <div className="flex flex-col">
+                  <div className="flex justify-between items-center">
+                    {venue.status === "open" && (
+                      <span className="px-2 py-1 rounded-full text-sm bg-green-100 text-green-700">
+                        Open
+                      </span>
+                    )}
+                    {venue.status === "closed" && (
+                      <span className="px-2 py-1 rounded-full text-sm bg-gray-100 text-gray-700">
+                        Closed
+                      </span>
+                    )}
+                    {venue.verificationStatus === "rejected" && (
+                      <span className="px-2 py-1 rounded-full text-sm bg-red-100 text-red-700">
+                        Rejected
+                      </span>
+                    )}
+                    <button
+                      className="text-blue-600 hover:text-blue-700 cursor-pointer"
+                      onClick={() => navigate(`/vendor/venues/${venue._id}`)}
+                    >
+                      Edit Venue
+                    </button>
+                  </div>
+                  {venue.verificationStatus === "rejected" &&
+                    venue.rejectionReason && (
+                      <p className="text-red-600 text-sm mt-2">
+                        Reason: {venue.rejectionReason}
+                      </p>
+                    )}
                 </div>
               </div>
             </div>

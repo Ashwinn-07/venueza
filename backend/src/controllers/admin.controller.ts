@@ -207,12 +207,12 @@ class AdminController implements IAdminController {
   ): Promise<void> {
     try {
       const { id: venueId } = req.params;
-      const { verificationStatus } = req.body;
+      const { verificationStatus, rejectionReason } = req.body;
       let result;
       if (verificationStatus === "approved") {
         result = await adminService.approveVenue(venueId);
       } else if (verificationStatus === "rejected") {
-        result = await adminService.rejectVenue(venueId);
+        result = await adminService.rejectVenue(venueId, rejectionReason);
       } else {
         throw new Error("Invalid verification status update");
       }

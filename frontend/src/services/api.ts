@@ -214,11 +214,16 @@ export const adminService = {
   },
   updateVenueVerificationStatus: async (
     venueId: string,
-    verificationStatus: string
+    verificationStatus: string,
+    rejectionReason?: string
   ) => {
-    const response = await adminApi.patch(`/venues/${venueId}`, {
-      verificationStatus,
-    });
+    const payload: any = { verificationStatus };
+
+    if (verificationStatus === "rejected" && rejectionReason) {
+      payload.rejectionReason = rejectionReason;
+    }
+
+    const response = await adminApi.patch(`/venues/${venueId}`, payload);
     return response.data;
   },
 };

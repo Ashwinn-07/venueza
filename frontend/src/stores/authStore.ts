@@ -49,7 +49,8 @@ interface AuthState {
   updateVendorStatus: (vendorId: string, status: string) => Promise<any>;
   updateVenueVerificationStatus: (
     venueId: string,
-    verificationStatus: string
+    verificationStatus: string,
+    rejectionReason?: string
   ) => Promise<any>;
 
   createVenue: (venueData: any) => Promise<any>;
@@ -403,7 +404,11 @@ export const useAuthStore = create<AuthState>()(
           throw error;
         }
       },
-      updateVenueVerificationStatus: async (venueId, verificationStatus) => {
+      updateVenueVerificationStatus: async (
+        venueId,
+        verificationStatus,
+        rejectionReason
+      ) => {
         try {
           const { authType } = get();
           if (!authType || authType !== "admin")
@@ -411,7 +416,8 @@ export const useAuthStore = create<AuthState>()(
 
           return await adminService.updateVenueVerificationStatus(
             venueId,
-            verificationStatus
+            verificationStatus,
+            rejectionReason
           );
         } catch (error) {
           console.error("Failed to update venue verification status", error);

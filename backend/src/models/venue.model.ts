@@ -15,6 +15,7 @@ export interface IVenue extends Document {
   documents: string[];
   status: "open" | "closed";
   verificationStatus: "pending" | "approved" | "rejected";
+  rejectionReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +49,7 @@ const venueSchema: Schema = new Schema(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+    rejectionReason: { type: String, default: null },
   },
   { timestamps: true }
 );

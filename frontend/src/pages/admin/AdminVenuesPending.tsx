@@ -14,6 +14,10 @@ const AdminVenuesPending = () => {
   const [error, setError] = useState(null);
   const [processingVenueId, setProcessingVenueId] = useState(null);
 
+  const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [venueToReject, setVenueToReject] = useState(null);
+
   const { listPendingVenues, updateVenueVerificationStatus } = useAuthStore();
 
   const [modalParent] = useAutoAnimate();
@@ -61,15 +65,30 @@ const AdminVenuesPending = () => {
     }
   };
 
-  const handleReject = async (venueId: any) => {
-    try {
-      setProcessingVenueId(venueId);
+  const openRejectionModal = (venue: any) => {
+    setVenueToReject(venue._id);
+    setRejectionReason("");
+    setIsRejectionModalOpen(true);
+  };
 
-      const result = await updateVenueVerificationStatus(venueId, "rejected");
+  const handleRejectWithReason = async () => {
+    if (!venueToReject) return;
+
+    try {
+      setProcessingVenueId(venueToReject);
+
+      const result = await updateVenueVerificationStatus(
+        venueToReject,
+        "rejected",
+        rejectionReason.trim() || ""
+      );
 
       notifySuccess(result.message || "Venue rejected successfully");
 
-      setVenues(venues.filter((venue: any) => venue._id !== venueId));
+      setVenues(venues.filter((venue: any) => venue._id !== venueToReject));
+      setIsRejectionModalOpen(false);
+      setVenueToReject(null);
+      setRejectionReason("");
     } catch (err) {
       notifyError("Failed to reject venue");
     } finally {
@@ -234,7 +253,7 @@ const AdminVenuesPending = () => {
                                 : "Accept"}
                             </button>
                             <button
-                              onClick={() => handleReject(venue._id)}
+                              onClick={() => openRejectionModal(venue)}
                               disabled={processingVenueId === venue._id}
                               className={`px-3 py-1.5 ${
                                 processingVenueId === venue._id
@@ -327,6 +346,67 @@ const AdminVenuesPending = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isRejectionModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 max-w-lg w-full mx-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Reject Venue
+                  </h3>
+                  <button
+                    onClick={() => setIsRejectionModalOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 transition duration-150 cursor-pointer"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="mb-6">
+                  <label
+                    htmlFor="rejectionReason"
+                    className="block mb-2 text-sm font-medium text-gray-700"
+                  >
+                    Reason for rejection
+                  </label>
+                  <textarea
+                    id="rejectionReason"
+                    rows={4}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Please provide a reason for rejecting this venue..."
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    This reason will be shared with the venue owner to help them
+                    understand why their venue was rejected.
+                  </p>
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setIsRejectionModalOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-150 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRejectWithReason}
+                    disabled={processingVenueId !== null}
+                    className={`px-4 py-2 text-sm font-medium text-white rounded-lg cursor-pointer ${
+                      processingVenueId !== null
+                        ? "bg-gray-400"
+                        : "bg-red-500 hover:bg-red-600"
+                    } transition duration-150`}
+                  >
+                    {processingVenueId !== null
+                      ? "Processing..."
+                      : "Reject Venue"}
+                  </button>
                 </div>
               </div>
             </div>

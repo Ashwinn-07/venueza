@@ -271,7 +271,8 @@ class AdminService implements IAdminService {
     };
   }
   async rejectVenue(
-    venueId: string
+    venueId: string,
+    rejectionReason?: string
   ): Promise<{ message: string; status: number; venue: IVenue }> {
     const venue = await venueRepository.findById(venueId);
     if (!venue) {
@@ -280,9 +281,15 @@ class AdminService implements IAdminService {
     if (venue.verificationStatus !== "pending") {
       throw new Error("venue not pending for approval");
     }
-    const updatedVenue = await venueRepository.update(venueId, {
+    const updateData: Partial<IVenue> = {
       verificationStatus: "rejected",
-    });
+    };
+
+    if (rejectionReason) {
+      updateData.rejectionReason = rejectionReason;
+    }
+
+    const updatedVenue = await venueRepository.update(venueId, updateData);
     if (!updatedVenue) {
       throw new Error("could not reject venue");
     }
