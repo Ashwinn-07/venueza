@@ -41,7 +41,18 @@ const venueSchema: Schema = new Schema(
     capacity: { type: Number, required: true },
     price: { type: Number, required: true },
     images: { type: [String], default: [] },
-    services: { type: [String], default: [] },
+    services: {
+      type: [String],
+      enum: [
+        "Catering",
+        "Decoration",
+        "Photography",
+        "Sound",
+        "Lighting",
+        "Security",
+      ],
+      default: [],
+    },
     documents: { type: [String], default: [] },
     status: { type: String, enum: ["open", "closed"], default: "closed" },
     verificationStatus: {

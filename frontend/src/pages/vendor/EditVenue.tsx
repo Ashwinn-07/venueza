@@ -10,14 +10,24 @@ const EditVenue = () => {
   const { id } = useParams();
   const { getVenue, updateVenue } = useAuthStore();
 
+  const availableServices = [
+    "Catering",
+    "Decoration",
+    "Photography",
+    "Sound",
+    "Lighting",
+    "Security",
+  ];
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
-    services: "",
     pricing: "",
     capacity: "",
     status: "open",
   });
+
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   const [coordinates, setCoordinates] = useState({
     lat: 40.7128,
@@ -47,11 +57,14 @@ const EditVenue = () => {
           setFormData({
             name: venueData.name || "",
             address: venueData.address || "",
-            services: venueData.services ? venueData.services.join(", ") : "",
             pricing: venueData.price?.toString() || "",
             capacity: venueData.capacity?.toString() || "",
             status: venueData.status || "open",
           });
+
+          if (venueData.services && Array.isArray(venueData.services)) {
+            setSelectedServices(venueData.services);
+          }
 
           if (venueData.location?.coordinates) {
             setCoordinates({
@@ -148,6 +161,16 @@ const EditVenue = () => {
     setFormData((prev) => ({ ...prev, address }));
   };
 
+  const toggleService = (service: string) => {
+    setSelectedServices((prev) => {
+      if (prev.includes(service)) {
+        return prev.filter((s) => s !== service);
+      } else {
+        return [...prev, service];
+      }
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -179,7 +202,7 @@ const EditVenue = () => {
         id,
         name: formData.name,
         address: formData.address,
-        services: formData.services.split(",").map((s) => s.trim()),
+        services: selectedServices,
         price: Number(formData.pricing),
         capacity: Number(formData.capacity),
         location: {
@@ -512,7 +535,6 @@ const EditVenue = () => {
               required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Capacity
@@ -532,44 +554,44 @@ const EditVenue = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Services (comma separated)
+            Services
           </label>
-          <input
-            type="text"
-            name="services"
-            value={formData.services}
-            onChange={(e) =>
-              setFormData({ ...formData, services: e.target.value })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g. Catering, Decoration, Photography"
-          />
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {availableServices.map((service) => (
+              <div key={service} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`service-${service}`}
+                  checked={selectedServices.includes(service)}
+                  onChange={() => toggleService(service)}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                />
+                <label
+                  htmlFor={`service-${service}`}
+                  className="ml-2 text-sm text-gray-700 cursor-pointer"
+                >
+                  {service}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Venue Status
+            Status
           </label>
-          <div className="flex gap-4">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                checked={formData.status === "open"}
-                onChange={() => setFormData({ ...formData, status: "open" })}
-                className="mr-2"
-              />
-              Open for bookings
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                checked={formData.status === "closed"}
-                onChange={() => setFormData({ ...formData, status: "closed" })}
-                className="mr-2"
-              />
-              Closed
-            </label>
-          </div>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={(e) =>
+              setFormData({ ...formData, status: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+          </select>
         </div>
 
         <button
