@@ -8,7 +8,7 @@ import {
   isValidPassword,
   isValidPhone,
 } from "../../utils/validators";
-import { authService } from "../../services/api";
+import { authService } from "../../services/authService";
 import { useAnimation } from "../../utils/animation";
 
 const UserSignup = () => {

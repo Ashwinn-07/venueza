@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidEmail } from "../../utils/validators";
-import { authService } from "../../services/api";
+import { authService } from "../../services/authService";
 import { useAnimation } from "../../utils/animation";
 
 const UserLogin = () => {

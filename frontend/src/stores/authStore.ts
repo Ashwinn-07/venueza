@@ -5,7 +5,7 @@ import {
   authService,
   userService,
   vendorService,
-} from "../services/api";
+} from "../services";
 
 type AuthType = "user" | "vendor" | "admin";
 
