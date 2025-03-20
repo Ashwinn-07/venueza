@@ -4,6 +4,7 @@ import LocationPicker from "../../components/maps/LocationPicker";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
 import { useAuthStore } from "../../stores/authStore";
 import { notifyError, notifySuccess } from "../../utils/notifications";
+import { validateVenueForm } from "../../utils/validateVenueForm";
 
 const AddVenue = () => {
   const navigate = useNavigate();
@@ -37,12 +38,22 @@ const AddVenue = () => {
   const [documents, setDocuments] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       setImages((prev) => [...prev, ...newFiles]);
       const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
       setImagePreviews((prev) => [...prev, ...newPreviews]);
+
+      if (errors.images) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.images;
+          return newErrors;
+        });
+      }
     }
   };
 
@@ -51,6 +62,14 @@ const AddVenue = () => {
     if (!files) return;
 
     setDocuments((prev) => [...prev, ...Array.from(files)]);
+
+    if (errors.documents) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.documents;
+        return newErrors;
+      });
+    }
   };
 
   const removeImage = (index: number) => {
@@ -81,6 +100,14 @@ const AddVenue = () => {
   ) => {
     setCoordinates(coords);
     setFormData((prev) => ({ ...prev, address }));
+
+    if (errors.address) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.address;
+        return newErrors;
+      });
+    }
   };
 
   const toggleService = (service: string) => {
@@ -88,13 +115,52 @@ const AddVenue = () => {
       if (prev.includes(service)) {
         return prev.filter((s) => s !== service);
       } else {
-        return [...prev, service];
+        const newServices = [...prev, service];
+
+        if (newServices.length > 0 && errors.services) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors.services;
+            return newErrors;
+          });
+        }
+
+        return newServices;
       }
     });
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = validateVenueForm(
+      formData,
+      images,
+      [],
+      documents,
+      [],
+      selectedServices
+    );
+
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+
+      window.scrollTo(0, 0);
+      return;
+    }
 
     try {
       const imageUrls = await Promise.all(
@@ -130,6 +196,12 @@ const AddVenue = () => {
     }
   };
 
+  const renderError = (field: string) => {
+    return errors[field] ? (
+      <p className="text-red-500 text-xs mt-1">{errors[field]}</p>
+    ) : null;
+  };
+
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -142,6 +214,12 @@ const AddVenue = () => {
         </button>
       </div>
 
+      {Object.keys(errors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-4">
+          Please fix the errors below before submitting.
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -151,10 +229,14 @@ const AddVenue = () => {
             type="text"
             name="name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border ${
+              errors.name ? "border-red-300" : "border-gray-300"
+            } rounded-lg focus:outline-none focus:ring-2 ${
+              errors.name ? "focus:ring-red-500" : "focus:ring-blue-500"
+            }`}
           />
+          {renderError("name")}
         </div>
 
         <div>
@@ -171,13 +253,18 @@ const AddVenue = () => {
             Coordinates: {coordinates.lat.toFixed(6)},{" "}
             {coordinates.lng.toFixed(6)}
           </div>
+          {renderError("address")}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Venue Images
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+          <div
+            className={`border-2 border-dashed ${
+              errors.images ? "border-red-300" : "border-gray-300"
+            } rounded-lg p-4 text-center`}
+          >
             <input
               type="file"
               multiple
@@ -207,6 +294,7 @@ const AddVenue = () => {
               <p className="text-xs text-gray-400">JPG, PNG, or GIF</p>
             </label>
           </div>
+          {renderError("images")}
           {imagePreviews.length > 0 && (
             <div className="mt-4 grid grid-cols-3 gap-4">
               {imagePreviews.map((preview, index) => (
@@ -246,7 +334,11 @@ const AddVenue = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Venue Documents
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+          <div
+            className={`border-2 border-dashed ${
+              errors.documents ? "border-red-300" : "border-gray-300"
+            } rounded-lg p-4 text-center`}
+          >
             <input
               type="file"
               multiple
@@ -276,6 +368,7 @@ const AddVenue = () => {
               <p className="text-xs text-gray-400">PDF, DOC, or IMAGES</p>
             </label>
           </div>
+          {renderError("documents")}
           {documents.length > 0 && (
             <div className="mt-4 space-y-2">
               {documents.map((doc, index) => (
@@ -337,12 +430,14 @@ const AddVenue = () => {
               type="number"
               name="pricing"
               value={formData.pricing}
-              onChange={(e) =>
-                setFormData({ ...formData, pricing: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border ${
+                errors.pricing ? "border-red-300" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                errors.pricing ? "focus:ring-red-500" : "focus:ring-blue-500"
+              }`}
             />
+            {renderError("pricing")}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -352,12 +447,14 @@ const AddVenue = () => {
               type="number"
               name="capacity"
               value={formData.capacity}
-              onChange={(e) =>
-                setFormData({ ...formData, capacity: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border ${
+                errors.capacity ? "border-red-300" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 ${
+                errors.capacity ? "focus:ring-red-500" : "focus:ring-blue-500"
+              }`}
             />
+            {renderError("capacity")}
           </div>
         </div>
 
@@ -373,7 +470,9 @@ const AddVenue = () => {
                   id={`service-${service}`}
                   checked={selectedServices.includes(service)}
                   onChange={() => toggleService(service)}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                  className={`h-4 w-4 ${
+                    errors.services ? "text-red-600" : "text-blue-600"
+                  } border-gray-300 rounded focus:ring-blue-500 cursor-pointer`}
                 />
                 <label
                   htmlFor={`service-${service}`}
@@ -384,6 +483,7 @@ const AddVenue = () => {
               </div>
             ))}
           </div>
+          {renderError("services")}
         </div>
 
         <button
