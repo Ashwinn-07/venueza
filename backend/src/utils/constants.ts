@@ -29,6 +29,9 @@ export const MESSAGES = {
     VENUE_CREATED: "Venue added successfully",
     VENUE_UPDATED: "Venue updated successfully",
     VENUE_FETCHED: "Venues fetched successfully",
+    BOOKING_FETCHED: "Booking fetched successfully",
+    BOOKING_CREATED: "Booking created successfully",
+    PAYMENT_VERIFIED: "Payment verified and booking confirmed",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",

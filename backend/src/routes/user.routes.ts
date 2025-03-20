@@ -3,6 +3,7 @@ import userController from "../controllers/user.controller";
 import passport from "../config/passport";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import venueController from "../controllers/venue.controller";
+import bookingController from "../controllers/booking.controller";
 
 const userRoutes = Router();
 
@@ -53,6 +54,21 @@ userRoutes.get(
   "/venues/:id",
   authMiddleware(["user"]),
   venueController.getVenue
+);
+userRoutes.post(
+  "/bookings",
+  authMiddleware(["user"]),
+  bookingController.createBooking
+);
+userRoutes.patch(
+  "/bookings/verify",
+  authMiddleware(["user"]),
+  bookingController.verifyPayment
+);
+userRoutes.get(
+  "/bookings/:id",
+  authMiddleware(["user"]),
+  bookingController.getBooking
 );
 
 export default userRoutes;
