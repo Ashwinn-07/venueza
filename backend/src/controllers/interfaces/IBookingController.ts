@@ -5,4 +5,5 @@ export interface IBookingController {
   verifyPayment(req: Request, res: Response): Promise<void>;
   getBooking(req: Request, res: Response): Promise<void>;
   getUserBookings(req: Request, res: Response): Promise<void>;
+  getBookedDatesForVenue(req: Request, res: Response): Promise<void>;
 }

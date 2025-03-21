@@ -110,6 +110,16 @@ class BookingService implements IBookingService {
       bookings,
     };
   }
+  async getBookedDatesForVenue(
+    venueId: string
+  ): Promise<{ startDate: Date; endDate: Date }[]> {
+    const bookings = await bookingRepository.findByVenue(venueId);
+
+    return bookings.map((booking) => ({
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+    }));
+  }
 }
 
 export default new BookingService();

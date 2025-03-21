@@ -22,4 +22,7 @@ export interface IBookingService {
   getBookingsByUserId(
     userId: string
   ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
+  getBookedDatesForVenue(
+    venueId: string
+  ): Promise<{ startDate: Date; endDate: Date }[]>;
 }

@@ -79,6 +79,24 @@ class BookingController implements IBookingController {
       });
     }
   }
+  async getBookedDatesForVenue(req: Request, res: Response): Promise<void> {
+    try {
+      const { venueId } = req.params;
+      const bookedDates = await bookingService.getBookedDatesForVenue(venueId);
+      res.status(STATUS_CODES.OK).json({
+        message: "Booked dates fetched successfully",
+        bookedDates,
+      });
+    } catch (error) {
+      console.error("Error fetching booked dates:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch booked dates",
+      });
+    }
+  }
 }
 
 export default new BookingController();

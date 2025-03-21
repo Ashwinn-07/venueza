@@ -39,4 +39,8 @@ export const bookingService = {
     const response = await userApi.get("/bookings");
     return response.data;
   },
+  getBookedDatesForVenue: async (venueId: string) => {
+    const response = await userApi.get(`/venues/${venueId}/booked-dates`);
+    return response.data;
+  },
 };

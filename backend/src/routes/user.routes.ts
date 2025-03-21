@@ -51,6 +51,12 @@ userRoutes.get(
   venueController.getAllVenues
 );
 userRoutes.get(
+  "/venues/:venueId/booked-dates",
+  authMiddleware(["user"]),
+  bookingController.getBookedDatesForVenue
+);
+
+userRoutes.get(
   "/venues/:id",
   authMiddleware(["user"]),
   venueController.getVenue
