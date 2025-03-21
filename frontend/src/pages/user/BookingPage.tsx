@@ -209,7 +209,7 @@ const BookingPage = () => {
                       onChange={handleStartDateChange}
                       excludeDates={excludedDates}
                       minDate={new Date()}
-                      dateFormat="yyyy-MM-dd"
+                      dateFormat="dd-MM-yyyy"
                       className="p-2 border rounded-md"
                     />
                   </div>
@@ -220,7 +220,7 @@ const BookingPage = () => {
                       onChange={handleEndDateChange}
                       excludeDates={excludedDates}
                       minDate={startDate}
-                      dateFormat="yyyy-MM-dd"
+                      dateFormat="dd-MM-yyyy"
                       className="p-2 border rounded-md"
                     />
                   </div>
