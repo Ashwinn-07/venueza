@@ -60,6 +60,8 @@ const AdminVenues = lazy(() => import("./pages/admin/AdminVenues"));
 const AdminVenuesPending = lazy(
   () => import("./pages/admin/AdminVenuesPending")
 );
+const BookingPage = lazy(() => import("./pages/user/BookingPage"));
+const PaymentPage = lazy(() => import("./pages/user/PaymentPage"));
 
 const App = () => {
   return (
@@ -232,6 +234,22 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <UserProfileSecurity />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/booking/:id"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <BookingPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/payment/:id"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <PaymentPage />
                 </Suspense>
               }
             />

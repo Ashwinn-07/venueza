@@ -10,9 +10,15 @@ import {
   AdminSlice,
   createVenueSlice,
   VenueSlice,
+  BookingSlice,
+  createBookingSlice,
 } from "./slices";
 
-export type AuthStore = AuthSlice & ProfileSlice & AdminSlice & VenueSlice;
+export type AuthStore = AuthSlice &
+  ProfileSlice &
+  AdminSlice &
+  VenueSlice &
+  BookingSlice;
 
 export const useAuthStore = create<AuthStore>()(
   persist(
@@ -21,6 +27,7 @@ export const useAuthStore = create<AuthStore>()(
       ...createProfileSlice(...a),
       ...createAdminSlice(...a),
       ...createVenueSlice(...a),
+      ...createBookingSlice(...a),
     }),
     {
       name: "auth-storage",

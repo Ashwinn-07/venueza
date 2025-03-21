@@ -36,7 +36,7 @@ class BookingService implements IBookingService {
       throw new Error("Failed to create booking");
     }
     const options = {
-      amount: advanceAmount * 100,
+      amount: Math.round(advanceAmount * 100),
       currency: "INR",
       receipt: `receipt_${booking._id}`,
     };
@@ -70,6 +70,7 @@ class BookingService implements IBookingService {
     if (generatedSignature != razorpaySignature) {
       throw new Error("Payment signature verification failed");
     }
+
     booking.status = "confirmed" as "confirmed";
     booking.advancePaid = true;
     booking.paymentId = paymentId;

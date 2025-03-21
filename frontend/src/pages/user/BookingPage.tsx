@@ -1,124 +1,174 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
 
 const BookingPage = () => {
-  // Mock venue data
-  const venue = {
-    id: "1",
-    name: "Grand Ballroom & Conference Center",
-    address: "123 Wedding Lane, New York, NY 10001",
-    photos: [
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    ],
-    pricing: 5000,
-    capacity: 250,
-    vendorName: "Elite Venues & Events",
-  };
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { getUserVenue, createBooking } = useAuthStore();
 
-  // Form state
+  const [venue, setVenue] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [totalPrice, setTotalPrice] = useState(venue.pricing);
-  const [advanceAmount, setAdvanceAmount] = useState(venue.pricing * 0.2);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [advanceAmount, setAdvanceAmount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Format date for display
-  // const formatDate = (date: any) => {
-  //   const options = { year: "numeric", month: "long", day: "numeric" };
-  //   return date.toLocaleDateString(undefined, options);
-  // };
+  useEffect(() => {
+    const fetchVenueData = async () => {
+      if (!id) return;
 
-  // Calculate price based on date range
-  const calculatePrice = (start: any, end: any) => {
+      try {
+        setLoading(true);
+        const response = await getUserVenue(id);
+
+        const venueData = response.result?.venue;
+        setVenue(venueData);
+        setTotalPrice(venueData.price || 0);
+        setAdvanceAmount((venueData.price || 0) * 0.2);
+      } catch (err) {
+        console.error("Error fetching venue:", err);
+        setError("Failed to load venue details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVenueData();
+  }, [id, getUserVenue]);
+
+  const calculatePrice = (start: Date, end: Date) => {
+    if (!venue || !venue.price) return;
+
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const days = diffDays > 0 ? diffDays : 1;
 
-    const calculatedTotal = venue.pricing * days;
+    const calculatedTotal = venue.price * days;
     setTotalPrice(calculatedTotal);
     setAdvanceAmount(calculatedTotal * 0.2);
   };
 
-  // Handle date changes
-  const handleStartDateChange = (e: any) => {
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = new Date(e.target.value);
     setStartDate(newDate);
     calculatePrice(newDate, endDate);
   };
 
-  const handleEndDateChange = (e: any) => {
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = new Date(e.target.value);
     setEndDate(newDate);
     calculatePrice(startDate, newDate);
   };
 
-  // Handle form submission
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Booking created successfully! Redirecting to confirmation page...");
+
+    if (!id || !venue) {
+      setError("Invalid venue information");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const bookingData = {
+        startDate,
+        endDate,
+        totalPrice,
+      };
+
+      const response = await createBooking(id, bookingData);
+
+      if (!response?.booking?._id) {
+        throw new Error("Invalid booking response from server");
+      }
+
+      navigate(`/user/payment/${response.booking._id}`);
+    } catch (err) {
+      console.error("Error creating booking:", err);
+      setError("Failed to create booking. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading venue details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (!venue) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Venue not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8">
-        {/* Header with navigation */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
-            <button className="p-2 border rounded hover:bg-gray-100">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-            </button>
             <h1 className="text-2xl font-bold text-gray-800">Book Venue</h1>
           </div>
         </div>
 
-        {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
-          {/* Left column - Venue summary */}
           <div className="lg:col-span-5">
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
               <div className="h-48 overflow-hidden">
-                <img
-                  src={venue.photos[0]}
-                  alt={venue.name}
-                  className="w-full h-full object-cover"
-                />
+                {venue.images && venue.images.length > 0 ? (
+                  <img
+                    src={venue.images[0]}
+                    alt={venue.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full bg-gray-200 flex items-center justify-center">
+                    <p className="text-gray-500">No images available</p>
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <h2 className="text-xl font-semibold mb-2">{venue.name}</h2>
-                <p className="text-gray-600 mb-4">{venue.address}</p>
+                <p className="text-gray-600 mb-4">
+                  {venue.address || "Address not available"}
+                </p>
 
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Price:</span>
                     <span className="font-medium">
-                      ${venue.pricing.toLocaleString()}/day
+                      ₹{venue.price || "N/A"}/day
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Capacity:</span>
-                    <span className="font-medium">{venue.capacity} people</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Vendor:</span>
-                    <span className="font-medium">{venue.vendorName}</span>
+                    <span className="font-medium">
+                      {venue.capacity || "N/A"} people
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right column - Booking form */}
           <div className="lg:col-span-7">
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
               <h2 className="text-xl font-semibold mb-6">Book {venue.name}</h2>
@@ -133,6 +183,7 @@ const BookingPage = () => {
                       onChange={handleStartDateChange}
                       className="p-2 border rounded-md"
                       min={new Date().toISOString().split("T")[0]}
+                      required
                     />
                   </div>
 
@@ -144,6 +195,7 @@ const BookingPage = () => {
                       onChange={handleEndDateChange}
                       className="p-2 border rounded-md"
                       min={startDate.toISOString().split("T")[0]}
+                      required
                     />
                   </div>
                 </div>
@@ -151,26 +203,22 @@ const BookingPage = () => {
                 <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Venue price per day:</span>
-                    <span className="font-medium">
-                      ${venue.pricing.toLocaleString()}
-                    </span>
+                    <span className="font-medium">₹{venue.price}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Total booking amount:</span>
-                    <span className="font-semibold">
-                      ${totalPrice.toLocaleString()}
-                    </span>
+                    <span className="font-semibold">₹{totalPrice}</span>
                   </div>
                   <div className="flex justify-between items-center border-t pt-3 border-dashed border-gray-300">
                     <span className="text-gray-600">Advance amount (20%):</span>
                     <span className="font-semibold text-blue-600">
-                      ${advanceAmount.toLocaleString()}
+                      ₹{advanceAmount}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Balance due at venue:</span>
                     <span className="font-semibold">
-                      ${(totalPrice - advanceAmount).toLocaleString()}
+                      ₹{totalPrice - advanceAmount}
                     </span>
                   </div>
                 </div>
@@ -178,9 +226,10 @@ const BookingPage = () => {
                 <div className="pt-4">
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                    className="w-full bg-[#2A9D8F] text-white py-2 px-4 rounded-md hover:bg-[#264653] transition-colors cursor-pointer"
+                    disabled={isSubmitting}
                   >
-                    Proceed to Payment
+                    {isSubmitting ? "Processing..." : "Proceed to Payment"}
                   </button>
                 </div>
               </form>

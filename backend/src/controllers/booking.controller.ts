@@ -49,6 +49,7 @@ class BookingController implements IBookingController {
   async getBooking(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+
       const result = await bookingService.getBookingById(id);
       res.status(result.status).json({
         message: result.message,

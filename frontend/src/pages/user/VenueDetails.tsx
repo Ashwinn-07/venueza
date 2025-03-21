@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Users,
   MapPin,
@@ -21,6 +21,7 @@ const VenueDetails = () => {
   const [venue, setVenue] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const [carousalRef] = useAnimation();
 
@@ -221,7 +222,10 @@ const VenueDetails = () => {
                   <MessageCircle className="w-5 h-5" />
                   <span>Chat with Vendor</span>
                 </button>
-                <button className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#2A9D8F] text-white rounded-md hover:bg-[#264653] transition-colors cursor-pointer">
+                <button
+                  onClick={() => navigate(`/user/booking/${id}`)}
+                  className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#2A9D8F] text-white rounded-md hover:bg-[#264653] transition-colors cursor-pointer"
+                >
                   <Calendar className="w-5 h-5" />
                   <span>Book Now</span>
                 </button>
