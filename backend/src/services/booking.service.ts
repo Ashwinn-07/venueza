@@ -17,6 +17,16 @@ class BookingService implements IBookingService {
     booking: IBooking;
     razorpayOrder: any;
   }> {
+    const conflictBooking = await bookingRepository.findOne({
+      venue: venueId,
+      startDate: { $lt: bookingData.endDate },
+      endDate: { $gt: bookingData.startDate },
+      status: { $ne: "cancelled" },
+    });
+    if (conflictBooking) {
+      throw new Error("The venue is already booked for the selected dates.");
+    }
+
     const advancePercentage = 20;
     const advanceAmount = (bookingData.totalPrice * advancePercentage) / 100;
     const balanceDue = bookingData.totalPrice - advanceAmount;
