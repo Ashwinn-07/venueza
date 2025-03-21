@@ -97,6 +97,19 @@ class BookingService implements IBookingService {
       booking,
     };
   }
+  async getBookingsByUserId(
+    userId: string
+  ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
+    const bookings = await bookingRepository.findByUser(userId);
+    if (!bookings) {
+      throw new Error("No bookings found for this user");
+    }
+    return {
+      message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+      status: STATUS_CODES.OK,
+      bookings,
+    };
+  }
 }
 
 export default new BookingService();

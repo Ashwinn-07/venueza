@@ -19,4 +19,7 @@ export interface IBookingService {
   getBookingById(
     bookingId: string
   ): Promise<{ message: string; status: number; booking: IBooking }>;
+  getBookingsByUserId(
+    userId: string
+  ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
 }

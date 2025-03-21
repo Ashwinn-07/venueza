@@ -70,5 +70,10 @@ userRoutes.get(
   authMiddleware(["user"]),
   bookingController.getBooking
 );
+userRoutes.get(
+  "/bookings",
+  authMiddleware(["user"]),
+  bookingController.getUserBookings
+);
 
 export default userRoutes;

@@ -63,6 +63,22 @@ class BookingController implements IBookingController {
       });
     }
   }
+  async getUserBookings(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).userId;
+      const result = await bookingService.getBookingsByUserId(userId);
+      res.status(result.status).json({
+        message: result.message,
+        bookings: result.bookings,
+      });
+    } catch (error) {
+      console.error("Get user bookings error:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to fetch bookings",
+      });
+    }
+  }
 }
 
 export default new BookingController();
