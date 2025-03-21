@@ -35,4 +35,8 @@ export const bookingService = {
     const response = await userApi.get(`/bookings/${bookingId}`);
     return response.data;
   },
+  getBookingsByUser: async () => {
+    const response = await userApi.get("/bookings");
+    return response.data;
+  },
 };

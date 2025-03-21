@@ -62,6 +62,7 @@ const AdminVenuesPending = lazy(
 );
 const BookingPage = lazy(() => import("./pages/user/BookingPage"));
 const PaymentPage = lazy(() => import("./pages/user/PaymentPage"));
+const UserBookings = lazy(() => import("./pages/user/UserBookings"));
 
 const App = () => {
   return (
@@ -234,6 +235,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <UserProfileSecurity />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/bookings"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <UserBookings />
                 </Suspense>
               }
             />

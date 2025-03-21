@@ -4,7 +4,6 @@ const UserProfileNavigation = () => {
   const location = useLocation();
   const basePath = "/user";
 
-  // Navigation items specifically for users
   const navItems = [
     { name: "Profile", path: `${basePath}/profile` },
     { name: "Security", path: `${basePath}/security` },
