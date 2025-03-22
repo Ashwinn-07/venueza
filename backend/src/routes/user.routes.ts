@@ -81,5 +81,15 @@ userRoutes.get(
   authMiddleware(["user"]),
   bookingController.getUserBookings
 );
+userRoutes.post(
+  "/bookings/balance",
+  authMiddleware(["user"]),
+  bookingController.createBalancePaymentOrder
+);
+userRoutes.patch(
+  "/bookings/balance/verify",
+  authMiddleware(["user"]),
+  bookingController.verifyBalancePayment
+);
 
 export default userRoutes;

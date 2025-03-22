@@ -39,10 +39,6 @@ const VendorBookingDetail = () => {
 
   const updateBookingStatus = async (newStatus: "confirmed" | "cancelled") => {
     try {
-      // This is a placeholder - you would need to implement this function in your authStore
-      // const response = await updateBookingStatus(bookingId, newStatus);
-
-      // For now, we'll just update the local state
       if (booking) {
         setBooking({ ...booking, status: newStatus });
       }
@@ -117,7 +113,6 @@ const VendorBookingDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Booking Summary */}
         <div className="bg-white rounded-lg shadow p-6 col-span-2">
           <h2 className="text-xl font-semibold mb-4">Booking Summary</h2>
 
@@ -185,7 +180,6 @@ const VendorBookingDetail = () => {
           </div>
         </div>
 
-        {/* Payment Information */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
 

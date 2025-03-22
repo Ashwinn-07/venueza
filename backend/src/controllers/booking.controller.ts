@@ -46,6 +46,47 @@ class BookingController implements IBookingController {
       });
     }
   }
+  async createBalancePaymentOrder(req: Request, res: Response): Promise<void> {
+    try {
+      const { bookingId } = req.body;
+      const result = await bookingService.createBalancePaymentOrder(bookingId);
+      res.status(result.status).json({
+        message: result.message,
+        booking: result.booking,
+        razorpayOrder: result.razorpayOrder,
+      });
+    } catch (error) {
+      console.error("Error creating balance payment order:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create balance payment order",
+      });
+    }
+  }
+  async verifyBalancePayment(req: Request, res: Response): Promise<void> {
+    try {
+      const { bookingId, paymentId, razorpaySignature } = req.body;
+      const result = await bookingService.verifyBalancePayment(
+        bookingId,
+        paymentId,
+        razorpaySignature
+      );
+      res.status(result.status).json({
+        message: result.message,
+        booking: result.booking,
+      });
+    } catch (error) {
+      console.error("Error verifying balance payment:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to verify balance payment",
+      });
+    }
+  }
   async getBooking(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

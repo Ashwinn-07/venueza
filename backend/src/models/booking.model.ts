@@ -10,9 +10,16 @@ export interface IBooking extends Document {
   advanceAmount: number;
   balanceDue: number;
   advancePaid: boolean;
-  status: "pending" | "confirmed" | "cancelled";
+  status:
+    | "pending"
+    | "advance_paid"
+    | "balance_pending"
+    | "fully_paid"
+    | "cancelled";
   razorpayOrderId?: string;
   paymentId?: string;
+  razorpayBalanceOrderId?: string;
+  balancePaymentId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,11 +36,19 @@ const bookingSchema: Schema = new Schema(
     advancePaid: { type: Boolean, default: false },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled"],
+      enum: [
+        "pending",
+        "advance_paid",
+        "balance_pending",
+        "fully_paid",
+        "cancelled",
+      ],
       default: "pending",
     },
     razorpayOrderId: { type: String, default: null },
     paymentId: { type: String, default: null },
+    razorpayBalanceOrderId: { type: String, default: null },
+    balancePaymentId: { type: String, default: null },
   },
   { timestamps: true }
 );

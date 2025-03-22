@@ -16,6 +16,17 @@ export interface IBookingService {
     paymentId: string,
     razorpaySignature: string
   ): Promise<{ message: string; status: number; booking: IBooking }>;
+  createBalancePaymentOrder(bookingId: string): Promise<{
+    message: string;
+    status: number;
+    booking: IBooking;
+    razorpayOrder: any;
+  }>;
+  verifyBalancePayment(
+    bookingId: string,
+    paymentId: string,
+    razorpaySignature: string
+  ): Promise<{ message: string; status: number; booking: IBooking }>;
   getBookingById(
     bookingId: string
   ): Promise<{ message: string; status: number; booking: IBooking }>;

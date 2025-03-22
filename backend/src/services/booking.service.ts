@@ -81,7 +81,7 @@ class BookingService implements IBookingService {
       throw new Error("Payment signature verification failed");
     }
 
-    booking.status = "confirmed" as "confirmed";
+    booking.status = "advance_paid" as any;
     booking.advancePaid = true;
     booking.paymentId = paymentId;
     const updatedBooking = await bookingRepository.update(bookingId, booking);
@@ -90,6 +90,72 @@ class BookingService implements IBookingService {
     }
     return {
       message: MESSAGES.SUCCESS.PAYMENT_VERIFIED,
+      status: STATUS_CODES.OK,
+      booking: updatedBooking,
+    };
+  }
+  async createBalancePaymentOrder(bookingId: string): Promise<{
+    message: string;
+    status: number;
+    booking: IBooking;
+    razorpayOrder: any;
+  }> {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new Error("No booking found");
+    }
+    if (booking.status !== "advance_paid") {
+      throw new Error(
+        "Advance payment not completed. Balance payment cannot be initiated."
+      );
+    }
+    const options = {
+      amount: Math.round(booking.balanceDue * 100),
+      currency: "INR",
+      receipt: `receipt_balance_${booking._id}`,
+    };
+    const order = await razorpayInstance.orders.create(options);
+    booking.razorpayBalanceOrderId = order.id;
+    booking.status = "balance_pending" as any;
+    await bookingRepository.update(booking._id.toString(), booking);
+    return {
+      message: "Balance payment order created successfully",
+      status: STATUS_CODES.OK,
+      booking,
+      razorpayOrder: order,
+    };
+  }
+  async verifyBalancePayment(
+    bookingId: string,
+    paymentId: string,
+    razorpaySignature: string
+  ): Promise<{ message: string; status: number; booking: IBooking }> {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new Error("No booking found");
+    }
+    if (booking.status !== "balance_pending") {
+      throw new Error("Balance payment not initiated or already processed");
+    }
+    const orderId = booking.razorpayBalanceOrderId;
+    if (!orderId) {
+      throw new Error("Balance order Id is missing");
+    }
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET?.trim() || "")
+      .update(orderId + "|" + paymentId)
+      .digest("hex");
+    if (generatedSignature != razorpaySignature) {
+      throw new Error("Balance payment signature verification failed");
+    }
+    booking.status = "fully_paid" as any;
+    booking.balancePaymentId = paymentId;
+    const updatedBooking = await bookingRepository.update(bookingId, booking);
+    if (!updatedBooking) {
+      throw new Error("Failed to update booking after balance payment");
+    }
+    return {
+      message: "Balance payment verified successfully",
       status: STATUS_CODES.OK,
       booking: updatedBooking,
     };

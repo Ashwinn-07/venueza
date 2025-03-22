@@ -39,10 +39,6 @@ const VendorBookingsList = () => {
     newStatus: "confirmed" | "cancelled"
   ) => {
     try {
-      // This is a placeholder - you would need to implement this function in your authStore
-      // const response = await updateBookingStatus(bookingId, newStatus);
-
-      // For now, we'll just update the local state
       setBookings((prevBookings) =>
         prevBookings.map((booking) =>
           booking._id === bookingId
