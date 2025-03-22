@@ -97,6 +97,22 @@ class BookingController implements IBookingController {
       });
     }
   }
+  async getBookingsByVendor(req: Request, res: Response): Promise<void> {
+    try {
+      const vendorId = (req as any).userId;
+      const result = await bookingService.getBookingsByVendorId(vendorId);
+      res.status(result.status).json({
+        message: result.message,
+        bookings: result.bookings,
+      });
+    } catch (error) {
+      console.error("Error fetching vendor bookings:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to fetch bookings",
+      });
+    }
+  }
 }
 
 export default new BookingController();

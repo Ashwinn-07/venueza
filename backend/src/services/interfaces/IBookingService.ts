@@ -25,4 +25,7 @@ export interface IBookingService {
   getBookedDatesForVenue(
     venueId: string
   ): Promise<{ startDate: Date; endDate: Date }[]>;
+  getBookingsByVendorId(
+    vendorId: string
+  ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
 }

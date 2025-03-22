@@ -130,6 +130,19 @@ class BookingService implements IBookingService {
       endDate: booking.endDate,
     }));
   }
+  async getBookingsByVendorId(
+    vendorId: string
+  ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
+    const bookings = await bookingRepository.findByVendor(vendorId);
+    if (!bookings) {
+      throw new Error("No bookings found");
+    }
+    return {
+      message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+      status: STATUS_CODES.OK,
+      bookings,
+    };
+  }
 }
 
 export default new BookingService();

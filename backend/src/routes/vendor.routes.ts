@@ -2,6 +2,7 @@ import { Router } from "express";
 import vendorController from "../controllers/vendor.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import venueController from "../controllers/venue.controller";
+import bookingController from "../controllers/booking.controller";
 
 const vendorRoutes = Router();
 
@@ -48,6 +49,11 @@ vendorRoutes.put(
   "/venues/:id",
   authMiddleware(["vendor"]),
   venueController.updateVenue
+);
+vendorRoutes.get(
+  "/bookings",
+  authMiddleware(["vendor"]),
+  bookingController.getBookingsByVendor
 );
 
 export default vendorRoutes;
