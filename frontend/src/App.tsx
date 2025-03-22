@@ -63,6 +63,12 @@ const AdminVenuesPending = lazy(
 const BookingPage = lazy(() => import("./pages/user/BookingPage"));
 const PaymentPage = lazy(() => import("./pages/user/PaymentPage"));
 const UserBookings = lazy(() => import("./pages/user/UserBookings"));
+const VendorBookingsList = lazy(
+  () => import("./pages/vendor/VendorBookingsList")
+);
+const VendorBookingDetail = lazy(
+  () => import("./pages/vendor/VendorBookingDetail")
+);
 
 const App = () => {
   return (
@@ -313,6 +319,22 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <EditVenue />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vendor/bookings"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorBookingsList />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vendor/bookings/:bookingId"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorBookingDetail />
                 </Suspense>
               }
             />

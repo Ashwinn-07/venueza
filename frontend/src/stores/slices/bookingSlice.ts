@@ -25,6 +25,7 @@ export interface BookingSlice {
 
   getBookingById: (bookingId: string) => Promise<any>;
   getBookingsByUser: () => Promise<any>;
+  getBookingsByVendor: () => Promise<any>;
   getBookedDatesForVenue: (venueId: string) => Promise<any>;
 }
 
@@ -83,6 +84,19 @@ export const createBookingSlice: StateCreator<
       }
 
       return await bookingService.getBookingsByUser();
+    } catch (error) {
+      console.error("Failed to get booking details", error);
+      throw error;
+    }
+  },
+  getBookingsByVendor: async () => {
+    try {
+      const { authType, isAuthenticated } = get();
+      if (!isAuthenticated || authType !== "vendor") {
+        throw new Error("Authentication required");
+      }
+
+      return await bookingService.getBookingsByVendor();
     } catch (error) {
       console.error("Failed to get booking details", error);
       throw error;

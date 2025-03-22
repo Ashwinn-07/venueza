@@ -1,4 +1,4 @@
-import { userApi } from "./api";
+import { userApi, vendorApi } from "./api";
 
 export const bookingService = {
   createBooking: async (
@@ -37,6 +37,10 @@ export const bookingService = {
   },
   getBookingsByUser: async () => {
     const response = await userApi.get("/bookings");
+    return response.data;
+  },
+  getBookingsByVendor: async () => {
+    const response = await vendorApi.get("/bookings");
     return response.data;
   },
   getBookedDatesForVenue: async (venueId: string) => {

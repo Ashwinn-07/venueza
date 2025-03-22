@@ -8,9 +8,9 @@ const VendorSidebar = () => {
   const menuItems = [
     { icon: "🏠", text: "Dashboard", path: "/vendor/dashboard" },
     { icon: "🏢", text: "Venue Management", path: "/vendor/venues" },
-    { icon: "📅", text: "Bookings Management", path: "/bookings" },
-    { icon: "💰", text: "Payments & Earnings", path: "/payments" },
-    { icon: "💬", text: "Messages", path: "/messages" },
+    { icon: "📅", text: "Bookings Management", path: "/vendor/bookings" },
+    { icon: "💰", text: "Payments & Earnings", path: "/vendor/payments" },
+    { icon: "💬", text: "Messages", path: "/vendor/messages" },
     { icon: "⚙️", text: "Settings", path: "/vendor/settings/profile" },
   ];
   const handleLogout = async () => {
