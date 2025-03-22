@@ -53,10 +53,6 @@ const UserBookings = () => {
     alert("Coming soon: Cancel booking functionality");
   };
 
-  const handleViewDetails = () => {
-    alert("Coming soon: Booking details view");
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -262,7 +258,11 @@ const UserBookings = () => {
 
                               {booking.status === "fully_paid" && (
                                 <button
-                                  onClick={() => handleViewDetails()}
+                                  onClick={() =>
+                                    navigate(
+                                      `/user/bookings/details/${booking._id}`
+                                    )
+                                  }
                                   className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"
                                 >
                                   View Details
