@@ -47,4 +47,22 @@ export const bookingService = {
     const response = await userApi.get(`/venues/${venueId}/booked-dates`);
     return response.data;
   },
+  createBalancePaymentOrder: async (bookingId: string) => {
+    const response = await userApi.post("/bookings/balance", { bookingId });
+    return response.data;
+  },
+  verifyBalancePayment: async (
+    bookingId: string,
+    paymentData: {
+      paymentId: string;
+      razorpaySignature: string;
+    }
+  ) => {
+    const response = await userApi.patch("/bookings/balance/verify", {
+      bookingId,
+      paymentId: paymentData.paymentId,
+      razorpaySignature: paymentData.razorpaySignature,
+    });
+    return response.data;
+  },
 };

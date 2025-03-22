@@ -69,6 +69,9 @@ const VendorBookingsList = lazy(
 const VendorBookingDetail = lazy(
   () => import("./pages/vendor/VendorBookingDetail")
 );
+const BalancePaymentPage = lazy(
+  () => import("./pages/user/BalancePaymentPage")
+);
 
 const App = () => {
   return (
@@ -265,6 +268,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <PaymentPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/bookings/balance/:id"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <BalancePaymentPage />
                 </Suspense>
               }
             />

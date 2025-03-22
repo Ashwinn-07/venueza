@@ -27,6 +27,14 @@ export interface BookingSlice {
   getBookingsByUser: () => Promise<any>;
   getBookingsByVendor: () => Promise<any>;
   getBookedDatesForVenue: (venueId: string) => Promise<any>;
+  createBalancePaymentOrder: (bookingId: string) => Promise<any>;
+  verifyBalancePayment: (
+    bookingId: string,
+    paymentData: {
+      paymentId: string;
+      razorpaySignature: string;
+    }
+  ) => Promise<any>;
 }
 
 export const createBookingSlice: StateCreator<
@@ -111,6 +119,30 @@ export const createBookingSlice: StateCreator<
       return await bookingService.getBookedDatesForVenue(venueId);
     } catch (error) {
       console.error("Failed to get booked dates", error);
+      throw error;
+    }
+  },
+  createBalancePaymentOrder: async (bookingId: string) => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "user") {
+        throw new Error("Authentication required");
+      }
+      return await bookingService.createBalancePaymentOrder(bookingId);
+    } catch (error) {
+      console.error("Failed to create balance payment order", error);
+      throw error;
+    }
+  },
+  verifyBalancePayment: async (bookingId: string, paymentData) => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "user") {
+        throw new Error("Authentication required");
+      }
+      return await bookingService.verifyBalancePayment(bookingId, paymentData);
+    } catch (error) {
+      console.error("Failed to verify balance payment", error);
       throw error;
     }
   },

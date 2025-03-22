@@ -148,6 +148,7 @@ class BookingService implements IBookingService {
     if (generatedSignature != razorpaySignature) {
       throw new Error("Balance payment signature verification failed");
     }
+    booking.balanceDue = 0;
     booking.status = "fully_paid" as any;
     booking.balancePaymentId = paymentId;
     const updatedBooking = await bookingRepository.update(bookingId, booking);

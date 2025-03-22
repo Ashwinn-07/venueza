@@ -34,13 +34,23 @@ const UserBookings = () => {
       setIsLoading(false);
     }
   };
+  const getStatusLabel = (status: any) => {
+    switch (status) {
+      case "fully_paid":
+        return "Fully Paid";
+      case "cancelled":
+        return "Cancelled";
+      case "pending":
+        return "Pending Payment";
+      case "partially_paid":
+        return "Partially Paid";
+      default:
+        return "Unknown Status";
+    }
+  };
 
   const handleCancelBooking = () => {
     alert("Coming soon: Cancel booking functionality");
-  };
-
-  const handlePayRemainder = () => {
-    alert("Coming soon: Payment functionality");
   };
 
   const handleViewDetails = () => {
@@ -156,15 +166,16 @@ const UserBookings = () => {
                           )}
                           <div
                             className={`absolute top-2 right-2 px-2 py-1 text-xs font-bold text-white rounded ${
-                              booking.status === "confirmed"
+                              booking.status === "fully_paid"
                                 ? "bg-green-500"
                                 : booking.status === "cancelled"
                                 ? "bg-red-500"
                                 : "bg-yellow-500"
                             }`}
                           >
-                            {booking.status.toUpperCase()}
+                            {getStatusLabel(booking.status)}
                           </div>
+                          ;
                         </div>
                         <div className="p-4 md:w-2/3">
                           <h3 className="text-xl font-semibold mb-2">
@@ -175,13 +186,17 @@ const UserBookings = () => {
                           </p>
                           <div className="grid grid-cols-2 gap-2 mb-4">
                             <div>
-                              <p className="text-sm text-gray-500">Check-in</p>
+                              <p className="text-sm text-gray-500">
+                                Event Start
+                              </p>
                               <p className="font-semibold">
                                 {formatDate(booking.startDate)}
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">Check-out</p>
+                              <p className="text-sm text-gray-500">
+                                Event Finish
+                              </p>
                               <p className="font-semibold">
                                 {formatDate(booking.endDate)}
                               </p>
@@ -234,13 +249,18 @@ const UserBookings = () => {
                                 booking.balanceDue > 0 &&
                                 booking.status !== "cancelled" && (
                                   <button
-                                    onClick={() => handlePayRemainder()}
+                                    onClick={() =>
+                                      navigate(
+                                        `/user/bookings/balance/${booking._id}`
+                                      )
+                                    }
                                     className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"
                                   >
                                     Pay Balance
                                   </button>
                                 )}
-                              {booking.status === "confirmed" && (
+
+                              {booking.status === "fully_paid" && (
                                 <button
                                   onClick={() => handleViewDetails()}
                                   className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"
