@@ -178,7 +178,7 @@ const UserBookings = () => {
                             {booking.venue.name}
                           </h3>
                           <p className="text-gray-600 mb-2">
-                            {booking.venue.location}
+                            {booking.venue.address}
                           </p>
                           <div className="grid grid-cols-2 gap-2 mb-4">
                             <div>

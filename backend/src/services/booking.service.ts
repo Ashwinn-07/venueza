@@ -164,7 +164,7 @@ class BookingService implements IBookingService {
   async getBookingById(
     bookingId: string
   ): Promise<{ message: string; status: number; booking: IBooking }> {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await bookingRepository.findByIdPopulated(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }

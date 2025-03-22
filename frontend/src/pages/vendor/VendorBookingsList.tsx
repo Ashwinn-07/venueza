@@ -16,6 +16,7 @@ const VendorBookingsList = () => {
       try {
         setIsLoading(true);
         const response = await getBookingsByVendor();
+        console.log("Vendor bookings response:", response);
         setBookings(response.bookings || []);
       } catch (err: any) {
         setError(err.message || "Failed to fetch bookings.");
@@ -27,34 +28,27 @@ const VendorBookingsList = () => {
     fetchBookings();
   }, [getBookingsByVendor]);
 
+  // Filter bookings by status
   const filteredBookings = bookings.filter((booking) => {
     if (filter === "pending") return booking.status === "pending";
-    if (filter === "confirmed") return booking.status === "confirmed";
+    if (filter === "advance_paid") return booking.status === "advance_paid";
+    if (filter === "balance_pending")
+      return booking.status === "balance_pending";
+    if (filter === "fully_paid" || filter === "confirmed")
+      return booking.status === "fully_paid" || booking.status === "confirmed";
     if (filter === "cancelled") return booking.status === "cancelled";
-    return true; // 'all' filter
+    return true;
   });
-
-  const updateBookingStatus = async (
-    bookingId: string,
-    newStatus: "confirmed" | "cancelled"
-  ) => {
-    try {
-      setBookings((prevBookings) =>
-        prevBookings.map((booking) =>
-          booking._id === bookingId
-            ? { ...booking, status: newStatus }
-            : booking
-        )
-      );
-    } catch (err: any) {
-      console.error("Error updating booking status:", err);
-    }
-  };
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "pending":
         return "bg-yellow-100 text-yellow-800";
+      case "advance_paid":
+        return "bg-blue-100 text-blue-800";
+      case "balance_pending":
+        return "bg-purple-100 text-purple-800";
+      case "fully_paid":
       case "confirmed":
         return "bg-green-100 text-green-800";
       case "cancelled":
@@ -102,11 +96,29 @@ const VendorBookingsList = () => {
         </button>
         <button
           className={`px-4 py-2 rounded cursor-pointer ${
-            filter === "confirmed" ? "bg-green-600 text-white" : "bg-gray-200"
+            filter === "advance_paid" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
-          onClick={() => setFilter("confirmed")}
+          onClick={() => setFilter("advance_paid")}
         >
-          Confirmed
+          Advance Paid
+        </button>
+        <button
+          className={`px-4 py-2 rounded cursor-pointer ${
+            filter === "balance_pending"
+              ? "bg-purple-600 text-white"
+              : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("balance_pending")}
+        >
+          Balance Pending
+        </button>
+        <button
+          className={`px-4 py-2 rounded cursor-pointer ${
+            filter === "fully_paid" ? "bg-green-600 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("fully_paid")}
+        >
+          Fully Paid
         </button>
         <button
           className={`px-4 py-2 rounded cursor-pointer ${
@@ -191,25 +203,25 @@ const VendorBookingsList = () => {
                         booking.status
                       )}`}
                     >
-                      {booking.status.charAt(0).toUpperCase() +
-                        booking.status.slice(1)}
+                      {booking.status
+                        .split("_")
+                        .map(
+                          (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+                        )
+                        .join(" ")}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {booking.status === "pending" && (
                       <div className="flex space-x-2">
                         <button
-                          onClick={() =>
-                            updateBookingStatus(booking._id, "confirmed")
-                          }
+                          onClick={() => alert("coming soon")}
                           className="text-green-600 hover:text-green-900 cursor-pointer"
                         >
                           Confirm
                         </button>
                         <button
-                          onClick={() =>
-                            updateBookingStatus(booking._id, "cancelled")
-                          }
+                          onClick={() => alert("coming soon")}
                           className="text-red-600 hover:text-red-900 cursor-pointer"
                         >
                           Cancel

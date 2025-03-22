@@ -12,17 +12,32 @@ class BookingRepository
   }
 
   async findByUser(userId: string): Promise<IBooking[]> {
-    return Booking.find({ user: userId }).exec();
+    return Booking.find({ user: userId })
+      .populate("venue")
+      .populate("user")
+      .exec();
   }
 
   async findByVenue(venueId: string): Promise<IBooking[]> {
-    return Booking.find({ venue: venueId }).exec();
+    return Booking.find({ venue: venueId })
+      .populate("venue")
+      .populate("user")
+      .exec();
   }
   async findByVendor(vendorId: string): Promise<IBooking[]> {
     const venues = await Venue.find({ vendor: vendorId }).select("_id").exec();
     const venueIds = venues.map((v: IVenue) => v._id);
 
-    return Booking.find({ venue: { $in: venueIds } }).exec();
+    return Booking.find({ venue: { $in: venueIds } })
+      .populate("venue")
+      .populate("user")
+      .exec();
+  }
+  async findByIdPopulated(bookingId: string): Promise<IBooking | null> {
+    return Booking.findById(bookingId)
+      .populate("venue")
+      .populate("user")
+      .exec();
   }
 }
 
