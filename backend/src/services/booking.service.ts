@@ -5,6 +5,7 @@ import { IBookingService } from "./interfaces/IBookingService";
 import { STATUS_CODES, MESSAGES } from "../utils/constants";
 import razorpayInstance from "../utils/razorpay";
 import mongoose from "mongoose";
+import blockedDateRepository from "../repositories/blockedDate.repository";
 
 class BookingService implements IBookingService {
   async createBooking(
@@ -191,11 +192,32 @@ class BookingService implements IBookingService {
     venueId: string
   ): Promise<{ startDate: Date; endDate: Date }[]> {
     const bookings = await bookingRepository.findByVenue(venueId);
-
-    return bookings.map((booking) => ({
+    const onlineDates = bookings.map((booking) => ({
       startDate: booking.startDate,
       endDate: booking.endDate,
     }));
+    const blockedDates = await blockedDateRepository.findBlockedDatesByVenue(
+      venueId
+    );
+    const offlineDates = blockedDates.map((block) => ({
+      startDate: block.startDate,
+      endDate: block.endDate,
+    }));
+
+    return [...onlineDates, ...offlineDates];
+  }
+  async addBlockedDateForVenue(
+    venueId: string,
+    data: { startDate: Date; endDate: Date; reason?: string }
+  ): Promise<{ message: string; blockedDate: any }> {
+    const blockedDate = await blockedDateRepository.createBlockedDate({
+      venue: venueId,
+      ...data,
+    });
+    return {
+      message: MESSAGES.SUCCESS.BLOCKED_DATE_ADDED,
+      blockedDate,
+    };
   }
   async getBookingsByVendorId(
     vendorId: string

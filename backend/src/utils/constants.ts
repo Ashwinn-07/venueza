@@ -33,6 +33,7 @@ export const MESSAGES = {
     BOOKING_CREATED: "Booking created successfully",
     PAYMENT_VERIFIED: "Payment verified and booking confirmed",
     BOOKING_DATES_FETCHED: "Booked dates fetched successfully",
+    BLOCKED_DATE_ADDED: "Blocked date added successfully",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",

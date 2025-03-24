@@ -50,6 +50,11 @@ vendorRoutes.put(
   authMiddleware(["vendor"]),
   venueController.updateVenue
 );
+vendorRoutes.post(
+  "/venues/block-dates",
+  authMiddleware(["vendor"]),
+  vendorController.addBlockedDate
+);
 vendorRoutes.get(
   "/bookings",
   authMiddleware(["vendor"]),

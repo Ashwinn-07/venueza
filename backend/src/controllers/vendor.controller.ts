@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import vendorService from "../services/vendor.service";
 import { IVendorController } from "./interfaces/IVendorController";
 import { STATUS_CODES } from "../utils/constants";
+import bookingService from "../services/booking.service";
 
 class VendorController implements IVendorController {
   async register(req: Request, res: Response): Promise<void> {
@@ -222,6 +223,30 @@ class VendorController implements IVendorController {
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error ? error.message : "Failed to upload documents",
+      });
+    }
+  }
+  async addBlockedDate(req: Request, res: Response): Promise<void> {
+    try {
+      const vendorId = (req as any).userId;
+      const { venueId, startDate, endDate, reason } = req.body;
+      if (!venueId || !startDate || !endDate) {
+        throw new Error("Missing required fields");
+      }
+      const result = await bookingService.addBlockedDateForVenue(venueId, {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        reason,
+      });
+      res.status(STATUS_CODES.OK).json({
+        message: result.message,
+        blockedDate: result.blockedDate,
+      });
+    } catch (error) {
+      console.error("Error adding blocked date:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to add blocked date",
       });
     }
   }

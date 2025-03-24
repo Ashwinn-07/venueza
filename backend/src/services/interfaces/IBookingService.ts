@@ -36,6 +36,10 @@ export interface IBookingService {
   getBookedDatesForVenue(
     venueId: string
   ): Promise<{ startDate: Date; endDate: Date }[]>;
+  addBlockedDateForVenue(
+    venueId: string,
+    data: { startDate: Date; endDate: Date; reason?: string }
+  ): Promise<{ message: string; blockedDate: any }>;
   getBookingsByVendorId(
     vendorId: string
   ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
