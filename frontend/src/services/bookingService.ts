@@ -82,4 +82,8 @@ export const bookingService = {
     const response = await adminApi.get("/revenue");
     return response.data;
   },
+  getVendorRevenue: async () => {
+    const response = await vendorApi.get("/revenue");
+    return response.data;
+  },
 };

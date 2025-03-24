@@ -53,4 +53,9 @@ export interface IBookingService {
     status: number;
     revenue: number;
   }>;
+  getVendorRevenue(vendorId: string): Promise<{
+    message: string;
+    status: number;
+    revenue: number;
+  }>;
 }

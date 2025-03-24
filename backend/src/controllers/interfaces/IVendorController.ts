@@ -12,4 +12,5 @@ export interface IVendorController {
   changeVendorPassword(req: Request, res: Response): Promise<void>;
   uploadDocuments(req: Request, res: Response): Promise<void>;
   addBlockedDate(req: Request, res: Response): Promise<void>;
+  getVendorRevenue(req: Request, res: Response): Promise<void>;
 }

@@ -8,4 +8,5 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   findByIdPopulated(bookingId: string): Promise<IBooking | null>;
   findAll(): Promise<IBooking[]>;
   getTotalCommission(): Promise<number>;
+  getVendorRevenue(vendorId: string): Promise<number>;
 }

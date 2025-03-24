@@ -50,6 +50,27 @@ class BookingRepository
     ]);
     return result.length > 0 ? result[0].totalCommission : 0;
   }
+  async getVendorRevenue(vendorId: string): Promise<number> {
+    const venues = await Venue.find({ vendor: vendorId }).select("_id").exec();
+    const venueIds = venues.map((v: IVenue) => v._id);
+
+    const result = await Booking.aggregate([
+      {
+        $match: {
+          venue: { $in: venueIds },
+          status: { $in: ["fully_paid", "confirmed"] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalVendorRevenue: { $sum: "$vendorReceives" },
+        },
+      },
+    ]);
+
+    return result.length > 0 ? result[0].totalVendorRevenue : 0;
+  }
 }
 
 export default new BookingRepository();

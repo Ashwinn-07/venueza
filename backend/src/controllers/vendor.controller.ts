@@ -250,6 +250,25 @@ class VendorController implements IVendorController {
       });
     }
   }
+  async getVendorRevenue(req: Request, res: Response): Promise<void> {
+    try {
+      const vendorId = (req as any).userId;
+      if (!vendorId) {
+        throw new Error("Vendor ID is missing");
+      }
+      const result = await bookingService.getVendorRevenue(vendorId);
+      res.status(result.status).json({
+        message: result.message,
+        revenue: result.revenue,
+      });
+    } catch (error) {
+      console.error("Error fetching vendor revenue:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to fetch revenue",
+      });
+    }
+  }
 }
 
 export default new VendorController();

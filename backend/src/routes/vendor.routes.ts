@@ -60,5 +60,10 @@ vendorRoutes.get(
   authMiddleware(["vendor"]),
   bookingController.getBookingsByVendor
 );
+vendorRoutes.get(
+  "/revenue",
+  authMiddleware(["vendor"]),
+  vendorController.getVendorRevenue
+);
 
 export default vendorRoutes;
