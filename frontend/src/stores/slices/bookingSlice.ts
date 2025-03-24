@@ -41,6 +41,7 @@ export interface BookingSlice {
       razorpaySignature: string;
     }
   ) => Promise<any>;
+  getAllBookings: () => Promise<any>;
 }
 
 export const createBookingSlice: StateCreator<
@@ -161,6 +162,18 @@ export const createBookingSlice: StateCreator<
       return await bookingService.verifyBalancePayment(bookingId, paymentData);
     } catch (error) {
       console.error("Failed to verify balance payment", error);
+      throw error;
+    }
+  },
+  getAllBookings: async () => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "admin") {
+        throw new Error("Authentication required");
+      }
+      return await bookingService.getAllBookings();
+    } catch (error) {
+      console.error("Failed to fetch admin bookings", error);
       throw error;
     }
   },

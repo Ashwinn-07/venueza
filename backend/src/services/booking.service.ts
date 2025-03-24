@@ -237,7 +237,7 @@ class BookingService implements IBookingService {
     status: number;
     bookings: IBooking[];
   }> {
-    const bookings = await bookingRepository.find({});
+    const bookings = await bookingRepository.findAll();
     if (!bookings || bookings.length === 0) {
       throw new Error("No bookings found");
     }

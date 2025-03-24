@@ -1,4 +1,4 @@
-import { userApi, vendorApi } from "./api";
+import { adminApi, userApi, vendorApi } from "./api";
 
 export const bookingService = {
   createBooking: async (
@@ -72,6 +72,10 @@ export const bookingService = {
       paymentId: paymentData.paymentId,
       razorpaySignature: paymentData.razorpaySignature,
     });
+    return response.data;
+  },
+  getAllBookings: async () => {
+    const response = await adminApi.get("/bookings");
     return response.data;
   },
 };
