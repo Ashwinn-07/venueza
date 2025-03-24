@@ -269,6 +269,27 @@ class VendorController implements IVendorController {
       });
     }
   }
+  async getDashboardData(req: Request, res: Response): Promise<void> {
+    try {
+      const vendorId = (req as any).userId;
+      if (!vendorId) {
+        throw new Error("Vendor ID is missing");
+      }
+      const result = await bookingService.getDashboardDataForVendor(vendorId);
+      res.status(result.status).json({
+        message: result.message,
+        dashboardData: result.dashboardData,
+      });
+    } catch (error) {
+      console.error("Error fetching vendor dashboard data:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vendor dashboard data",
+      });
+    }
+  }
 }
 
 export default new VendorController();

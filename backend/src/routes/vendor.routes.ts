@@ -65,5 +65,10 @@ vendorRoutes.get(
   authMiddleware(["vendor"]),
   vendorController.getVendorRevenue
 );
+vendorRoutes.get(
+  "/dashboard",
+  authMiddleware(["vendor"]),
+  vendorController.getDashboardData
+);
 
 export default vendorRoutes;

@@ -13,4 +13,5 @@ export interface IVendorController {
   uploadDocuments(req: Request, res: Response): Promise<void>;
   addBlockedDate(req: Request, res: Response): Promise<void>;
   getVendorRevenue(req: Request, res: Response): Promise<void>;
+  getDashboardData(req: Request, res: Response): Promise<void>;
 }

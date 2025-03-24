@@ -58,4 +58,14 @@ export interface IBookingService {
     status: number;
     revenue: { month: number; revenue: number }[];
   }>;
+  getDashboardDataForVendor(vendorId: string): Promise<{
+    message: string;
+    status: number;
+    dashboardData: {
+      totalBookings: number;
+      vendorRevenue: number;
+      upcomingBookings: number;
+      monthlyRevenue: { month: number; revenue: number }[];
+    };
+  }>;
 }

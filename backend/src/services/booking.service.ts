@@ -279,6 +279,37 @@ class BookingService implements IBookingService {
       revenue,
     };
   }
+  async getDashboardDataForVendor(vendorId: string): Promise<{
+    message: string;
+    status: number;
+    dashboardData: {
+      totalBookings: number;
+      vendorRevenue: number;
+      upcomingBookings: number;
+      monthlyRevenue: { month: number; revenue: number }[];
+    };
+  }> {
+    const bookings = await bookingRepository.findByVendor(vendorId);
+    const totalBookings = bookings.length;
+    const vendorRevenue = bookings.reduce((sum: any, booking: any) => {
+      return sum + (booking.vendorReceives || 0);
+    }, 0);
+    const now = new Date();
+    const upcomingBookings = bookings.filter(
+      (booking: any) => new Date(booking.startDate) > now
+    ).length;
+    const monthlyRevenue = await bookingRepository.getVendorRevenue(vendorId);
+    return {
+      message: "Vendor dashboard data fetched successfully",
+      status: STATUS_CODES.OK,
+      dashboardData: {
+        totalBookings,
+        vendorRevenue,
+        upcomingBookings,
+        monthlyRevenue,
+      },
+    };
+  }
 }
 
 export default new BookingService();
