@@ -3,6 +3,7 @@ import adminService from "../services/admin.service";
 import { IAdminController } from "./interfaces/IAdminController";
 import { STATUS_CODES } from "../utils/constants";
 import vendorRepository from "../repositories/vendor.repository";
+import bookingService from "../services/booking.service";
 
 class AdminController implements IAdminController {
   async login(req: Request, res: Response): Promise<void> {
@@ -227,6 +228,21 @@ class AdminController implements IAdminController {
           error instanceof Error
             ? error.message
             : "Failed to update venue verification status",
+      });
+    }
+  }
+  async getAllBookings(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await bookingService.getAllBookings();
+      res.status(result.status).json({
+        message: result.message,
+        bookings: result.bookings,
+      });
+    } catch (error) {
+      console.error("Error fetching all bookings:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to fetch bookings",
       });
     }
   }

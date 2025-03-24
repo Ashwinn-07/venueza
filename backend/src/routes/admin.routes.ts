@@ -48,4 +48,9 @@ adminRoutes.patch(
   authMiddleware(["admin"]),
   adminController.updateVenueVerificationStatus
 );
+adminRoutes.get(
+  "/bookings",
+  authMiddleware(["admin"]),
+  adminController.getAllBookings
+);
 export default adminRoutes;

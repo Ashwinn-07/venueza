@@ -43,4 +43,9 @@ export interface IBookingService {
   getBookingsByVendorId(
     vendorId: string
   ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
+  getAllBookings(): Promise<{
+    message: string;
+    status: number;
+    bookings: IBooking[];
+  }>;
 }

@@ -232,6 +232,21 @@ class BookingService implements IBookingService {
       bookings,
     };
   }
+  async getAllBookings(): Promise<{
+    message: string;
+    status: number;
+    bookings: IBooking[];
+  }> {
+    const bookings = await bookingRepository.find({});
+    if (!bookings || bookings.length === 0) {
+      throw new Error("No bookings found");
+    }
+    return {
+      message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+      status: STATUS_CODES.OK,
+      bookings,
+    };
+  }
 }
 
 export default new BookingService();

@@ -12,4 +12,5 @@ export interface IAdminController {
   updateVendorStatus(req: Request, res: Response): Promise<void>;
   updateUserStatus(req: Request, res: Response): Promise<void>;
   updateVenueVerificationStatus(req: Request, res: Response): Promise<void>;
+  getAllBookings(req: Request, res: Response): Promise<void>;
 }
