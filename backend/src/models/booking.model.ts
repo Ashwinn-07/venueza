@@ -20,6 +20,8 @@ export interface IBooking extends Document {
   paymentId?: string;
   razorpayBalanceOrderId?: string;
   balancePaymentId?: string;
+  commissionAmount?: number;
+  vendorReceives?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +51,8 @@ const bookingSchema: Schema = new Schema(
     paymentId: { type: String, default: null },
     razorpayBalanceOrderId: { type: String, default: null },
     balancePaymentId: { type: String, default: null },
+    commissionAmount: { type: Number, default: 0 },
+    vendorReceives: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

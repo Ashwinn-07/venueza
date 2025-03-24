@@ -42,8 +42,8 @@ const UserBookings = () => {
         return "Cancelled";
       case "pending":
         return "Pending Payment";
-      case "partially_paid":
-        return "Partially Paid";
+      case "advance_paid":
+        return "Advance Paid";
       default:
         return "Unknown Status";
     }

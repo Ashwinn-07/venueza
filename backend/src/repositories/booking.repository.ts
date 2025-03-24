@@ -18,6 +18,7 @@ class BookingRepository
     return Booking.find({ user: userId })
       .populate("venue")
       .populate("user")
+      .sort({ createdAt: -1 })
       .exec();
   }
 

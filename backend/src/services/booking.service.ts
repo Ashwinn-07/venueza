@@ -149,6 +149,14 @@ class BookingService implements IBookingService {
     if (generatedSignature != razorpaySignature) {
       throw new Error("Balance payment signature verification failed");
     }
+
+    const commissionPercentage = 5;
+    const commissionAmount = booking.totalPrice * (commissionPercentage / 100);
+    const vendorReceives = booking.totalPrice - commissionAmount;
+
+    booking.commissionAmount = commissionAmount;
+    booking.vendorReceives = vendorReceives;
+
     booking.balanceDue = 0;
     booking.status = "fully_paid" as any;
     booking.balancePaymentId = paymentId;
