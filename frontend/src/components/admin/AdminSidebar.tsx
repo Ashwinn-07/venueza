@@ -91,6 +91,25 @@ const AdminSidebar = () => {
       text: "Bookings",
       path: "/admin/bookings",
     },
+    {
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V3z" />
+          <path
+            fillRule="evenodd"
+            d="M3 8a1 1 0 011-1h12a1 1 0 011 1v7a2 2 0 01-2 2H6a2 2 0 01-2-2V8zm2 2a1 1 0 000 2h10a1 1 0 100-2H5z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ),
+      text: "Revenue",
+      path: "/admin/revenue",
+    },
   ];
 
   const handleLogout = async () => {

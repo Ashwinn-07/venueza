@@ -77,6 +77,10 @@ const BookingDetailsPage = lazy(
 );
 const BlockDatesPage = lazy(() => import("./pages/vendor/BlockDatesPage"));
 const AdminBookingsPage = lazy(() => import("./pages/admin/AdminBookingsPage"));
+const VendorRevenuePage = lazy(
+  () => import("./pages/vendor/VendorRevenuePage")
+);
+const AdminRevenuePage = lazy(() => import("./pages/admin/AdminRevenuePage"));
 const App = () => {
   return (
     <BrowserRouter>
@@ -369,6 +373,14 @@ const App = () => {
                 </Suspense>
               }
             />
+            <Route
+              path="/vendor/revenue"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorRevenuePage />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
 
@@ -428,6 +440,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <AdminBookingsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/revenue"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <AdminRevenuePage />
                 </Suspense>
               }
             />

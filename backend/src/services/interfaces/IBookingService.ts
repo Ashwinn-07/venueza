@@ -51,11 +51,11 @@ export interface IBookingService {
   getAdminRevenue(): Promise<{
     message: string;
     status: number;
-    revenue: number;
+    revenue: { month: number; revenue: number }[];
   }>;
   getVendorRevenue(vendorId: string): Promise<{
     message: string;
     status: number;
-    revenue: number;
+    revenue: { month: number; revenue: number }[];
   }>;
 }

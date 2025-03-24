@@ -258,7 +258,7 @@ class BookingService implements IBookingService {
   async getAdminRevenue(): Promise<{
     message: string;
     status: number;
-    revenue: number;
+    revenue: { month: number; revenue: number }[];
   }> {
     const revenue = await bookingRepository.getTotalCommission();
     return {
@@ -267,9 +267,11 @@ class BookingService implements IBookingService {
       revenue,
     };
   }
-  async getVendorRevenue(
-    vendorId: string
-  ): Promise<{ message: string; status: number; revenue: number }> {
+  async getVendorRevenue(vendorId: string): Promise<{
+    message: string;
+    status: number;
+    revenue: { month: number; revenue: number }[];
+  }> {
     const revenue = await bookingRepository.getVendorRevenue(vendorId);
     return {
       message: MESSAGES.SUCCESS.REVENUE_FETCHED,

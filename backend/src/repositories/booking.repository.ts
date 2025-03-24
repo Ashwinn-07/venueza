@@ -43,14 +43,33 @@ class BookingRepository
       .populate("user")
       .exec();
   }
-  async getTotalCommission(): Promise<number> {
+  async getTotalCommission(): Promise<{ month: number; revenue: number }[]> {
     const result = await Booking.aggregate([
-      { $match: { status: { $in: ["fully_paid", "confirmed"] } } },
-      { $group: { _id: null, totalCommission: { $sum: "$commissionAmount" } } },
+      {
+        $match: { status: { $in: ["fully_paid", "confirmed"] } },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          revenue: { $sum: "$commissionAmount" },
+        },
+      },
+      {
+        $project: {
+          month: "$_id",
+          revenue: 1,
+          _id: 0,
+        },
+      },
+      {
+        $sort: { month: 1 },
+      },
     ]);
-    return result.length > 0 ? result[0].totalCommission : 0;
+    return result;
   }
-  async getVendorRevenue(vendorId: string): Promise<number> {
+  async getVendorRevenue(
+    vendorId: string
+  ): Promise<{ month: number; revenue: number }[]> {
     const venues = await Venue.find({ vendor: vendorId }).select("_id").exec();
     const venueIds = venues.map((v: IVenue) => v._id);
 
@@ -63,13 +82,21 @@ class BookingRepository
       },
       {
         $group: {
-          _id: null,
-          totalVendorRevenue: { $sum: "$vendorReceives" },
+          _id: { $month: "$createdAt" },
+          revenue: { $sum: "$vendorReceives" },
         },
       },
+      {
+        $project: {
+          month: "$_id",
+          revenue: 1,
+          _id: 0,
+        },
+      },
+      { $sort: { month: 1 } },
     ]);
 
-    return result.length > 0 ? result[0].totalVendorRevenue : 0;
+    return result;
   }
 }
 
