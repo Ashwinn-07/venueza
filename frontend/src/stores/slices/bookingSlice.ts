@@ -27,6 +27,12 @@ export interface BookingSlice {
   getBookingsByUser: () => Promise<any>;
   getBookingsByVendor: () => Promise<any>;
   getBookedDatesForVenue: (venueId: string) => Promise<any>;
+  addBlockedDateForVenue: (data: {
+    venueId: string;
+    startDate: Date;
+    endDate: Date;
+    reason?: string;
+  }) => Promise<any>;
   createBalancePaymentOrder: (bookingId: string) => Promise<any>;
   verifyBalancePayment: (
     bookingId: string,
@@ -119,6 +125,18 @@ export const createBookingSlice: StateCreator<
       return await bookingService.getBookedDatesForVenue(venueId);
     } catch (error) {
       console.error("Failed to get booked dates", error);
+      throw error;
+    }
+  },
+  addBlockedDateForVenue: async (data) => {
+    try {
+      const { authType, isAuthenticated } = get();
+      if (!isAuthenticated || authType !== "vendor") {
+        throw new Error("Authentication required");
+      }
+      return await bookingService.addBlockedDateForVenue(data);
+    } catch (error) {
+      console.error("Failed to add blocked date", error);
       throw error;
     }
   },

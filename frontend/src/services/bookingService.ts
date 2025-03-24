@@ -47,6 +47,15 @@ export const bookingService = {
     const response = await userApi.get(`/venues/${venueId}/booked-dates`);
     return response.data;
   },
+  addBlockedDateForVenue: async (data: {
+    venueId: string;
+    startDate: Date;
+    endDate: Date;
+    reason?: string;
+  }) => {
+    const response = await vendorApi.post("/venues/block-dates", data);
+    return response.data;
+  },
   createBalancePaymentOrder: async (bookingId: string) => {
     const response = await userApi.post("/bookings/balance", { bookingId });
     return response.data;

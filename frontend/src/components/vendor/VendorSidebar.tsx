@@ -12,6 +12,7 @@ const VendorSidebar = () => {
     { icon: "💰", text: "Payments & Earnings", path: "/vendor/payments" },
     { icon: "💬", text: "Messages", path: "/vendor/messages" },
     { icon: "⚙️", text: "Settings", path: "/vendor/settings/profile" },
+    { icon: "⛔", text: "Block Dates", path: "/vendor/venues/block-dates" },
   ];
   const handleLogout = async () => {
     try {
