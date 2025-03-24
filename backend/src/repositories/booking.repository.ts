@@ -43,6 +43,13 @@ class BookingRepository
       .populate("user")
       .exec();
   }
+  async getTotalCommission(): Promise<number> {
+    const result = await Booking.aggregate([
+      { $match: { status: { $in: ["fully_paid", "confirmed"] } } },
+      { $group: { _id: null, totalCommission: { $sum: "$commissionAmount" } } },
+    ]);
+    return result.length > 0 ? result[0].totalCommission : 0;
+  }
 }
 
 export default new BookingRepository();

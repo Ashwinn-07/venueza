@@ -53,4 +53,9 @@ adminRoutes.get(
   authMiddleware(["admin"]),
   adminController.getAllBookings
 );
+adminRoutes.get(
+  "/revenue",
+  authMiddleware(["admin"]),
+  adminController.getAdminRevenue
+);
 export default adminRoutes;

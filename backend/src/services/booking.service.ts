@@ -255,6 +255,18 @@ class BookingService implements IBookingService {
       bookings,
     };
   }
+  async getAdminRevenue(): Promise<{
+    message: string;
+    status: number;
+    revenue: number;
+  }> {
+    const revenue = await bookingRepository.getTotalCommission();
+    return {
+      message: MESSAGES.SUCCESS.REVENUE_FETCHED,
+      status: STATUS_CODES.OK,
+      revenue,
+    };
+  }
 }
 
 export default new BookingService();

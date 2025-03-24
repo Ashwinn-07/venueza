@@ -48,4 +48,9 @@ export interface IBookingService {
     status: number;
     bookings: IBooking[];
   }>;
+  getAdminRevenue(): Promise<{
+    message: string;
+    status: number;
+    revenue: number;
+  }>;
 }

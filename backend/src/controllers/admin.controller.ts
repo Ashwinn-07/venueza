@@ -246,6 +246,21 @@ class AdminController implements IAdminController {
       });
     }
   }
+  async getAdminRevenue(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await bookingService.getAdminRevenue();
+      res.status(result.status).json({
+        message: result.message,
+        revenue: result.revenue,
+      });
+    } catch (error) {
+      console.error("Error fetching admin revenue:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to fetch revenue",
+      });
+    }
+  }
 }
 
 export default new AdminController();

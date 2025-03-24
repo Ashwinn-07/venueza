@@ -42,6 +42,7 @@ export interface BookingSlice {
     }
   ) => Promise<any>;
   getAllBookings: () => Promise<any>;
+  getAdminRevenue: () => Promise<any>;
 }
 
 export const createBookingSlice: StateCreator<
@@ -174,6 +175,18 @@ export const createBookingSlice: StateCreator<
       return await bookingService.getAllBookings();
     } catch (error) {
       console.error("Failed to fetch admin bookings", error);
+      throw error;
+    }
+  },
+  getAdminRevenue: async () => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "admin") {
+        throw new Error("Authentication required");
+      }
+      return await bookingService.getAdminRevenue();
+    } catch (error) {
+      console.error("Failed to fetch admin revenue", error);
       throw error;
     }
   },
