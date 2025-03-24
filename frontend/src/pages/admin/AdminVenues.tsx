@@ -194,19 +194,18 @@ const AdminVenues = () => {
                   <span className="font-medium">{filteredVenues.length}</span>{" "}
                   of <span className="font-medium">{venues.length}</span> venues
                 </p>
-                {venues.length > 10 && (
-                  <nav className="relative z-0 inline-flex shadow-sm rounded-md">
-                    <button className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
-                      Previous
-                    </button>
-                    <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-blue-100 transition duration-150 cursor-pointer">
-                      1
-                    </button>
-                    <button className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
-                      Next
-                    </button>
-                  </nav>
-                )}
+
+                <nav className="relative z-0 inline-flex shadow-sm rounded-md">
+                  <button className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                    Previous
+                  </button>
+                  <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-blue-100 transition duration-150 cursor-pointer">
+                    1
+                  </button>
+                  <button className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                    Next
+                  </button>
+                </nav>
               </div>
             </div>
           </div>
