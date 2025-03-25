@@ -50,6 +50,7 @@ class AdminController implements IAdminController {
       res.status(result.status).json({
         totalUsers: result.totalUsers,
         totalVendors: result.totalVendors,
+        totalBookings: result.totalBookings,
       });
     } catch (error) {
       console.error(error);

@@ -10,6 +10,7 @@ import { isValidEmail } from "../utils/validators";
 import { IVenue } from "../models/venue.model";
 import venueRepository from "../repositories/venue.repository";
 import Vendors from "../models/vendor.model";
+import bookingRepository from "../repositories/booking.repository";
 
 class AdminService implements IAdminService {
   private sanitizeAdmin(admin: IAdmin) {
@@ -58,14 +59,17 @@ class AdminService implements IAdminService {
   async getAdminDashboardStats(): Promise<{
     totalUsers: number;
     totalVendors: number;
+    totalBookings: number;
     status: number;
   }> {
     const totalUsers = await userRepository.countDocuments({});
     const totalVendors = await vendorRepository.countDocuments({});
+    const totalBookings = await bookingRepository.countDocuments({});
 
     return {
       totalUsers,
       totalVendors,
+      totalBookings,
       status: STATUS_CODES.OK,
     };
   }

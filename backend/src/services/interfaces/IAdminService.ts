@@ -9,7 +9,7 @@ export interface IAdminService {
   getAdminDashboardStats(): Promise<{
     totalUsers: number;
     totalVendors: number;
-    // totalBookings: number;  will add once I implement bookings system for now just commenting it out
+    totalBookings: number;
     status: number;
   }>;
   listUsers(): Promise<{ users: any[]; status: number }>;
