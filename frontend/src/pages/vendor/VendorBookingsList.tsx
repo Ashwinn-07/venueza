@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../stores/authStore";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const VendorBookingsList = () => {
   const { getBookingsByVendor } = useAuthStore();
@@ -9,7 +9,7 @@ const VendorBookingsList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [filter, setFilter] = useState<string>("all");
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -157,9 +157,9 @@ const VendorBookingsList = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -228,14 +228,14 @@ const VendorBookingsList = () => {
                         </button>
                       </div>
                     )}
-                    <button
+                    {/* <button
                       onClick={() =>
                         navigate(`/vendor/bookings/${booking._id}`)
                       }
                       className="text-blue-600 hover:text-blue-900 cursor-pointer"
                     >
                       View Details
-                    </button>
+                    </button> */}
                   </td>
                 </tr>
               ))}

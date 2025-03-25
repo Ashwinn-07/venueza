@@ -81,6 +81,7 @@ const VendorRevenuePage = lazy(
   () => import("./pages/vendor/VendorRevenuePage")
 );
 const AdminRevenuePage = lazy(() => import("./pages/admin/AdminRevenuePage"));
+
 const App = () => {
   return (
     <BrowserRouter>

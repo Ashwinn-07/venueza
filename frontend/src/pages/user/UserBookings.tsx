@@ -7,11 +7,14 @@ import { notifyError } from "../../utils/notifications";
 const UserBookings = () => {
   const navigate = useNavigate();
   const { isAuthenticated, getBookingsByUser } = useAuthStore();
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [allBookings, setAllBookings] = useState<any[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"upcoming" | "past" | "all">(
     "upcoming"
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const bookingsPerPage = 5;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -20,13 +23,17 @@ const UserBookings = () => {
     }
 
     fetchBookings();
-  }, [isAuthenticated, navigate, activeTab]);
+  }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    filterBookings();
+  }, [activeTab, allBookings]);
 
   const fetchBookings = async () => {
     setIsLoading(true);
     try {
       const response = await getBookingsByUser();
-      setBookings(response.bookings);
+      setAllBookings(response.bookings);
     } catch (error: any) {
       console.error("Error fetching bookings", error);
       notifyError(error.message || "Failed to fetch bookings");
@@ -34,7 +41,32 @@ const UserBookings = () => {
       setIsLoading(false);
     }
   };
-  const getStatusLabel = (status: any) => {
+
+  const filterBookings = () => {
+    const now = new Date();
+    let filtered: any[] = [];
+
+    switch (activeTab) {
+      case "upcoming":
+        filtered = allBookings.filter(
+          (booking) => new Date(booking.endDate) > now
+        );
+        break;
+      case "past":
+        filtered = allBookings.filter(
+          (booking) => new Date(booking.endDate) <= now
+        );
+        break;
+      case "all":
+        filtered = allBookings;
+        break;
+    }
+
+    setFilteredBookings(filtered);
+    setCurrentPage(1);
+  };
+
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case "fully_paid":
         return "Fully Paid";
@@ -60,6 +92,15 @@ const UserBookings = () => {
       day: "numeric",
     });
   };
+
+  const indexOfLastBooking = currentPage * bookingsPerPage;
+  const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
+  const currentBookings = filteredBookings.slice(
+    indexOfFirstBooking,
+    indexOfLastBooking
+  );
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -129,7 +170,7 @@ const UserBookings = () => {
                     ></path>
                   </svg>
                 </div>
-              ) : bookings.length === 0 ? (
+              ) : filteredBookings.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No bookings found.</p>
                   <button
@@ -140,141 +181,177 @@ const UserBookings = () => {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {bookings.map((booking) => (
-                    <div
-                      key={booking._id}
-                      className="border border-gray-200 rounded-lg overflow-hidden shadow-sm"
-                    >
-                      <div className="md:flex">
-                        <div className="md:w-1/3 h-48 md:h-auto relative">
-                          {booking.venue.images &&
-                          booking.venue.images.length > 0 ? (
-                            <img
-                              src={booking.venue.images[0]}
-                              alt={booking.venue.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                              <span className="text-gray-500">No Image</span>
-                            </div>
-                          )}
-                          <div
-                            className={`absolute top-2 right-2 px-2 py-1 text-xs font-bold text-white rounded ${
-                              booking.status === "fully_paid"
-                                ? "bg-green-500"
-                                : booking.status === "cancelled"
-                                ? "bg-red-500"
-                                : "bg-yellow-500"
-                            }`}
-                          >
-                            {getStatusLabel(booking.status)}
-                          </div>
-                          ;
-                        </div>
-                        <div className="p-4 md:w-2/3">
-                          <h3 className="text-xl font-semibold mb-2">
-                            {booking.venue.name}
-                          </h3>
-                          <p className="text-gray-600 mb-2">
-                            {booking.venue.address}
-                          </p>
-                          <div className="grid grid-cols-2 gap-2 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                Event Start
-                              </p>
-                              <p className="font-semibold">
-                                {formatDate(booking.startDate)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                Event Finish
-                              </p>
-                              <p className="font-semibold">
-                                {formatDate(booking.endDate)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                Booking Date
-                              </p>
-                              <p className="font-semibold">
-                                {formatDate(booking.createdAt)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                Total Price
-                              </p>
-                              <p className="font-semibold">
-                                ₹{booking.totalPrice.toLocaleString()}
-                              </p>
+                <>
+                  <div className="space-y-6">
+                    {currentBookings.map((booking) => (
+                      <div
+                        key={booking._id}
+                        className="border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+                      >
+                        <div className="md:flex">
+                          <div className="md:w-1/3 h-48 md:h-auto relative">
+                            {booking.venue.images &&
+                            booking.venue.images.length > 0 ? (
+                              <img
+                                src={booking.venue.images[0]}
+                                alt={booking.venue.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <span className="text-gray-500">No Image</span>
+                              </div>
+                            )}
+                            <div
+                              className={`absolute top-2 right-2 px-2 py-1 text-xs font-bold text-white rounded ${
+                                booking.status === "fully_paid"
+                                  ? "bg-green-500"
+                                  : booking.status === "cancelled"
+                                  ? "bg-red-500"
+                                  : "bg-yellow-500"
+                              }`}
+                            >
+                              {getStatusLabel(booking.status)}
                             </div>
                           </div>
+                          <div className="p-4 md:w-2/3">
+                            <h3 className="text-xl font-semibold mb-2">
+                              {booking.venue.name}
+                            </h3>
+                            <p className="text-gray-600 mb-2">
+                              {booking.venue.address}
+                            </p>
+                            <div className="grid grid-cols-2 gap-2 mb-4">
+                              <div>
+                                <p className="text-sm text-gray-500">
+                                  Event Start
+                                </p>
+                                <p className="font-semibold">
+                                  {formatDate(booking.startDate)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">
+                                  Event Finish
+                                </p>
+                                <p className="font-semibold">
+                                  {formatDate(booking.endDate)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">
+                                  Booking Date
+                                </p>
+                                <p className="font-semibold">
+                                  {formatDate(booking.createdAt)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">
+                                  Total Price
+                                </p>
+                                <p className="font-semibold">
+                                  ₹{booking.totalPrice.toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
 
-                          <div className="border-t pt-4 flex justify-between items-center">
-                            <div>
-                              {!booking.advancePaid ? (
-                                <p className="text-red-500 text-sm">
-                                  Advance payment pending
-                                </p>
-                              ) : booking.balanceDue > 0 ? (
-                                <p className="text-amber-600 text-sm">
-                                  Balance due: ₹
-                                  {booking.balanceDue.toLocaleString()}
-                                </p>
-                              ) : (
-                                <p className="text-green-600 text-sm">
-                                  Fully paid
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex space-x-2">
-                              {booking.status === "pending" && (
-                                <button
-                                  onClick={() => handleCancelBooking()}
-                                  className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 text-sm"
-                                >
-                                  Cancel
-                                </button>
-                              )}
-                              {booking.advancePaid &&
-                                booking.balanceDue > 0 &&
-                                booking.status !== "cancelled" && (
+                            <div className="border-t pt-4 flex justify-between items-center">
+                              <div>
+                                {!booking.advancePaid ? (
+                                  <p className="text-red-500 text-sm">
+                                    Advance payment pending
+                                  </p>
+                                ) : booking.balanceDue > 0 ? (
+                                  <p className="text-amber-600 text-sm">
+                                    Balance due: ₹
+                                    {booking.balanceDue.toLocaleString()}
+                                  </p>
+                                ) : (
+                                  <p className="text-green-600 text-sm">
+                                    Fully paid
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex space-x-2">
+                                {booking.status === "pending" && (
+                                  <button
+                                    onClick={() => handleCancelBooking()}
+                                    className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 text-sm"
+                                  >
+                                    Cancel
+                                  </button>
+                                )}
+                                {booking.advancePaid &&
+                                  booking.balanceDue > 0 &&
+                                  booking.status !== "cancelled" && (
+                                    <button
+                                      onClick={() =>
+                                        navigate(
+                                          `/user/bookings/balance/${booking._id}`
+                                        )
+                                      }
+                                      className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"
+                                    >
+                                      Pay Balance
+                                    </button>
+                                  )}
+
+                                {booking.status === "fully_paid" && (
                                   <button
                                     onClick={() =>
                                       navigate(
-                                        `/user/bookings/balance/${booking._id}`
+                                        `/user/bookings/details/${booking._id}`
                                       )
                                     }
                                     className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"
                                   >
-                                    Pay Balance
+                                    View Details
                                   </button>
                                 )}
-
-                              {booking.status === "fully_paid" && (
-                                <button
-                                  onClick={() =>
-                                    navigate(
-                                      `/user/bookings/details/${booking._id}`
-                                    )
-                                  }
-                                  className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"
-                                >
-                                  View Details
-                                </button>
-                              )}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-center mt-6">
+                    <nav className="inline-flex rounded-md shadow-sm">
+                      {Array.from(
+                        {
+                          length: Math.ceil(
+                            filteredBookings.length / bookingsPerPage
+                          ),
+                        },
+                        (_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => paginate(i + 1)}
+                            className={`px-4 py-2 text-sm font-medium ${
+                              currentPage === i + 1
+                                ? "bg-[#F4A261] text-white"
+                                : "text-gray-600 hover:bg-gray-100"
+                            } ${
+                              i === 0
+                                ? "rounded-l-md"
+                                : i ===
+                                  Math.ceil(
+                                    filteredBookings.length / bookingsPerPage
+                                  ) -
+                                    1
+                                ? "rounded-r-md"
+                                : ""
+                            }`}
+                          >
+                            {i + 1}
+                          </button>
+                        )
+                      )}
+                    </nav>
+                  </div>
+                </>
               )}
             </div>
           </div>
