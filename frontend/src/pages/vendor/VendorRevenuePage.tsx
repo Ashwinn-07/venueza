@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../stores/authStore";
 import { Line } from "react-chartjs-2";
+import { IndianRupee, TrendingUp, AlertCircle } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,6 +11,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from "chart.js";
 
 ChartJS.register(
@@ -19,7 +21,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 const VendorRevenuePage = () => {
@@ -29,13 +32,13 @@ const VendorRevenuePage = () => {
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchRevenueData = async () => {
       try {
         setLoading(true);
         const response = await getVendorRevenue();
-
         setMonthlyRevenueData(response.revenue);
       } catch (err: any) {
         console.error("Error fetching vendor revenue data:", err);
@@ -44,34 +47,47 @@ const VendorRevenuePage = () => {
         setLoading(false);
       }
     };
-
     fetchRevenueData();
   }, [getVendorRevenue]);
 
   const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
+    "January",
+    "February",
+    "March",
+    "April",
     "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
-  const sortedData = [...monthlyRevenueData].sort((a, b) => a.month - b.month);
+  const revenueByMonth = new Map(
+    monthlyRevenueData.map((item) => [item.month, item.revenue])
+  );
 
-  const chartLabels = sortedData.map((item) => monthNames[item.month - 1]);
-  const chartDataValues = sortedData.map((item) => item.revenue);
+  const fullYearData = monthNames.map((_, index) => ({
+    month: index + 1,
+    revenue: revenueByMonth.get(index + 1) || 0,
+  }));
 
-  const overallRevenue = sortedData.reduce(
+  const chartLabels = fullYearData.map((item) => monthNames[item.month - 1]);
+  const chartDataValues = fullYearData.map((item) => item.revenue);
+  const overallRevenue = fullYearData.reduce(
     (sum, item) => sum + item.revenue,
     0
   );
+
+  const maxRevenue = Math.max(...chartDataValues);
+  const averageRevenue = overallRevenue / 12;
+
+  const gradientColors = {
+    start: "rgba(59, 130, 246, 0.15)",
+    end: "rgba(59, 130, 246, 0.02)",
+  };
 
   const chartData = {
     labels: chartLabels,
@@ -79,25 +95,120 @@ const VendorRevenuePage = () => {
       {
         label: "Monthly Revenue",
         data: chartDataValues,
-        borderColor: "#2A9D8F",
-        backgroundColor: "rgba(42, 157, 143, 0.2)",
+        borderColor: "#3B82F6",
+        borderWidth: 2,
+        fill: true,
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+          gradient.addColorStop(0, gradientColors.start);
+          gradient.addColorStop(1, gradientColors.end);
+          return gradient;
+        },
         tension: 0.4,
+        pointRadius: (context: any) => {
+          const index = context.dataIndex;
+          return hoveredMonth === index
+            ? 8
+            : chartDataValues[index] > 0
+            ? 6
+            : 4;
+        },
+        pointHoverRadius: 10,
+        pointBackgroundColor: chartDataValues.map((value) =>
+          value > 0 ? "#3B82F6" : "#E9ECEF"
+        ),
+        pointBorderColor: chartDataValues.map((value) =>
+          value > 0 ? "#FFFFFF" : "#E9ECEF"
+        ),
+        pointBorderWidth: 2,
       },
     ],
   };
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: "index" as const,
+    },
+    onHover: (_: any, elements: any[]) => {
+      setHoveredMonth(elements.length > 0 ? elements[0].index : null);
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: "rgba(0, 0, 0, 0.05)",
+          drawBorder: false,
+        },
+        ticks: {
+          callback: (value: any) => `₹${value.toLocaleString()}`,
+          font: {
+            size: 12,
+          },
+        },
+        title: {
+          display: true,
+          text: "Revenue (₹)",
+          font: {
+            size: 14,
+            weight: "bold" as const,
+          },
+          padding: { bottom: 10 },
+        },
+      },
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          font: {
+            size: 12,
+          },
+        },
+      },
+    },
     plugins: {
-      legend: { position: "top" as const },
-      title: { display: true, text: "Revenue Trend (Monthly)" },
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: "Monthly Revenue Trend",
+        font: {
+          size: 20,
+          weight: "bold" as const,
+        },
+        padding: { bottom: 30 },
+      },
+      tooltip: {
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        titleColor: "#1F2937",
+        bodyColor: "#1F2937",
+        bodyFont: {
+          size: 14,
+        },
+        borderColor: "rgba(0, 0, 0, 0.1)",
+        borderWidth: 1,
+        padding: 12,
+        usePointStyle: true,
+        callbacks: {
+          label: (context: any) =>
+            `Revenue: ₹${context.parsed.y.toLocaleString()}`,
+        },
+      },
     },
   };
 
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center p-8">
-        <p className="text-xl text-gray-600">Loading revenue data...</p>
+        <div className="flex items-center space-x-3 text-gray-600">
+          <div className="animate-spin h-5 w-5 border-2 border-gray-600 border-t-transparent rounded-full" />
+          <p className="text-xl">Loading revenue data...</p>
+        </div>
       </div>
     );
   }
@@ -105,36 +216,86 @@ const VendorRevenuePage = () => {
   if (error) {
     return (
       <div className="flex h-screen items-center justify-center p-8">
-        <p className="text-xl text-red-600">{error}</p>
+        <div className="flex items-center space-x-2 text-red-600">
+          <AlertCircle size={24} />
+          <p className="text-xl">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Vendor Revenue Dashboard</h1>
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          Vendor Revenue Dashboard
+        </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow flex flex-col items-center">
-          <div className="text-4xl font-bold text-blue-600">
-            ₹{overallRevenue.toLocaleString()}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <IndianRupee className="h-6 w-6 text-blue-600" />
+              </div>
+              <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">
+                Total Revenue
+              </span>
+            </div>
+            <div className="text-4xl font-bold text-gray-900 mb-1">
+              ₹{overallRevenue.toLocaleString()}
+            </div>
+            <p className="text-sm text-gray-500">
+              Total earnings after platform fee
+            </p>
           </div>
-          <div className="mt-2 text-sm text-gray-500">
-            Total Revenue Received
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-green-600" />
+              </div>
+              <span className="text-sm font-medium text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">
+                Best Month
+              </span>
+            </div>
+            <div className="text-4xl font-bold text-gray-900 mb-1">
+              ₹{maxRevenue.toLocaleString()}
+            </div>
+            <p className="text-sm text-gray-500">Highest monthly revenue</p>
           </div>
-          <div className="mt-1 text-xs text-gray-400">(After platform fee)</div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <IndianRupee className="h-6 w-6 text-purple-600" />
+              </div>
+              <span className="text-sm font-medium text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full">
+                Monthly Average
+              </span>
+            </div>
+            <div className="text-4xl font-bold text-gray-900 mb-1">
+              ₹{Math.round(averageRevenue).toLocaleString()}
+            </div>
+            <p className="text-sm text-gray-500">Average monthly earnings</p>
+          </div>
         </div>
-      </div>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <Line data={chartData} options={chartOptions} />
-      </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="h-[400px]">
+            <Line data={chartData} options={chartOptions} />
+          </div>
+        </div>
 
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
-        <p className="text-sm text-blue-800">
-          Note: The revenue figure represents the total amount you have received
-          after the platform fee has been deducted.
-        </p>
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <p className="text-sm text-blue-800">
+              The revenue figures shown represent your total earnings after the
+              platform fee has been deducted. This helps you track your business
+              performance and income growth over time.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
