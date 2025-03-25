@@ -13,7 +13,6 @@ const AdminVendorsPending = () => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
 
-  // New state for rejection modal
   const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [vendorToReject, setVendorToReject] = useState<string | null>(null);
