@@ -10,8 +10,9 @@ export interface IVendor extends Document {
   businessAddress: string;
   businessName: string;
   documents: string[];
-  status: "pending" | "blocked" | "active";
+  status: "pending" | "blocked" | "active" | "rejected";
   isVerified: boolean;
+  rejectionReason?: string;
   otp?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -35,10 +36,11 @@ const vendorSchema: Schema = new Schema(
     documents: { type: [String], default: [] },
     status: {
       type: String,
-      enum: ["pending", "blocked", "active"],
+      enum: ["pending", "blocked", "active", "rejected"],
       default: "pending",
     },
     isVerified: { type: Boolean, default: false },
+    rejectionReason: { type: String, default: null },
     otp: { type: String, default: null },
   },
   { timestamps: true }

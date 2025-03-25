@@ -137,7 +137,7 @@ const VendorProfile = () => {
       );
     }
 
-    if (user?.status === "blocked") {
+    if (user?.status === "rejected") {
       return (
         <div className="space-y-4">
           <div className="p-4 bg-red-50 rounded-lg border border-red-200 mb-4">
@@ -147,6 +147,11 @@ const VendorProfile = () => {
                 Verification Rejected
               </h3>
             </div>
+            {user.rejectionReason && (
+              <p className="text-sm text-red-600 mb-2">
+                Reason: {user.rejectionReason}
+              </p>
+            )}
             <p className="text-sm text-red-600">
               Your verification was not approved. Please upload new documents to
               try again.
@@ -214,10 +219,6 @@ const VendorProfile = () => {
                 Verification Pending
               </h3>
             </div>
-            <p className="text-sm text-yellow-600">
-              Your documents are being reviewed. We'll notify you once the
-              verification is complete.
-            </p>
           </div>
 
           <div className="border rounded-lg p-4 bg-gray-50">

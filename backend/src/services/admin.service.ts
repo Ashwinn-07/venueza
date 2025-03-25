@@ -9,7 +9,7 @@ import vendorRepository from "../repositories/vendor.repository";
 import { isValidEmail } from "../utils/validators";
 import { IVenue } from "../models/venue.model";
 import venueRepository from "../repositories/venue.repository";
-import Vendors from "../models/vendor.model";
+import { IVendor } from "../models/vendor.model";
 import bookingRepository from "../repositories/booking.repository";
 
 class AdminService implements IAdminService {
@@ -84,7 +84,7 @@ class AdminService implements IAdminService {
 
   async listAllVendors(): Promise<{ vendors: any[]; status: number }> {
     const vendors = await vendorRepository.find({
-      status: { $nin: ["pending"] },
+      status: { $nin: ["pending", "rejected"] },
     });
     return {
       vendors,
@@ -143,7 +143,8 @@ class AdminService implements IAdminService {
     };
   }
   async rejectVendor(
-    vendorId: string
+    vendorId: string,
+    rejectionReason?: string
   ): Promise<{ message: string; status: number; vendor: any }> {
     const vendor = await vendorRepository.findById(vendorId);
     if (!vendor) {
@@ -152,9 +153,14 @@ class AdminService implements IAdminService {
     if (vendor.status !== "pending") {
       throw new Error("this vendor is not pending for approval");
     }
-    const updatedVendor = await vendorRepository.update(vendorId, {
-      status: "blocked",
-    });
+    const updateData: Partial<IVendor> = {
+      status: "rejected",
+    };
+    if (rejectionReason) {
+      updateData.rejectionReason = rejectionReason;
+    }
+
+    const updatedVendor = await vendorRepository.update(vendorId, updateData);
     if (!updatedVendor) {
       throw new Error("could not reject vendor");
     }

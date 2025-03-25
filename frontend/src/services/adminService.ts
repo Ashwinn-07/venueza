@@ -29,8 +29,18 @@ export const adminService = {
     const response = await adminApi.patch(`/users/${userId}`, { status });
     return response.data;
   },
-  updateVendorStatus: async (vendorId: string, status: string) => {
-    const response = await adminApi.patch(`/vendors/${vendorId}`, { status });
+  updateVendorStatus: async (
+    vendorId: string,
+    status: string,
+    rejectionReason?: string
+  ) => {
+    const payload: any = { status };
+
+    if (status === "rejected" && rejectionReason) {
+      payload.rejectionReason = rejectionReason;
+    }
+
+    const response = await adminApi.patch(`/vendors/${vendorId}`, payload);
     return response.data;
   },
   updateVenueVerificationStatus: async (

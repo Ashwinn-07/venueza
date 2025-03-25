@@ -13,6 +13,11 @@ const AdminVendorsPending = () => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
 
+  // New state for rejection modal
+  const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [vendorToReject, setVendorToReject] = useState<string | null>(null);
+
   const [modalParent] = useAnimation();
 
   useEffect(() => {
@@ -54,12 +59,29 @@ const AdminVendorsPending = () => {
     }
   };
 
-  const handleRejectVendor = async (vendorId: any) => {
+  const openRejectionModal = (vendor: any) => {
+    setVendorToReject(vendor.id || vendor._id);
+    setRejectionReason("");
+    setIsRejectionModalOpen(true);
+  };
+
+  const handleRejectVendor = async () => {
+    if (!vendorToReject) return;
+
     try {
-      await updateVendorStatus(vendorId, "blocked");
+      await updateVendorStatus(
+        vendorToReject,
+        "blocked",
+        rejectionReason.trim() || ""
+      );
       const response = await listPendingVendors();
       setPendingVendors(response.vendors);
+
       notifySuccess("Vendor rejected successfully");
+
+      setIsRejectionModalOpen(false);
+      setVendorToReject(null);
+      setRejectionReason("");
     } catch (error) {
       console.error("Failed to reject vendor:", error);
       notifyError(
@@ -175,9 +197,7 @@ const AdminVendorsPending = () => {
                             Accept
                           </button>
                           <button
-                            onClick={() =>
-                              handleRejectVendor(vendor.id || vendor._id)
-                            }
+                            onClick={() => openRejectionModal(vendor)}
                             className="px-3.5 py-1.5 bg-red-500 text-white rounded-lg flex items-center text-sm font-medium transition duration-150 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer"
                           >
                             <X className="w-4 h-4 mr-1.5" />
@@ -267,6 +287,60 @@ const AdminVendorsPending = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isRejectionModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 max-w-lg w-full mx-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Reject Vendor
+                  </h3>
+                  <button
+                    onClick={() => setIsRejectionModalOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 transition duration-150 cursor-pointer"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="mb-6">
+                  <label
+                    htmlFor="rejectionReason"
+                    className="block mb-2 text-sm font-medium text-gray-700"
+                  >
+                    Reason for rejection
+                  </label>
+                  <textarea
+                    id="rejectionReason"
+                    rows={4}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Please provide a reason for rejecting this vendor..."
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    This reason will be shared with the vendor to help them
+                    understand why their application was rejected.
+                  </p>
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setIsRejectionModalOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-150 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRejectVendor}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition duration-150 cursor-pointer"
+                  >
+                    Reject Vendor
+                  </button>
                 </div>
               </div>
             </div>

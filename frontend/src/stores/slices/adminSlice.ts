@@ -12,7 +12,11 @@ export interface AdminSlice {
   listPendingVenues: () => Promise<any>;
   listApprovedVenues: () => Promise<any>;
   updateUserStatus: (userId: string, status: string) => Promise<any>;
-  updateVendorStatus: (vendorId: string, status: string) => Promise<any>;
+  updateVendorStatus: (
+    vendorId: string,
+    status: string,
+    rejectionReason?: string
+  ) => Promise<any>;
   updateVenueVerificationStatus: (
     venueId: string,
     verificationStatus: string,
@@ -117,13 +121,17 @@ export const createAdminSlice: StateCreator<
     }
   },
 
-  updateVendorStatus: async (vendorId, status) => {
+  updateVendorStatus: async (vendorId, status, rejectionReason) => {
     try {
       const { authType } = get();
       if (!authType || authType !== "admin")
         throw new Error("Not authorized as admin");
 
-      return await adminService.updateVendorStatus(vendorId, status);
+      return await adminService.updateVendorStatus(
+        vendorId,
+        status,
+        rejectionReason
+      );
     } catch (error) {
       console.error("Failed to update vendor status", error);
       throw error;

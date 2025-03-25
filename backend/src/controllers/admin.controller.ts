@@ -140,7 +140,7 @@ class AdminController implements IAdminController {
   async updateVendorStatus(req: Request, res: Response): Promise<void> {
     try {
       const { id: vendorId } = req.params;
-      const { status } = req.body;
+      const { status, rejectionReason } = req.body;
       const currentVendor = await vendorRepository.findById(vendorId);
       if (!currentVendor) {
         throw new Error("vendor not found");
@@ -150,7 +150,7 @@ class AdminController implements IAdminController {
         if (status === "active") {
           result = await adminService.approveVendor(vendorId);
         } else if (status === "blocked") {
-          result = await adminService.rejectVendor(vendorId);
+          result = await adminService.rejectVendor(vendorId, rejectionReason);
         } else {
           throw new Error("Invalid status update for a pending vendor");
         }
