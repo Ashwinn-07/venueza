@@ -224,7 +224,12 @@ const VenueDetails = () => {
                 </button>
                 <button
                   onClick={() => navigate(`/user/booking/${id}`)}
-                  className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#2A9D8F] text-white rounded-md hover:bg-[#264653] transition-colors cursor-pointer"
+                  disabled={venue.status === "closed"}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-colors cursor-pointer ${
+                    venue.status === "closed"
+                      ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                      : "bg-[#2A9D8F] text-white hover:bg-[#264653]"
+                  }`}
                 >
                   <Calendar className="w-5 h-5" />
                   <span>Book Now</span>

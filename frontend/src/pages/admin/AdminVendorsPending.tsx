@@ -17,6 +17,9 @@ const AdminVendorsPending = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [vendorToReject, setVendorToReject] = useState<string | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const [modalParent] = useAnimation();
 
   useEffect(() => {
@@ -36,6 +39,7 @@ const AdminVendorsPending = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1);
   };
 
   const filteredPendingVendors = pendingVendors.filter(
@@ -43,6 +47,22 @@ const AdminVendorsPending = () => {
       vendor.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vendor.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentPendingVendors = filteredPendingVendors.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredPendingVendors.length / itemsPerPage);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   const handleApproveVendor = async (vendorId: any) => {
     try {
@@ -147,7 +167,7 @@ const AdminVendorsPending = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {filteredPendingVendors.map((vendor) => (
+                  {currentPendingVendors.map((vendor) => (
                     <tr
                       key={vendor.id || vendor._id}
                       className="hover:bg-gray-50 transition duration-150"
@@ -215,20 +235,31 @@ const AdminVendorsPending = () => {
                 <p className="text-sm text-gray-600">
                   Showing{" "}
                   <span className="font-medium">
-                    {filteredPendingVendors.length}
+                    {indexOfFirstItem + 1} -{" "}
+                    {Math.min(indexOfLastItem, filteredPendingVendors.length)}
                   </span>{" "}
                   of{" "}
-                  <span className="font-medium">{pendingVendors.length}</span>{" "}
+                  <span className="font-medium">
+                    {filteredPendingVendors.length}
+                  </span>{" "}
                   vendors
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Previous
                   </button>
                   <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-blue-100 transition duration-150 cursor-pointer">
-                    1
+                    {currentPage}
                   </button>
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Next
                   </button>
                 </nav>

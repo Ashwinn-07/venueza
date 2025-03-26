@@ -18,6 +18,9 @@ const AdminVenuesPending = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [venueToReject, setVenueToReject] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const { listPendingVenues, updateVenueVerificationStatus } = useAuthStore();
 
   const [modalParent] = useAutoAnimate();
@@ -41,6 +44,7 @@ const AdminVenuesPending = () => {
 
   const handleSearch = (e: any) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1);
   };
 
   const filteredVenues = venues.filter(
@@ -48,6 +52,19 @@ const AdminVenuesPending = () => {
       venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       venue.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentVenues = filteredVenues.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredVenues.length / itemsPerPage);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   const handleApprove = async (venueId: any) => {
     try {
@@ -145,9 +162,11 @@ const AdminVenuesPending = () => {
             </div>
 
             <div className="overflow-x-auto">
-              {venues.length === 0 ? (
+              {filteredVenues.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
-                  No pending venues found
+                  {searchTerm
+                    ? "No venues match your search criteria"
+                    : "No pending venues found"}
                 </div>
               ) : (
                 <table className="w-full">
@@ -174,7 +193,7 @@ const AdminVenuesPending = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-100">
-                    {filteredVenues.map((venue: any) => (
+                    {currentVenues.map((venue: any) => (
                       <tr
                         key={venue._id}
                         className="hover:bg-gray-50 transition duration-150"
@@ -278,17 +297,30 @@ const AdminVenuesPending = () => {
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600">
                   Showing{" "}
+                  <span className="font-medium">
+                    {indexOfFirstItem + 1} -{" "}
+                    {Math.min(indexOfLastItem, filteredVenues.length)}
+                  </span>{" "}
+                  of{" "}
                   <span className="font-medium">{filteredVenues.length}</span>{" "}
-                  of <span className="font-medium">{venues.length}</span> venues
+                  venues
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Previous
                   </button>
                   <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-blue-100 transition duration-150 cursor-pointer">
-                    1
+                    {currentPage}
                   </button>
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Next
                   </button>
                 </nav>

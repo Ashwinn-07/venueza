@@ -15,6 +15,8 @@ const AdminVendors = () => {
   const [processingVendorId, setProcessingVendorId] = useState<string | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const [modalParent] = useAnimation();
 
@@ -35,6 +37,7 @@ const AdminVendors = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1);
   };
 
   const filteredVendors = vendors.filter(
@@ -42,6 +45,22 @@ const AdminVendors = () => {
       vendor.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vendor.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentVendors = filteredVendors.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredVendors.length / itemsPerPage);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   const handleToggleBlock = async (vendorId: string, currentStatus: string) => {
     setProcessingVendorId(vendorId);
@@ -127,7 +146,7 @@ const AdminVendors = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
-                  {filteredVendors.map((vendor) => (
+                  {currentVendors.map((vendor) => (
                     <tr
                       key={vendor._id}
                       className="hover:bg-gray-50 transition duration-150"
@@ -217,18 +236,30 @@ const AdminVendors = () => {
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600">
                   Showing{" "}
+                  <span className="font-medium">
+                    {indexOfFirstItem + 1} -{" "}
+                    {Math.min(indexOfLastItem, filteredVendors.length)}
+                  </span>{" "}
+                  of{" "}
                   <span className="font-medium">{filteredVendors.length}</span>{" "}
-                  of <span className="font-medium">{vendors.length}</span>{" "}
                   vendors
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Previous
                   </button>
                   <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-blue-100 transition duration-150 cursor-pointer">
-                    1
+                    {currentPage}
                   </button>
-                  <button className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer">
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     Next
                   </button>
                 </nav>

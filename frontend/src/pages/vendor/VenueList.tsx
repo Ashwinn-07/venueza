@@ -139,7 +139,12 @@ const VenueList = () => {
                   </div>
                   {venue.verificationStatus === "rejected" && (
                     <div className="text-red-600 text-sm mt-2">
-                      <p>Reason: {venue.rejectionReason}</p>
+                      <p>
+                        Reason:{" "}
+                        {venue.rejectionReason
+                          ? venue.rejectionReason
+                          : "No Reason given by the admin"}
+                      </p>
                       <p>
                         You can try again by clicking on the add venue button on
                         top.
