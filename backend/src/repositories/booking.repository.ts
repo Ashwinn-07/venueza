@@ -35,6 +35,7 @@ class BookingRepository
     return Booking.find({ venue: { $in: venueIds } })
       .populate("venue")
       .populate("user")
+      .sort({ createdAt: -1 })
       .exec();
   }
   async findByIdPopulated(bookingId: string): Promise<IBooking | null> {
