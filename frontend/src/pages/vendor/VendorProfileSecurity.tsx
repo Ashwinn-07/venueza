@@ -4,6 +4,8 @@ import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { isValidPassword } from "../../utils/validators";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const VendorProfileSecurity = () => {
   const navigate = useNavigate();
@@ -56,6 +58,22 @@ const VendorProfileSecurity = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  const handleUpdatePasswordConfirm = () => {
+    confirmAlert({
+      title: "Confirm Change Password",
+      message: "Are you sure you want to change your password?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleUpdatePassword(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   return (
@@ -142,7 +160,7 @@ const VendorProfileSecurity = () => {
 
                 <div className="flex justify-end pt-4">
                   <button
-                    onClick={handleUpdatePassword}
+                    onClick={handleUpdatePasswordConfirm}
                     disabled={isLoading}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50"
                   >

@@ -6,6 +6,8 @@ import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidPhone } from "../../utils/validators";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const VendorProfile = () => {
   const navigate = useNavigate();
@@ -121,6 +123,22 @@ const VendorProfile = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  const handleSaveProfileConfirm = () => {
+    confirmAlert({
+      title: "Confirm Updates",
+      message: "Are you sure you want to update your details?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleSaveProfile(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const renderVerificationSection = () => {
@@ -452,7 +470,7 @@ const VendorProfile = () => {
 
             <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">
               <button
-                onClick={handleSaveProfile}
+                onClick={handleSaveProfileConfirm}
                 disabled={isLoading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50"
               >

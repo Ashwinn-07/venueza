@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const VendorSidebar = () => {
   const navigate = useNavigate();
@@ -24,6 +26,22 @@ const VendorSidebar = () => {
         err.response?.data?.message || "Failed to logout. Please try again.";
       notifyError(errMsg);
     }
+  };
+  const handleLogoutConfirm = () => {
+    confirmAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to Logout from this account?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleLogout(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   return (
@@ -52,7 +70,7 @@ const VendorSidebar = () => {
 
       <div className="py-4 border-t border-gray-200 flex items-center px-6  text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
         <span className="mr-3 text-lg">🚪</span>
-        <span onClick={handleLogout} className="text-sm">
+        <span onClick={handleLogoutConfirm} className="text-sm">
           Logout
         </span>
       </div>
