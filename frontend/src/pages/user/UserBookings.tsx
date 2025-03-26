@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 import UserProfileNavigation from "../../components/user/UserProfileNavigation";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
-import { notifyError } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 
 const UserBookings = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, getBookingsByUser } = useAuthStore();
+  const { isAuthenticated, getBookingsByUser, cancelBookingByUser } =
+    useAuthStore();
   const [allBookings, setAllBookings] = useState<any[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,7 +73,9 @@ const UserBookings = () => {
     switch (status) {
       case "fully_paid":
         return "Fully Paid";
-      case "cancelled":
+      case "cancelled_by_user":
+        return "Cancelled (No Refund)";
+      case "cancelled_by_vendor":
         return "Cancelled";
       case "pending":
         return "Pending Payment";
@@ -81,8 +86,34 @@ const UserBookings = () => {
     }
   };
 
-  const handleCancelBooking = () => {
-    alert("Coming soon: Cancel booking functionality");
+  const handleCancelBooking = async (bookingId: string) => {
+    try {
+      await cancelBookingByUser(bookingId);
+      notifySuccess(
+        "Booking cancelled successfully. Note: Advance is not refunded."
+      );
+      fetchBookings();
+    } catch (error: any) {
+      console.error("Error cancelling booking:", error);
+      notifyError(error.message || "Cancellation failed");
+    }
+  };
+  const handleCancelBookingConfirm = (bookingId: string) => {
+    confirmAlert({
+      title: "Confirm Cancellation",
+      message:
+        "Are you sure you want to cancel this booking? Note: Advance is non-refundable.",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleCancelBooking(bookingId),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -262,29 +293,35 @@ const UserBookings = () => {
                                   <p className="text-red-500 text-sm">
                                     Advance payment pending
                                   </p>
-                                ) : booking.balanceDue > 0 ? (
+                                ) : booking.balanceDue > 0 &&
+                                  booking.status !== "cancelled_by_vendor" &&
+                                  booking.status !== "cancelled_by_user" ? (
                                   <p className="text-amber-600 text-sm">
                                     Balance due: ₹
                                     {booking.balanceDue.toLocaleString()}
                                   </p>
                                 ) : (
                                   <p className="text-green-600 text-sm">
-                                    Fully paid
+                                    {getStatusLabel(booking.status)}
                                   </p>
                                 )}
                               </div>
                               <div className="flex space-x-2">
-                                {booking.status === "pending" && (
+                                {(booking.status === "pending" ||
+                                  booking.status === "advance_paid") && (
                                   <button
-                                    onClick={() => handleCancelBooking()}
-                                    className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 text-sm"
+                                    onClick={() =>
+                                      handleCancelBookingConfirm(booking._id)
+                                    }
+                                    className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 text-sm cursor-pointer"
                                   >
                                     Cancel
                                   </button>
                                 )}
                                 {booking.advancePaid &&
                                   booking.balanceDue > 0 &&
-                                  booking.status !== "cancelled" && (
+                                  booking.status !== "cancelled_by_user" &&
+                                  booking.status !== "cancelled_by_user" && (
                                     <button
                                       onClick={() =>
                                         navigate(
