@@ -45,6 +45,11 @@ export interface BookingSlice {
   getAdminRevenue: () => Promise<any>;
   getVendorRevenue: () => Promise<any>;
   getVendorDashboard: () => Promise<any>;
+  cancelBookingByUser: (bookingId: string) => Promise<any>;
+  cancelBookingByVendor: (
+    bookingId: string,
+    cancellationReason: string
+  ) => Promise<any>;
 }
 
 export const createBookingSlice: StateCreator<
@@ -213,6 +218,33 @@ export const createBookingSlice: StateCreator<
       return await bookingService.getVendorDashboard();
     } catch (error) {
       console.error("Failed to fetch vendor dashboard data", error);
+      throw error;
+    }
+  },
+  cancelBookingByUser: async (bookingId) => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "user") {
+        throw new Error("Authentication required");
+      }
+      return await bookingService.cancelBookingByUser(bookingId);
+    } catch (error) {
+      console.error("Failed to cancel booking by user", error);
+      throw error;
+    }
+  },
+  cancelBookingByVendor: async (bookingId, cancellationReason) => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "vendor") {
+        throw new Error("Authentication required");
+      }
+      return await bookingService.cancelBookingByVendor(
+        bookingId,
+        cancellationReason
+      );
+    } catch (error) {
+      console.error("Failed to cancel booking by vendor", error);
       throw error;
     }
   },

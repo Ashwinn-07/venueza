@@ -90,4 +90,18 @@ export const bookingService = {
     const response = await vendorApi.get("/dashboard");
     return response.data;
   },
+  cancelBookingByUser: async (bookingId: string) => {
+    const response = await userApi.patch("/bookings/cancel", { bookingId });
+    return response.data;
+  },
+  cancelBookingByVendor: async (
+    bookingId: string,
+    cancellationReason: string
+  ) => {
+    const response = await vendorApi.patch("/bookings/cancel", {
+      bookingId,
+      cancellationReason,
+    });
+    return response.data;
+  },
 };
