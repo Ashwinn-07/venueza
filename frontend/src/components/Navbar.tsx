@@ -2,7 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Heart, Menu, X, User, LogOut, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "../stores/authStore";
-
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 const Navbar = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -33,6 +34,22 @@ const Navbar = () => {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+  const handleLogoutConfirm = () => {
+    confirmAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to Logout from this account?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleLogout(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   return (
@@ -103,7 +120,7 @@ const Navbar = () => {
                       </div>
                     </Link>
                     <button
-                      onClick={handleLogout}
+                      onClick={handleLogoutConfirm}
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
                     >
                       <div className="flex items-center gap-2">

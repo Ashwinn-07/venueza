@@ -5,6 +5,8 @@ import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
 import { isValidPassword } from "../../utils/validators";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const UserProfileSecurity = () => {
   const navigate = useNavigate();
@@ -70,6 +72,38 @@ const UserProfileSecurity = () => {
         err.response?.data?.message || "Failed to logout. Please try again.";
       notifyError(errMsg);
     }
+  };
+  const handleLogoutConfirm = () => {
+    confirmAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to Logout from this account?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleLogout(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
+  const handleUpdatePasswordConfirm = () => {
+    confirmAlert({
+      title: "Confirm Change Password",
+      message: "Are you sure you want to change your password?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleUpdatePassword(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   return (
@@ -179,13 +213,13 @@ const UserProfileSecurity = () => {
 
                 <div className="flex items-center justify-between pt-6">
                   <button
-                    onClick={handleLogout}
+                    onClick={handleLogoutConfirm}
                     className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 transition duration-200 font-medium cursor-pointer"
                   >
                     Logout
                   </button>
                   <button
-                    onClick={handleUpdatePassword}
+                    onClick={handleUpdatePasswordConfirm}
                     disabled={isLoading}
                     className={`px-6 py-2.5 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md transition duration-200 font-medium cursor-pointer ${
                       isLoading ? "opacity-70 cursor-not-allowed" : ""

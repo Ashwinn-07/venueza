@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { notifySuccess, notifyError } from "../../utils/notifications";
 import { isValidPhone } from "../../utils/validators";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -86,6 +88,38 @@ const UserProfile = () => {
       notifyError(errMsg);
     }
   };
+  const handleLogoutConfirm = () => {
+    confirmAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to Logout from this account?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleLogout(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
+  const handleSaveConfirm = () => {
+    confirmAlert({
+      title: "Confirm Updates",
+      message: "Are you sure you want to update your details?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleSave(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -163,13 +197,13 @@ const UserProfile = () => {
 
                 <div className="flex items-center justify-between pt-6">
                   <button
-                    onClick={handleLogout}
+                    onClick={handleLogoutConfirm}
                     className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 transition duration-200 font-medium cursor-pointer"
                   >
                     Logout
                   </button>
                   <button
-                    onClick={handleSave}
+                    onClick={handleSaveConfirm}
                     disabled={isLoading}
                     className={`px-6 py-2.5 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md transition duration-200 font-medium cursor-pointer ${
                       isLoading ? "opacity-70 cursor-not-allowed" : ""
