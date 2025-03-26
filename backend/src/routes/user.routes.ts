@@ -91,5 +91,10 @@ userRoutes.patch(
   authMiddleware(["user"]),
   bookingController.verifyBalancePayment
 );
+userRoutes.patch(
+  "/bookings/cancel",
+  authMiddleware(["user"]),
+  bookingController.userCancelBooking
+);
 
 export default userRoutes;

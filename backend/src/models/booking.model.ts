@@ -15,13 +15,16 @@ export interface IBooking extends Document {
     | "advance_paid"
     | "balance_pending"
     | "fully_paid"
-    | "cancelled";
+    | "cancelled_by_vendor"
+    | "cancelled_by_user";
   razorpayOrderId?: string;
   paymentId?: string;
   razorpayBalanceOrderId?: string;
   balancePaymentId?: string;
   commissionAmount?: number;
   vendorReceives?: number;
+  refundId?: number;
+  cancellationReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,7 +46,8 @@ const bookingSchema: Schema = new Schema(
         "advance_paid",
         "balance_pending",
         "fully_paid",
-        "cancelled",
+        "cancelled_by_vendor",
+        "cancelled_by_user",
       ],
       default: "pending",
     },
@@ -51,8 +55,10 @@ const bookingSchema: Schema = new Schema(
     paymentId: { type: String, default: null },
     razorpayBalanceOrderId: { type: String, default: null },
     balancePaymentId: { type: String, default: null },
+    refundId: { type: String, default: null },
     commissionAmount: { type: Number, default: 0 },
     vendorReceives: { type: Number, default: 0 },
+    cancellationReason: { type: String, default: null },
   },
   { timestamps: true }
 );

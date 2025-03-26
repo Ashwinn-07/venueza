@@ -68,4 +68,16 @@ export interface IBookingService {
       monthlyRevenue: { month: number; revenue: number }[];
     };
   }>;
+  cancelBookingByUser(
+    bookingId: string
+  ): Promise<{ message: string; status: number; booking: IBooking }>;
+  cancelBookingByVendor(
+    bookingId: string,
+    cancellationReason: string
+  ): Promise<{
+    message: string;
+    status: number;
+    booking: IBooking;
+    refund?: any;
+  }>;
 }

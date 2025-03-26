@@ -6,6 +6,7 @@ import { STATUS_CODES, MESSAGES } from "../utils/constants";
 import razorpayInstance from "../utils/razorpay";
 import mongoose from "mongoose";
 import blockedDateRepository from "../repositories/blockedDate.repository";
+import { issueRefund } from "../utils/issueRefund";
 
 class BookingService implements IBookingService {
   async createBooking(
@@ -308,6 +309,63 @@ class BookingService implements IBookingService {
         upcomingBookings,
         monthlyRevenue,
       },
+    };
+  }
+  async cancelBookingByUser(
+    bookingId: string
+  ): Promise<{ message: string; status: number; booking: IBooking }> {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new Error("No booking found");
+    }
+    if (booking.status !== "advance_paid" && booking.status !== "pending") {
+      throw new Error("Booking cannot be cancelled at this stage");
+    }
+    booking.status = "cancelled_by_user" as any;
+    const updatedBooking = await bookingRepository.update(bookingId, booking);
+    if (!updatedBooking) {
+      throw new Error("Bookings status update failed");
+    }
+    return {
+      message: MESSAGES.SUCCESS.BOOKING_CANCELLED,
+      status: STATUS_CODES.OK,
+      booking: updatedBooking,
+    };
+  }
+  async cancelBookingByVendor(
+    bookingId: string,
+    cancellationReason: string
+  ): Promise<{
+    message: string;
+    status: number;
+    booking: IBooking;
+    refund?: any;
+  }> {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new Error("No booking found");
+    }
+    if (booking.status !== "advance_paid") {
+      throw new Error("Booking cannot be cancelled by vendor at this stage");
+    }
+    const refundResult = await issueRefund(
+      booking.paymentId ? booking.paymentId : "",
+      Math.round(booking.advanceAmount * 100)
+    );
+    booking.status = "cancelled_by_vendor" as any;
+    booking.cancellationReason = cancellationReason;
+    booking.balanceDue = booking.totalPrice;
+
+    booking.refundId = refundResult.id;
+    const updatedBooking = await bookingRepository.update(bookingId, booking);
+    if (!updatedBooking) {
+      throw new Error("Bookings status update failed");
+    }
+    return {
+      message: MESSAGES.SUCCESS.BOOKING_CANCELLED,
+      status: STATUS_CODES.OK,
+      booking: updatedBooking,
+      refund: refundResult,
     };
   }
 }

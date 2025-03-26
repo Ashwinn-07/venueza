@@ -154,6 +154,42 @@ class BookingController implements IBookingController {
       });
     }
   }
+  async userCancelBooking(req: Request, res: Response): Promise<void> {
+    try {
+      const { bookingId } = req.body;
+      const result = await bookingService.cancelBookingByUser(bookingId);
+      res.status(result.status).json({
+        message: result.message,
+        booking: result.booking,
+      });
+    } catch (error) {
+      console.error("Error cancelling booking by user:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to cancel booking",
+      });
+    }
+  }
+  async vendorCancelBooking(req: Request, res: Response): Promise<void> {
+    try {
+      const { bookingId, cancellationReason } = req.body;
+      const result = await bookingService.cancelBookingByVendor(
+        bookingId,
+        cancellationReason
+      );
+      res.status(result.status).json({
+        message: result.message,
+        booking: result.booking,
+        refund: result.refund,
+      });
+    } catch (error) {
+      console.error("Error in vendor cancellation:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to cancel booking",
+      });
+    }
+  }
 }
 
 export default new BookingController();
