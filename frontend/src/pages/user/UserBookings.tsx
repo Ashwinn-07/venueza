@@ -76,7 +76,7 @@ const UserBookings = () => {
       case "cancelled_by_user":
         return "Cancelled (No Refund)";
       case "cancelled_by_vendor":
-        return "Cancelled(Refund will be processed) ";
+        return "Cancelled(Refund successful ) ";
       case "pending":
         return "Pending Payment";
       case "advance_paid":
