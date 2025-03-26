@@ -12,7 +12,11 @@ class BookingRepository
   }
 
   async findAll(): Promise<IBooking[]> {
-    return Booking.find({}).populate("venue").populate("user").exec();
+    return Booking.find({})
+      .populate("venue")
+      .populate("user")
+      .sort({ createdAt: -1 })
+      .exec();
   }
   async findByUser(userId: string): Promise<IBooking[]> {
     return Booking.find({ user: userId })

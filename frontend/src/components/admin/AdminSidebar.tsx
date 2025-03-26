@@ -1,6 +1,8 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -123,6 +125,22 @@ const AdminSidebar = () => {
       notifyError(errMsg);
     }
   };
+  const handleLogoutConfirm = () => {
+    confirmAlert({
+      title: "Confirm Logout",
+      message: "Are you sure you want to Logout from this account?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => handleLogout(),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
 
   return (
     <div className="w-72 bg-gray-900 h-screen flex flex-col text-white shadow-xl">
@@ -173,7 +191,7 @@ const AdminSidebar = () => {
 
       <div className="p-4 border-t border-gray-800">
         <button
-          onClick={handleLogout}
+          onClick={handleLogoutConfirm}
           className="flex w-full items-center justify-center px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors duration-200"
         >
           <svg
