@@ -76,7 +76,7 @@ const UserBookings = () => {
       case "cancelled_by_user":
         return "Cancelled (No Refund)";
       case "cancelled_by_vendor":
-        return "Cancelled";
+        return "Cancelled(Refund will be processed) ";
       case "pending":
         return "Pending Payment";
       case "advance_paid":
@@ -303,6 +303,11 @@ const UserBookings = () => {
                                 ) : (
                                   <p className="text-green-600 text-sm">
                                     {getStatusLabel(booking.status)}
+                                    <span>
+                                      {booking.cancellationReason
+                                        ? booking.cancellationReason
+                                        : ""}
+                                    </span>
                                   </p>
                                 )}
                               </div>
@@ -321,7 +326,7 @@ const UserBookings = () => {
                                 {booking.advancePaid &&
                                   booking.balanceDue > 0 &&
                                   booking.status !== "cancelled_by_user" &&
-                                  booking.status !== "cancelled_by_user" && (
+                                  booking.status !== "cancelled_by_vendor" && (
                                     <button
                                       onClick={() =>
                                         navigate(
