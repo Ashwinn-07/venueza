@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "../../stores/authStore";
 import { format } from "date-fns";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-// import { useNavigate } from "react-router-dom";
 
 const VendorBookingsList = () => {
   const { getBookingsByVendor, cancelBookingByVendor } = useAuthStore();
@@ -10,7 +9,9 @@ const VendorBookingsList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [filter, setFilter] = useState<string>("all");
-  // const navigate = useNavigate();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const [showModal, setShowModal] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string>("");
@@ -48,6 +49,26 @@ const VendorBookingsList = () => {
     return true;
   });
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentBookings = filteredBookings.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
+
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "pending":
@@ -67,11 +88,13 @@ const VendorBookingsList = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
   const openModal = (bookingId: string) => {
     setSelectedBookingId(bookingId);
     setCancelReason("");
     setShowModal(true);
   };
+
   const confirmCancellation = async () => {
     if (!cancelReason.trim()) {
       notifyError("Please enter a cancellation reason.");
@@ -173,107 +196,135 @@ const VendorBookingsList = () => {
           <p className="text-gray-600">No bookings found for this category.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Booking ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Venue
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredBookings.map((booking) => (
-                <tr key={booking._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {booking._id.substring(0, 8)}...
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {booking.venue?.name || "Venue name"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {format(new Date(booking.startDate), "MMM dd, yyyy")}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      to {format(new Date(booking.endDate), "MMM dd, yyyy")}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {booking.user?.name || "Customer name"}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {booking.user?.email || "customer@example.com"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      ₹{booking.totalPrice}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {booking.advancePaid ? "Advance paid" : "Advance pending"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(
-                        booking.status
-                      )}`}
-                    >
-                      {booking.status
-                        .split("_")
-                        .map(
-                          (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
-                        )
-                        .join(" ")}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {booking.status === "advance_paid" && (
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => openModal(booking._id)}
-                          className="text-red-600 hover:text-red-900 cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                    {/* <button
-                      onClick={() =>
-                        navigate(`/vendor/bookings/${booking._id}`)
-                      }
-                      className="text-blue-600 hover:text-blue-900 cursor-pointer"
-                    >
-                      View Details
-                    </button> */}
-                  </td>
+        <>
+          <div className="overflow-x-auto bg-white rounded-lg shadow">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Booking ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Venue
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {currentBookings.map((booking) => (
+                  <tr key={booking._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {booking._id.substring(0, 8)}...
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {booking.venue?.name || "Venue name"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {format(new Date(booking.startDate), "MMM dd, yyyy")}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        to {format(new Date(booking.endDate), "MMM dd, yyyy")}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {booking.user?.name || "Customer name"}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {booking.user?.email || "customer@example.com"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        ₹{booking.totalPrice}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {booking.advancePaid
+                          ? "Advance paid"
+                          : "Advance pending"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(
+                          booking.status
+                        )}`}
+                      >
+                        {booking.status
+                          .split("_")
+                          .map(
+                            (s: string) =>
+                              s.charAt(0).toUpperCase() + s.slice(1)
+                          )
+                          .join(" ")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {booking.status === "advance_paid" && (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => openModal(booking._id)}
+                            className="text-red-600 hover:text-red-900 cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex items-center justify-between mt-6">
+            <p className="text-sm text-gray-600">
+              Showing{" "}
+              <span className="font-medium">
+                {indexOfFirstItem + 1} -{" "}
+                {Math.min(indexOfLastItem, filteredBookings.length)}
+              </span>{" "}
+              of <span className="font-medium">{filteredBookings.length}</span>{" "}
+              bookings
+            </p>
+            <nav className="relative z-0 inline-flex shadow-sm rounded-md">
+              <button
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button className="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-blue-100 transition duration-150 cursor-pointer">
+                {currentPage}
+              </button>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </nav>
+          </div>
+        </>
       )}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">

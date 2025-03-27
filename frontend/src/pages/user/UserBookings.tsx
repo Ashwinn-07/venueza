@@ -17,7 +17,7 @@ const UserBookings = () => {
     "upcoming"
   );
   const [currentPage, setCurrentPage] = useState(1);
-  const bookingsPerPage = 5;
+  const bookingsPerPage = 3;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -371,7 +371,7 @@ const UserBookings = () => {
                           <button
                             key={i}
                             onClick={() => paginate(i + 1)}
-                            className={`px-4 py-2 text-sm font-medium ${
+                            className={`px-4 py-2 text-sm font-medium cursor-pointer ${
                               currentPage === i + 1
                                 ? "bg-[#F4A261] text-white"
                                 : "text-gray-600 hover:bg-gray-100"
