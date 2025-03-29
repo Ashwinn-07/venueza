@@ -84,6 +84,9 @@ const AdminRevenuePage = lazy(() => import("./pages/admin/AdminRevenuePage"));
 const VenueCalendarPage = lazy(
   () => import("./pages/vendor/VenueCalendarPage")
 );
+const TransactionHistoryPage = lazy(
+  () => import("./pages/user/TransactionHistoryPage")
+);
 
 const App = () => {
   return (
@@ -296,6 +299,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <BalancePaymentPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/transactions"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <TransactionHistoryPage />
                 </Suspense>
               }
             />
