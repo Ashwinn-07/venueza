@@ -75,5 +75,10 @@ vendorRoutes.patch(
   authMiddleware(["vendor"]),
   bookingController.vendorCancelBooking
 );
+vendorRoutes.get(
+  "/venues/:venueId/booked-dates",
+  authMiddleware(["vendor"]),
+  bookingController.getBookedDatesForVenue
+);
 
 export default vendorRoutes;

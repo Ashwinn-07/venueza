@@ -81,6 +81,9 @@ const VendorRevenuePage = lazy(
   () => import("./pages/vendor/VendorRevenuePage")
 );
 const AdminRevenuePage = lazy(() => import("./pages/admin/AdminRevenuePage"));
+const VenueCalendarPage = lazy(
+  () => import("./pages/vendor/VenueCalendarPage")
+);
 
 const App = () => {
   return (
@@ -347,6 +350,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <BlockDatesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vendor/venues/dates"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VenueCalendarPage />
                 </Suspense>
               }
             />
