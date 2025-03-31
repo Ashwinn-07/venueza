@@ -1,6 +1,7 @@
 import { Router } from "express";
 import adminController from "../controllers/admin.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import reviewController from "../controllers/review.controller";
 
 const adminRoutes = Router();
 
@@ -57,5 +58,10 @@ adminRoutes.get(
   "/revenue",
   authMiddleware(["admin"]),
   adminController.getAdminRevenue
+);
+adminRoutes.get(
+  "/reviews/:venueId",
+  authMiddleware(["user", "vendor", "admin"]),
+  reviewController.getReviews
 );
 export default adminRoutes;

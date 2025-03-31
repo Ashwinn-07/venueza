@@ -3,6 +3,7 @@ import vendorController from "../controllers/vendor.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import venueController from "../controllers/venue.controller";
 import bookingController from "../controllers/booking.controller";
+import reviewController from "../controllers/review.controller";
 
 const vendorRoutes = Router();
 
@@ -79,6 +80,11 @@ vendorRoutes.get(
   "/venues/:venueId/booked-dates",
   authMiddleware(["vendor"]),
   bookingController.getBookedDatesForVenue
+);
+vendorRoutes.get(
+  "/reviews/:venueId",
+  authMiddleware(["user", "vendor", "admin"]),
+  reviewController.getReviews
 );
 
 export default vendorRoutes;

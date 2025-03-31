@@ -36,6 +36,8 @@ export const MESSAGES = {
     BLOCKED_DATE_ADDED: "Blocked date added successfully",
     REVENUE_FETCHED: "Revenue fetched successfully",
     BOOKING_CANCELLED: "Booking cancelled successfully.",
+    REVIEW_CREATED: "Review created successfully.",
+    REVIEW_FETCHED: "Reviews fetched successfully.",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",

@@ -4,6 +4,7 @@ import passport from "../config/passport";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import venueController from "../controllers/venue.controller";
 import bookingController from "../controllers/booking.controller";
+import reviewController from "../controllers/review.controller";
 
 const userRoutes = Router();
 
@@ -95,6 +96,16 @@ userRoutes.patch(
   "/bookings/cancel",
   authMiddleware(["user"]),
   bookingController.userCancelBooking
+);
+userRoutes.get(
+  "/reviews/:venueId",
+  authMiddleware(["user", "vendor", "admin"]),
+  reviewController.getReviews
+);
+userRoutes.post(
+  "/reviews",
+  authMiddleware(["user"]),
+  reviewController.createReview
 );
 
 export default userRoutes;
