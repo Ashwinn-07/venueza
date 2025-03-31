@@ -13,6 +13,10 @@ class VenueRepository
   async findByVendor(vendorId: string): Promise<IVenue[]> {
     return Venue.find({ vendor: vendorId }).exec();
   }
+
+  async findByVenueId(id: string) {
+    return Venue.findById(id).populate("vendor").exec();
+  }
 }
 
 export default new VenueRepository();

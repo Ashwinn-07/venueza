@@ -89,6 +89,7 @@ const TransactionHistoryPage = lazy(
 );
 const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
 const VendorReviews = lazy(() => import("./pages/vendor/VendorReviews"));
+const ChatPage = lazy(() => import("./pages/user/ChatPage"));
 
 const App = () => {
   return (
@@ -309,6 +310,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <TransactionHistoryPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/user/chat/:vendorId"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ChatPage />
                 </Suspense>
               }
             />

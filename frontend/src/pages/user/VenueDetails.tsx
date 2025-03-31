@@ -283,7 +283,10 @@ const VenueDetails = () => {
               </div>
             )}
             <div className="flex space-x-4 mt-8">
-              <button className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#F4A261] text-white rounded-md hover:bg-[#E76F51] transition-colors cursor-pointer">
+              <button
+                onClick={() => navigate(`/user/chat/${venue.vendor._id}`)}
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#F4A261] text-white rounded-md hover:bg-[#E76F51] transition-colors cursor-pointer"
+              >
                 <MessageCircle className="w-5 h-5" />
                 <span>Chat with Vendor</span>
               </button>

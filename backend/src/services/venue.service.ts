@@ -75,7 +75,7 @@ class VenueService implements IVenueService {
   async getVenueById(
     venueId: string
   ): Promise<{ message: string; status: number; venue: IVenue }> {
-    const venue = await venueRepository.findById(venueId);
+    const venue = await venueRepository.findByVenueId(venueId);
     if (!venue) {
       throw new Error("Venue not found");
     }
