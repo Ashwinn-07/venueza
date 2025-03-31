@@ -4,6 +4,7 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 import venueController from "../controllers/venue.controller";
 import bookingController from "../controllers/booking.controller";
 import reviewController from "../controllers/review.controller";
+import chatController from "../controllers/chat.controller";
 
 const vendorRoutes = Router();
 
@@ -90,6 +91,21 @@ vendorRoutes.patch(
   "/reviews/:reviewId/reply",
   authMiddleware(["vendor"]),
   reviewController.vendorReplyReview
+);
+vendorRoutes.post(
+  "/messages",
+  authMiddleware(["vendor"]),
+  chatController.sendMessage
+);
+vendorRoutes.get(
+  "/conversation",
+  authMiddleware(["vendor"]),
+  chatController.getConversation
+);
+vendorRoutes.get(
+  "/conversations",
+  authMiddleware(["vendor"]),
+  chatController.getConversations
 );
 
 export default vendorRoutes;

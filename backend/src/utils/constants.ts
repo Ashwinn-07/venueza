@@ -40,6 +40,9 @@ export const MESSAGES = {
     REVIEW_FETCHED: "Reviews fetched successfully.",
     REPLY_ADDED: "Reply added successfully",
     REVIEW_DELETED: "Review deleted successfully",
+    MESSAGE_SENT: "Message sent successfully",
+    CONVERSATION_FETCHED: "Conversation fetched successfully",
+    CONVERSATIONS_FETCHED: "Conversations fetched successfully",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",
