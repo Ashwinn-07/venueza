@@ -20,6 +20,17 @@ class ReviewRepository
   async findByVenue(venueId: string): Promise<IReview[]> {
     return Review.find({ venue: venueId }).populate("user").exec();
   }
+  async updateReply(reviewId: string, reply: string): Promise<IReview | null> {
+    return Review.findByIdAndUpdate(
+      reviewId,
+      { vendorReply: reply },
+      { new: true }
+    ).exec();
+  }
+
+  async delete(reviewId: string): Promise<IReview | null> {
+    return Review.findByIdAndDelete(reviewId).exec();
+  }
 }
 
 export default new ReviewRepository();

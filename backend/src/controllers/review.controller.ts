@@ -43,6 +43,42 @@ class ReviewController implements IReviewController {
       });
     }
   }
+  async vendorReplyReview(req: Request, res: Response): Promise<void> {
+    try {
+      const reviewId = req.params.reviewId;
+      const { reply } = req.body;
+      const result = await reviewService.vendorReplyReview(reviewId, reply);
+      res.status(result.status).json({
+        message: result.message,
+        review: result.review,
+      });
+    } catch (error) {
+      console.error("Error adding vendor reply:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to add vendor reply",
+      });
+    }
+  }
+  async deleteReview(req: Request, res: Response): Promise<void> {
+    try {
+      const reviewId = req.params.reviewId;
+      const currentUserRole = (req as any).userType;
+      const result = await reviewService.deleteReview(
+        reviewId,
+        currentUserRole
+      );
+      res.status(result.status).json({
+        message: result.message,
+      });
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error ? error.message : "Failed to delete review",
+      });
+    }
+  }
 }
 
 export default new ReviewController();

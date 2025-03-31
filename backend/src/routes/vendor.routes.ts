@@ -86,5 +86,10 @@ vendorRoutes.get(
   authMiddleware(["user", "vendor", "admin"]),
   reviewController.getReviews
 );
+vendorRoutes.patch(
+  "/reviews/:reviewId/reply",
+  authMiddleware(["vendor"]),
+  reviewController.vendorReplyReview
+);
 
 export default vendorRoutes;

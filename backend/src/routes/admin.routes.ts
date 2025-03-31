@@ -64,4 +64,9 @@ adminRoutes.get(
   authMiddleware(["user", "vendor", "admin"]),
   reviewController.getReviews
 );
+adminRoutes.delete(
+  "/reviews/:reviewId",
+  authMiddleware(["admin"]),
+  reviewController.deleteReview
+);
 export default adminRoutes;

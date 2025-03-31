@@ -6,6 +6,7 @@ export interface IReview extends Document {
   rating: number;
   reviewText: string;
   images: string[];
+  vendorReply?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +18,7 @@ const reviewSchema: Schema = new Schema(
     rating: { type: Number, required: true, min: 1, max: 5 },
     reviewText: { type: String, required: true },
     images: { type: [String], default: [] },
+    vendorReply: { type: String, default: "" },
   },
   { timestamps: true }
 );

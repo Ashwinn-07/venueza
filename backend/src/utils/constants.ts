@@ -38,6 +38,8 @@ export const MESSAGES = {
     BOOKING_CANCELLED: "Booking cancelled successfully.",
     REVIEW_CREATED: "Review created successfully.",
     REVIEW_FETCHED: "Reviews fetched successfully.",
+    REPLY_ADDED: "Reply added successfully",
+    REVIEW_DELETED: "Review deleted successfully",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",

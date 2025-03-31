@@ -4,6 +4,7 @@ import { IReview } from "../models/review.model";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
 import { IReviewService } from "./interfaces/IReviewService";
 import mongoose from "mongoose";
+import venueRepository from "../repositories/venue.repository";
 
 class ReviewService implements IReviewService {
   async createReview(
@@ -51,6 +52,38 @@ class ReviewService implements IReviewService {
       message: MESSAGES.SUCCESS.REVIEW_FETCHED,
       status: STATUS_CODES.OK,
       reviews,
+    };
+  }
+  async vendorReplyReview(
+    reviewId: string,
+    reply: string
+  ): Promise<{ message: string; status: number; review: IReview }> {
+    const review = await reviewRepository.findById(reviewId);
+    if (!review) {
+      throw new Error("No Review found");
+    }
+    const updatedReview = await reviewRepository.updateReply(reviewId, reply);
+    return {
+      message: MESSAGES.SUCCESS.REPLY_ADDED,
+      status: STATUS_CODES.OK,
+      review: updatedReview as IReview,
+    };
+  }
+  async deleteReview(
+    reviewId: string,
+    currentUserRole: string
+  ): Promise<{ message: string; status: number }> {
+    const review = await reviewRepository.findById(reviewId);
+    if (!review) {
+      throw new Error("Review not found");
+    }
+    if (currentUserRole !== "admin") {
+      throw new Error("Unauthorized: Only admins can delete reviews");
+    }
+    await reviewRepository.delete(reviewId);
+    return {
+      message: MESSAGES.SUCCESS.REVIEW_DELETED,
+      status: STATUS_CODES.OK,
     };
   }
 }
