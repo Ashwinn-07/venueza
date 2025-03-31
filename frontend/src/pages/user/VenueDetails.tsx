@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Image,
   Send,
+  Reply,
 } from "lucide-react";
 import LocationPicker from "../../components/maps/LocationPicker";
 import { useAuthStore } from "../../stores/authStore";
@@ -30,7 +31,7 @@ const VenueDetails = () => {
   const [carousalRef] = useAnimation();
   const [userHasReviewed, setUserHasReviewed] = useState(false);
 
-  const [rating, setRating] = useState<number>(5);
+  const [rating, setRating] = useState<number>(0);
   const [reviewText, setReviewText] = useState<string>("");
   const [reviewImages, setReviewImages] = useState<File[]>([]);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -357,6 +358,20 @@ const VenueDetails = () => {
                             />
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {review.vendorReply && review.vendorReply.trim() !== "" && (
+                      <div className="mt-4 pl-4 border-l-2 border-gray-200">
+                        <div className="flex items-center mb-2">
+                          <Reply className="w-4 h-4 text-gray-400 mr-2" />
+                          <h4 className="text-sm font-medium text-gray-800">
+                            Vendor's Response
+                          </h4>
+                        </div>
+                        <p className="text-gray-600 text-sm italic">
+                          {review.vendorReply}
+                        </p>
                       </div>
                     )}
                   </div>

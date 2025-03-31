@@ -1,18 +1,28 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../../stores/authStore";
-import { notifyError } from "../../utils/notifications";
-import { Search, X, Star, AlertCircle, MessageSquare } from "lucide-react";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import {
+  Search,
+  X,
+  Star,
+  AlertCircle,
+  MessageSquare,
+  Send,
+} from "lucide-react";
 import { useAnimation } from "../../utils/animation";
 
 const VendorReviews = () => {
-  const { getVenues, getReviewsVendor } = useAuthStore();
+  const { getVenues, getReviewsVendor, vendorReplyReview } = useAuthStore();
   const [venues, setVenues] = useState([]);
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<any>([]);
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [replyText, setReplyText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -98,8 +108,39 @@ const VendorReviews = () => {
     setIsReviewModalOpen(true);
   };
 
-  const handleRespondToReview = (reviewId: any) => {
-    console.log("Respond to review:", reviewId);
+  const handleRespondToReview = (review: any) => {
+    setSelectedReview(review);
+    setReplyText(review.vendorReply || "");
+    setIsReplyModalOpen(true);
+  };
+
+  const handleSubmitReply = async () => {
+    if (!replyText.trim()) {
+      notifyError("Please enter a reply.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await vendorReplyReview(selectedReview._id, replyText);
+
+      const updatedReviews = reviews.map((review: any) =>
+        review._id === selectedReview._id
+          ? { ...review, vendorReply: replyText }
+          : review
+      );
+      setReviews(updatedReviews);
+
+      setSelectedReview({ ...selectedReview, vendorReply: replyText });
+
+      notifySuccess("Reply submitted successfully!");
+      setIsReplyModalOpen(false);
+    } catch (error) {
+      console.error("Failed to submit reply:", error);
+      notifyError("Failed to submit reply. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const calculateAverageRating = () => {
@@ -333,6 +374,9 @@ const VendorReviews = () => {
                               Date
                             </th>
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                               Actions
                             </th>
                           </tr>
@@ -370,6 +414,19 @@ const VendorReviews = () => {
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm">
+                                    {review.vendorReply ? (
+                                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                                        Replied
+                                      </span>
+                                    ) : (
+                                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">
+                                        Awaiting Reply
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex space-x-2">
                                     <button
                                       onClick={() => handleViewReview(review)}
@@ -379,12 +436,14 @@ const VendorReviews = () => {
                                     </button>
                                     <button
                                       onClick={() =>
-                                        handleRespondToReview(review._id)
+                                        handleRespondToReview(review)
                                       }
                                       className="px-3 py-1 text-teal-600 hover:text-teal-800 text-sm font-medium transition duration-150 cursor-pointer flex items-center"
                                     >
                                       <MessageSquare className="w-4 h-4 mr-1" />
-                                      Respond
+                                      {review.vendorReply
+                                        ? "Edit Reply"
+                                        : "Respond"}
                                     </button>
                                   </div>
                                 </td>
@@ -392,7 +451,7 @@ const VendorReviews = () => {
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={5} className="px-6 py-8 text-center">
+                              <td colSpan={6} className="px-6 py-8 text-center">
                                 <div className="flex flex-col items-center justify-center text-gray-500">
                                   <AlertCircle className="w-12 h-12 mb-2" />
                                   <p className="text-lg">
@@ -494,6 +553,16 @@ const VendorReviews = () => {
                       {selectedReview.reviewText}
                     </p>
                   </div>
+                  {selectedReview.vendorReply && (
+                    <div className="bg-teal-50 p-4 rounded-lg border border-teal-100">
+                      <p className="text-sm font-medium text-teal-700 mb-1">
+                        Your Reply
+                      </p>
+                      <p className="text-base text-gray-800 whitespace-pre-line">
+                        {selectedReview.vendorReply}
+                      </p>
+                    </div>
+                  )}
                   {selectedReview.images &&
                     selectedReview.images.length > 0 && (
                       <div>
@@ -520,11 +589,93 @@ const VendorReviews = () => {
                     )}
                   <div className="pt-4 border-t border-gray-200">
                     <button
-                      onClick={() => handleRespondToReview(selectedReview._id)}
+                      onClick={() => {
+                        setIsReviewModalOpen(false);
+                        handleRespondToReview(selectedReview);
+                      }}
                       className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 cursor-pointer flex items-center justify-center"
                     >
                       <MessageSquare className="w-5 h-5 mr-2" />
-                      Respond to Review
+                      {selectedReview.vendorReply
+                        ? "Edit Reply"
+                        : "Respond to Review"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isReplyModalOpen && selectedReview && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {selectedReview.vendorReply
+                      ? "Edit Your Reply"
+                      : "Respond to Review"}
+                  </h3>
+                  <button
+                    onClick={() => setIsReplyModalOpen(false)}
+                    className="text-gray-400 hover:text-gray-600 transition duration-150"
+                  >
+                    <X className="w-6 h-6 cursor-pointer" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <div className="flex items-center">
+                        {renderStars(selectedReview.rating)}
+                        <span className="ml-2 text-sm text-gray-600">
+                          ({selectedReview.rating})
+                        </span>
+                      </div>
+                      <span className="mx-2 text-gray-300">•</span>
+                      <span className="text-sm text-gray-600">
+                        {selectedReview.user.name || "Anonymous User"}
+                      </span>
+                    </div>
+                    <p className="text-gray-800">{selectedReview.reviewText}</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Your Response
+                    </label>
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write your reply here..."
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-150 resize-none"
+                      rows={6}
+                    ></textarea>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Your reply will be visible to all users viewing this
+                      review.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-4">
+                    <button
+                      onClick={() => setIsReplyModalOpen(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSubmitReply}
+                      disabled={isSubmitting}
+                      className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 cursor-pointer flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        "Submitting..."
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Submit Reply
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
