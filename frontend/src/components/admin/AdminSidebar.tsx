@@ -101,6 +101,24 @@ const AdminSidebar = () => {
           viewBox="0 0 20 20"
           fill="currentColor"
         >
+          <path
+            fillRule="evenodd"
+            d="M5 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zm10 10a1 1 0 01-1 1H6a1 1 0 01-1-1V9h10v3z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ),
+      text: "Reviews",
+      path: "/admin/reviews",
+    },
+    {
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
           <path d="M3 3a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V3z" />
           <path
             fillRule="evenodd"

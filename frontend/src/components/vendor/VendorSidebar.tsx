@@ -12,6 +12,7 @@ const VendorSidebar = () => {
     { icon: "🏢", text: "Venue Management", path: "/vendor/venues" },
     { icon: "📅", text: "Calendar", path: "/vendor/venues/dates" },
     { icon: "📊", text: "Bookings Management", path: "/vendor/bookings" },
+    { icon: "⭐", text: "Reviews", path: "/vendor/reviews" },
     { icon: "💰", text: "Earnings", path: "/vendor/revenue" },
     { icon: "💬", text: "Messages", path: "/vendor/messages" },
     { icon: "⚙️", text: "Settings", path: "/vendor/settings/profile" },

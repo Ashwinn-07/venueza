@@ -87,6 +87,8 @@ const VenueCalendarPage = lazy(
 const TransactionHistoryPage = lazy(
   () => import("./pages/user/TransactionHistoryPage")
 );
+const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
+const VendorReviews = lazy(() => import("./pages/vendor/VendorReviews"));
 
 const App = () => {
   return (
@@ -404,6 +406,14 @@ const App = () => {
                 </Suspense>
               }
             />
+            <Route
+              path="/vendor/reviews"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorReviews />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
 
@@ -471,6 +481,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <AdminRevenuePage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/reviews"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <AdminReviews />
                 </Suspense>
               }
             />

@@ -3,3 +3,4 @@ export * from "./profileSlice";
 export * from "./adminSlice";
 export * from "./venueSlice";
 export * from "./bookingSlice";
+export * from "./reviewSlice";
