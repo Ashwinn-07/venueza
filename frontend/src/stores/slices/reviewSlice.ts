@@ -12,6 +12,8 @@ export interface ReviewSlice {
   getReviewsUser: (venueId: string) => Promise<any>;
   getReviewsVendor: (venueId: string) => Promise<any>;
   getReviewsAdmin: (venueId: string) => Promise<any>;
+  vendorReplyReview: (reviewId: string, reply: string) => Promise<any>;
+  adminDeleteReview: (reviewId: string) => Promise<any>;
 }
 
 export const createReviewSlice: StateCreator<
@@ -70,6 +72,30 @@ export const createReviewSlice: StateCreator<
       return await reviewService.getReviewsAdmin(venueId);
     } catch (error) {
       console.error("Failed to fetch reviews", error);
+      throw error;
+    }
+  },
+  vendorReplyReview: async (reviewId, reply) => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "vendor") {
+        throw new Error("Authentication required");
+      }
+      return await reviewService.replyReview(reviewId, reply);
+    } catch (error) {
+      console.error("Failed to add reply", error);
+      throw error;
+    }
+  },
+  adminDeleteReview: async (reviewId) => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "admin") {
+        throw new Error("Authentication required");
+      }
+      return await reviewService.deleteReview(reviewId);
+    } catch (error) {
+      console.error("Failed to delete review", error);
       throw error;
     }
   },

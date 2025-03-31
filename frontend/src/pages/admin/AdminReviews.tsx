@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../../stores/authStore";
-import { notifyError } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import { Search, X, Star, AlertCircle } from "lucide-react";
 import { useAnimation } from "../../utils/animation";
 
 const AdminReviews = () => {
-  const { listApprovedVenues, getReviewsAdmin } = useAuthStore();
+  const { listApprovedVenues, getReviewsAdmin, adminDeleteReview } =
+    useAuthStore();
   const [venues, setVenues] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
@@ -14,6 +15,7 @@ const AdminReviews = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDeleting, setIsDeleting] = useState(false);
   const itemsPerPage = 5;
 
   const [modalParent] = useAnimation();
@@ -95,8 +97,27 @@ const AdminReviews = () => {
     setIsReviewModalOpen(true);
   };
 
-  const handleCancelReview = (reviewId: any) => {
-    console.log("Cancel review:", reviewId);
+  const handleDeleteReview = async (reviewId: any) => {
+    try {
+      setIsDeleting(true);
+      await adminDeleteReview(reviewId);
+      setReviews(reviews.filter((review: any) => review._id !== reviewId));
+
+      if (
+        isReviewModalOpen &&
+        selectedReview &&
+        selectedReview._id === reviewId
+      ) {
+        setIsReviewModalOpen(false);
+      }
+
+      notifySuccess("Review Deleted Successfully");
+    } catch (error) {
+      console.error("Failed to delete review:", error);
+      notifyError("Failed to delete review.");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const renderStars = (rating: any) => {
@@ -290,11 +311,12 @@ const AdminReviews = () => {
                                   </button>
                                   <button
                                     onClick={() =>
-                                      handleCancelReview(review._id)
+                                      handleDeleteReview(review._id)
                                     }
                                     className="px-3 py-1 text-red-600 hover:text-red-800 text-sm font-medium transition duration-150 cursor-pointer"
+                                    disabled={isDeleting}
                                   >
-                                    Cancel
+                                    Delete
                                   </button>
                                 </div>
                               </td>
@@ -302,7 +324,7 @@ const AdminReviews = () => {
                           ))
                         ) : (
                           <tr>
-                            <td className="px-6 py-8 text-center">
+                            <td colSpan={5} className="px-6 py-8 text-center">
                               <div className="flex flex-col items-center justify-center text-gray-500">
                                 <AlertCircle className="w-12 h-12 mb-2" />
                                 <p className="text-lg">
@@ -426,10 +448,11 @@ const AdminReviews = () => {
                     )}
                   <div className="pt-4 border-t border-gray-200">
                     <button
-                      onClick={() => handleCancelReview(selectedReview._id)}
+                      onClick={() => handleDeleteReview(selectedReview._id)}
                       className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
+                      disabled={isDeleting}
                     >
-                      Cancel Review
+                      {isDeleting ? "Deleting..." : "Delete Review"}
                     </button>
                   </div>
                 </div>
