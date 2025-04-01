@@ -5,3 +5,4 @@ export * from "./venueSlice";
 export * from "./bookingSlice";
 export * from "./reviewSlice";
 export * from "./chatSlice";
+export * from "./notificationSlice";
