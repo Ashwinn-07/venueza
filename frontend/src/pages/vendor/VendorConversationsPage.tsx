@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, MessageCircle } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { format } from "date-fns";
+import NotificationDropdown from "../../components/NotificationDropDown";
 
 interface Conversation {
   _id: string;
@@ -113,7 +114,10 @@ const VendorConversationsPage = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       <div className="flex-1 p-8 overflow-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Messages</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Messages</h1>
+          <NotificationDropdown onNavigate={navigate} />
+        </div>
 
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
           <div className="p-6">
