@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, User } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { format } from "date-fns";
+import { io, Socket } from "socket.io-client";
 
 interface Message {
   _id: string;
@@ -28,7 +29,35 @@ const VendorChatPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [partner, setPartner] = useState<Partner | null>(null);
   const [error, setError] = useState<string>("");
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const socketInstance = io(
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"
+    );
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!socket || !user?.id || !userId) return;
+
+    const room = [user.id, userId].sort().join("-");
+    socket.emit("joinRoom", room);
+
+    socket.on("receiveMessage", (newMessage: Message) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [socket, user?.id, userId]);
 
   useEffect(() => {
     if (!userId || !user?.id) return;
@@ -64,30 +93,25 @@ const VendorChatPage = () => {
     if (!newMessage.trim() || !userId || !user?.id) return;
 
     try {
+      setSending(true);
+      const room = [user.id, userId].sort().join("-");
+
       const data = {
         sender: user.id,
         senderModel: "Vendor",
         receiver: userId,
         receiverModel: "User",
         content: newMessage,
-        room: `${user.id}_${userId}`,
+        room,
       };
 
       await sendMessage(data);
-
-      const tempMessage: Message = {
-        _id: Date.now().toString(),
-        sender: user.id,
-        content: newMessage,
-        createdAt: new Date().toISOString(),
-        read: false,
-      };
-
-      setMessages([...messages, tempMessage]);
       setNewMessage("");
     } catch (err: any) {
       console.error("Error sending message:", err);
       alert("Failed to send message. Please try again.");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -175,7 +199,6 @@ const VendorChatPage = () => {
                     : message.sender;
 
                 const isVendor = senderId === user?.id;
-                console.log(message.sender);
                 return (
                   <div
                     key={message._id}
@@ -216,16 +239,23 @@ const VendorChatPage = () => {
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
               placeholder="Type your message..."
               className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={sending}
             />
             <button
               onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || sending}
               className="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors cursor-pointer"
             >
               <Send size={20} />
             </button>
           </div>
         </div>
+
+        {sending && (
+          <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full text-sm">
+            Sending message...
+          </div>
+        )}
       </div>
     </div>
   );
