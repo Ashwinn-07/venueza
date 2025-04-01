@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 import { Ban, CheckCircle, Search } from "lucide-react";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const AdminUsers = () => {
   const { listAllUsers, updateUserStatus } = useAuthStore();
@@ -40,10 +42,9 @@ const AdminUsers = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleToggleBlock = async (userId: string, currentStatus: string) => {
+  const executeStatusChange = async (userId: string, newStatus: string) => {
     setProcessingUserId(userId);
     try {
-      const newStatus = currentStatus === "active" ? "blocked" : "active";
       await updateUserStatus(userId, newStatus);
       const response = await listAllUsers();
       setUsers(response.users);
@@ -61,6 +62,26 @@ const AdminUsers = () => {
     } finally {
       setProcessingUserId(null);
     }
+  };
+
+  const handleToggleBlock = (userId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "active" ? "blocked" : "active";
+    const actionText = newStatus === "blocked" ? "Block" : "Unblock";
+
+    confirmAlert({
+      title: `Confirm ${actionText}`,
+      message: `Are you sure you want to ${actionText.toLowerCase()} this user?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => executeStatusChange(userId, newStatus),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;

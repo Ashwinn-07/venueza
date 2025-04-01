@@ -3,6 +3,8 @@ import { useAuthStore } from "../../stores/authStore";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { Search, X, Star, AlertCircle } from "lucide-react";
 import { useAnimation } from "../../utils/animation";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const AdminReviews = () => {
   const { listApprovedVenues, getReviewsAdmin, adminDeleteReview } =
@@ -98,26 +100,43 @@ const AdminReviews = () => {
   };
 
   const handleDeleteReview = async (reviewId: any) => {
-    try {
-      setIsDeleting(true);
-      await adminDeleteReview(reviewId);
-      setReviews(reviews.filter((review: any) => review._id !== reviewId));
+    confirmAlert({
+      title: "Confirm Delete",
+      message: "Are you sure you want to delete this review?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              setIsDeleting(true);
+              await adminDeleteReview(reviewId);
+              setReviews(
+                reviews.filter((review: any) => review._id !== reviewId)
+              );
 
-      if (
-        isReviewModalOpen &&
-        selectedReview &&
-        selectedReview._id === reviewId
-      ) {
-        setIsReviewModalOpen(false);
-      }
+              if (
+                isReviewModalOpen &&
+                selectedReview &&
+                selectedReview._id === reviewId
+              ) {
+                setIsReviewModalOpen(false);
+              }
 
-      notifySuccess("Review Deleted Successfully");
-    } catch (error) {
-      console.error("Failed to delete review:", error);
-      notifyError("Failed to delete review.");
-    } finally {
-      setIsDeleting(false);
-    }
+              notifySuccess("Review Deleted Successfully");
+            } catch (error) {
+              console.error("Failed to delete review:", error);
+              notifyError("Failed to delete review.");
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const renderStars = (rating: any) => {

@@ -4,6 +4,8 @@ import { useAuthStore } from "../../stores/authStore";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { FileText, X, Search, Ban, CheckCircle } from "lucide-react";
 import { useAnimation } from "../../utils/animation";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 const AdminVendors = () => {
   const { listAllVendors, updateVendorStatus } = useAuthStore();
@@ -62,10 +64,9 @@ const AdminVendors = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  const handleToggleBlock = async (vendorId: string, currentStatus: string) => {
+  const executeStatusChange = async (vendorId: string, newStatus: string) => {
     setProcessingVendorId(vendorId);
     try {
-      const newStatus = currentStatus === "active" ? "blocked" : "active";
       await updateVendorStatus(vendorId, newStatus);
       const response = await listAllVendors();
       setVendors(response.vendors);
@@ -85,6 +86,26 @@ const AdminVendors = () => {
     } finally {
       setProcessingVendorId(null);
     }
+  };
+
+  const handleToggleBlock = (vendorId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "active" ? "blocked" : "active";
+    const actionText = newStatus === "blocked" ? "Block" : "Unblock";
+
+    confirmAlert({
+      title: `Confirm ${actionText}`,
+      message: `Are you sure you want to ${actionText.toLowerCase()} this vendor?`,
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => executeStatusChange(vendorId, newStatus),
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const handleViewDocuments = (documents: string[]) => {
