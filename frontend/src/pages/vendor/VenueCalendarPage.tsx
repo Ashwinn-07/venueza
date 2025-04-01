@@ -357,6 +357,8 @@ const VenueCalendarPage = () => {
         reason={modalData.reason}
       />
 
+      {/* using style because tailwind cannot override some default calendar styles */}
+
       <style>{`
         .calendar-container .react-calendar {
           width: 100%;
