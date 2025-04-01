@@ -44,6 +44,16 @@ const NotificationDropdown = ({ onNavigate }: NotificationDropdownProps) => {
   }, [isOpen]);
 
   useEffect(() => {
+    fetchNotifications();
+
+    const intervalId = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -162,7 +172,7 @@ const NotificationDropdown = ({ onNavigate }: NotificationDropdownProps) => {
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-6 text-center text-gray-500">
-                <div className="mb-2">No notifications yet</div>
+                <div className="mb-2">You're all caught up!</div>
                 <div className="text-sm">
                   We'll notify you of important updates
                 </div>

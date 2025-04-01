@@ -11,7 +11,7 @@ class NotificationRepository
   }
 
   async findByRecipient(recipientId: string): Promise<INotification[]> {
-    return Notification.find({ recipient: recipientId })
+    return Notification.find({ recipient: recipientId, read: false })
       .sort({ createdAt: -1 })
       .exec();
   }
