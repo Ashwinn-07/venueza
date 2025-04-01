@@ -14,7 +14,7 @@ const VendorSidebar = () => {
     { icon: "📊", text: "Bookings Management", path: "/vendor/bookings" },
     { icon: "⭐", text: "Reviews", path: "/vendor/reviews" },
     { icon: "💰", text: "Earnings", path: "/vendor/revenue" },
-    { icon: "💬", text: "Messages", path: "/vendor/messages" },
+    { icon: "💬", text: "Messages", path: "/vendor/conversations" },
     { icon: "⚙️", text: "Settings", path: "/vendor/settings/profile" },
     { icon: "⛔", text: "Block Dates", path: "/vendor/venues/block-dates" },
   ];

@@ -9,7 +9,7 @@ import { notifyError, notifySuccess } from "../../utils/notifications";
 interface Message {
   _id: string;
   content: string;
-  sender: string;
+  sender: string | { _id: string; [key: string]: any };
   senderModel: string;
   receiver: string;
   receiverModel: string;
@@ -210,9 +210,6 @@ const ChatPage = () => {
             <h2 className="text-lg font-semibold">
               {chatPartner?.name || "Vendor"}
             </h2>
-            <p className="text-sm text-gray-500">
-              {chatPartner?.email || "Loading..."}
-            </p>
           </div>
         </div>
       </div>
@@ -231,7 +228,12 @@ const ChatPage = () => {
               </div>
 
               {messagesForDate.map((message) => {
-                const isCurrentUser = message.sender === user?._id;
+                const senderId =
+                  typeof message.sender === "object"
+                    ? message.sender._id
+                    : message.sender;
+
+                const isCurrentUser = senderId === user?.id;
 
                 return (
                   <div

@@ -91,6 +91,10 @@ const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
 const VendorReviews = lazy(() => import("./pages/vendor/VendorReviews"));
 const ChatPage = lazy(() => import("./pages/user/ChatPage"));
 const ConversationsPage = lazy(() => import("./pages/user/ConversationsPage"));
+const VendorChatPage = lazy(() => import("./pages/vendor/VendorChatPage"));
+const VendorConversationsPage = lazy(
+  () => import("./pages/vendor/VendorConversationsPage")
+);
 
 const App = () => {
   return (
@@ -429,6 +433,22 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <VendorReviews />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vendor/conversations"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorConversationsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vendor/chat/:userId"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorChatPage />
                 </Suspense>
               }
             />
