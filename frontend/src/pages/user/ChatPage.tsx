@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Send, ChevronLeft, Image as ImageIcon } from "lucide-react";
+import { format } from "date-fns";
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "../../stores/authStore";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
@@ -164,8 +165,8 @@ const ChatPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+    const messageDate = new Date(dateString);
+    return format(messageDate, "MMMM d, yyyy");
   };
 
   const groupMessagesByDate = () => {

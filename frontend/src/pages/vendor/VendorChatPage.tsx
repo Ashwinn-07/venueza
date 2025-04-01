@@ -151,16 +151,28 @@ const VendorChatPage = () => {
     }
   };
 
-  const formatMessageDate = (dateString: string) => {
+  const formatTime = (dateString: string) => {
     const messageDate = new Date(dateString);
-    const now = new Date();
-    const isToday = messageDate.toDateString() === now.toDateString();
+    return format(messageDate, "h:mm a");
+  };
 
-    if (isToday) {
-      return format(messageDate, "h:mm a");
-    } else {
-      return format(messageDate, "MMM d, h:mm a");
-    }
+  const formatDate = (dateString: string) => {
+    const messageDate = new Date(dateString);
+    return format(messageDate, "MMMM d, yyyy");
+  };
+
+  const groupMessagesByDate = () => {
+    const groups: { [key: string]: Message[] } = {};
+
+    messages.forEach((message) => {
+      const date = formatDate(message.createdAt);
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
+    });
+
+    return groups;
   };
 
   const getInitials = (name: string) => {
@@ -171,6 +183,8 @@ const VendorChatPage = () => {
       .toUpperCase()
       .substring(0, 2);
   };
+
+  const messageGroups = groupMessagesByDate();
 
   if (loading && messages.length === 0) {
     return (
@@ -222,63 +236,77 @@ const VendorChatPage = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-3xl mx-auto">
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
                 <p>No messages yet. Start the conversation!</p>
               </div>
             ) : (
-              messages.map((message) => {
-                const senderId =
-                  typeof message.sender === "object"
-                    ? message.sender._id
-                    : message.sender;
-
-                const isVendor = senderId === user?.id;
-                return (
-                  <div
-                    key={message._id}
-                    className={`flex ${
-                      isVendor ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-xs md:max-w-md rounded-lg px-4 py-2 ${
-                        isVendor
-                          ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
-                      }`}
-                    >
-                      {message.content && (
-                        <p className="break-words">{message.content}</p>
-                      )}
-
-                      {message.images && message.images.length > 0 && (
-                        <div className="mt-2 grid grid-cols-2 gap-2">
-                          {message.images.map((image, index) => (
-                            <div key={index} className="relative">
-                              <img
-                                src={image}
-                                alt={`Chat attachment ${index + 1}`}
-                                className="rounded-md max-h-40 object-cover cursor-pointer"
-                                onClick={() => window.open(image, "_blank")}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <p
-                        className={`text-xs mt-1 text-right ${
-                          isVendor ? "text-blue-100" : "text-gray-500"
-                        }`}
-                      >
-                        {formatMessageDate(message.createdAt)}
-                      </p>
-                    </div>
+              Object.entries(messageGroups).map(([date, messagesForDate]) => (
+                <div key={date} className="mb-6">
+                  <div className="flex justify-center mb-4">
+                    <span className="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs">
+                      {date}
+                    </span>
                   </div>
-                );
-              })
+
+                  <div className="space-y-4">
+                    {messagesForDate.map((message) => {
+                      const senderId =
+                        typeof message.sender === "object"
+                          ? message.sender._id
+                          : message.sender;
+
+                      const isVendor = senderId === user?.id;
+                      return (
+                        <div
+                          key={message._id}
+                          className={`flex ${
+                            isVendor ? "justify-end" : "justify-start"
+                          }`}
+                        >
+                          <div
+                            className={`max-w-xs md:max-w-md rounded-lg px-4 py-2 ${
+                              isVendor
+                                ? "bg-blue-600 text-white rounded-br-none"
+                                : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
+                            }`}
+                          >
+                            {message.content && (
+                              <p className="break-words">{message.content}</p>
+                            )}
+
+                            {message.images && message.images.length > 0 && (
+                              <div className="mt-2 grid grid-cols-2 gap-2">
+                                {message.images.map((image, index) => (
+                                  <div key={index} className="relative">
+                                    <img
+                                      src={image}
+                                      alt={`Chat attachment ${index + 1}`}
+                                      className="rounded-md max-h-40 object-cover cursor-pointer"
+                                      onClick={() =>
+                                        window.open(image, "_blank")
+                                      }
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            <p
+                              className={`text-xs mt-1 text-right ${
+                                isVendor ? "text-blue-100" : "text-gray-500"
+                              }`}
+                            >
+                              {formatTime(message.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))
             )}
             <div ref={messagesEndRef} />
           </div>
