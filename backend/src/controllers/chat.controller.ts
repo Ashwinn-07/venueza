@@ -3,6 +3,7 @@ import chatService from "../services/chat.service";
 import { IChatController } from "./interfaces/IChatController";
 import { io } from "../config/socket";
 import { STATUS_CODES } from "../utils/constants";
+import notificationService from "../services/notification.service";
 
 class ChatController implements IChatController {
   async sendMessage(req: Request, res: Response): Promise<void> {
@@ -30,11 +31,20 @@ class ChatController implements IChatController {
         io.emit("receiveMessage", { ...result.data.toObject(), room: "all" });
       }
 
+      const notification = await notificationService.createNotification(
+        receiver,
+        receiverModel,
+        "chat",
+        "You have a new message"
+      );
+      io.to(receiver).emit("newNotification", notification);
+
       res.status(result.status).json({
         message: result.message,
         data: result.data,
       });
     } catch (error) {
+      console.error("error sending message:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error ? error.message : "Failed to send message",
@@ -56,6 +66,7 @@ class ChatController implements IChatController {
         data: result.data,
       });
     } catch (error) {
+      console.error("error fetching conversation:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error
@@ -73,6 +84,7 @@ class ChatController implements IChatController {
         data: result.data,
       });
     } catch (error) {
+      console.error("error fetching conversations", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error

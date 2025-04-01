@@ -6,6 +6,7 @@ import venueController from "../controllers/venue.controller";
 import bookingController from "../controllers/booking.controller";
 import reviewController from "../controllers/review.controller";
 import chatController from "../controllers/chat.controller";
+import notificationController from "../controllers/notification.controller";
 
 const userRoutes = Router();
 
@@ -122,6 +123,16 @@ userRoutes.get(
   "/conversations",
   authMiddleware(["user"]),
   chatController.getConversations
+);
+userRoutes.get(
+  "/notifications",
+  authMiddleware(["user"]),
+  notificationController.getNotifications
+);
+userRoutes.patch(
+  "/notifications/:notificationId/read",
+  authMiddleware(["user"]),
+  notificationController.markNotificationAsRead
 );
 
 export default userRoutes;

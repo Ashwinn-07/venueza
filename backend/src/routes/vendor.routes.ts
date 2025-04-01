@@ -5,6 +5,7 @@ import venueController from "../controllers/venue.controller";
 import bookingController from "../controllers/booking.controller";
 import reviewController from "../controllers/review.controller";
 import chatController from "../controllers/chat.controller";
+import notificationController from "../controllers/notification.controller";
 
 const vendorRoutes = Router();
 
@@ -106,6 +107,16 @@ vendorRoutes.get(
   "/conversations",
   authMiddleware(["vendor"]),
   chatController.getConversations
+);
+vendorRoutes.get(
+  "/notifications",
+  authMiddleware(["vendor"]),
+  notificationController.getNotifications
+);
+vendorRoutes.patch(
+  "/notifications/:notificationId/read",
+  authMiddleware(["vendor"]),
+  notificationController.markNotificationAsRead
 );
 
 export default vendorRoutes;
