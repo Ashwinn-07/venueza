@@ -6,6 +6,7 @@ export interface SendMessageInput {
   receiver: string;
   receiverModel: string;
   content: string;
+  images?: string[];
 }
 
 export interface IChatService {

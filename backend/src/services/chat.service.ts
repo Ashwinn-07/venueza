@@ -16,6 +16,7 @@ class ChatService implements IChatService {
       receiver: receiverObj,
       receiverModel: input.receiverModel,
       content: input.content,
+      images: input.images || [],
     });
     return {
       message: MESSAGES.SUCCESS.MESSAGE_SENT,

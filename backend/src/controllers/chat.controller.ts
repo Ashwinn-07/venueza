@@ -7,14 +7,22 @@ import { STATUS_CODES } from "../utils/constants";
 class ChatController implements IChatController {
   async sendMessage(req: Request, res: Response): Promise<void> {
     try {
-      const { sender, senderModel, receiver, receiverModel, content, room } =
-        req.body;
+      const {
+        sender,
+        senderModel,
+        receiver,
+        receiverModel,
+        content,
+        images,
+        room,
+      } = req.body;
       const result = await chatService.sendMessage({
         sender,
         senderModel,
         receiver,
         receiverModel,
         content,
+        images,
       });
       if (room) {
         io.to(room).emit("receiveMessage", { ...result.data.toObject(), room });

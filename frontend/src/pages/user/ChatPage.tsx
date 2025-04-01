@@ -186,14 +186,14 @@ const ChatPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-xl text-gray-600">Loading conversation...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen bg-gray-50 flex flex-col">
       <div className="bg-white shadow-sm p-4 flex items-center">
         <button
           onClick={() => navigate(-1)}

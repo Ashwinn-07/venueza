@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, User } from "lucide-react";
+import { ArrowLeft, Send, User, Image as ImageIcon } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { format } from "date-fns";
 import { io, Socket } from "socket.io-client";
+import { uploadImageToCloudinary } from "../../utils/cloudinary";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 
 interface Message {
   _id: string;
@@ -11,6 +13,7 @@ interface Message {
   content: string;
   createdAt: string;
   read: boolean;
+  images?: string[];
 }
 
 interface Partner {
@@ -31,6 +34,9 @@ const VendorChatPage = () => {
   const [error, setError] = useState<string>("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [sending, setSending] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUploadLoading, setImageUploadLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,8 +95,35 @@ const VendorChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      if (files.length > 5) {
+        notifyError("You can only upload up to 5 images at once");
+        return;
+      }
+
+      setSelectedImages(files);
+
+      try {
+        setImageUploadLoading(true);
+        const urls = await Promise.all(
+          files.map((file) => uploadImageToCloudinary(file))
+        );
+        setImageUrls(urls);
+        notifySuccess("Images uploaded successfully");
+      } catch (error) {
+        console.error("Error uploading images:", error);
+        notifyError("Failed to upload images");
+      } finally {
+        setImageUploadLoading(false);
+      }
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !userId || !user?.id) return;
+    if ((!newMessage.trim() && imageUrls.length === 0) || !userId || !user?.id)
+      return;
 
     try {
       setSending(true);
@@ -103,13 +136,16 @@ const VendorChatPage = () => {
         receiverModel: "User",
         content: newMessage,
         room,
+        images: imageUrls,
       };
 
       await sendMessage(data);
       setNewMessage("");
+      setSelectedImages([]);
+      setImageUrls([]);
     } catch (err: any) {
       console.error("Error sending message:", err);
-      alert("Failed to send message. Please try again.");
+      notifyError("Failed to send message. Please try again.");
     } finally {
       setSending(false);
     }
@@ -213,7 +249,25 @@ const VendorChatPage = () => {
                           : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
                       }`}
                     >
-                      <p className="break-words">{message.content}</p>
+                      {message.content && (
+                        <p className="break-words">{message.content}</p>
+                      )}
+
+                      {message.images && message.images.length > 0 && (
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          {message.images.map((image, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={image}
+                                alt={`Chat attachment ${index + 1}`}
+                                className="rounded-md max-h-40 object-cover cursor-pointer"
+                                onClick={() => window.open(image, "_blank")}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <p
                         className={`text-xs mt-1 text-right ${
                           isVendor ? "text-blue-100" : "text-gray-500"
@@ -230,8 +284,57 @@ const VendorChatPage = () => {
           </div>
         </div>
 
+        {selectedImages.length > 0 && (
+          <div className="bg-white border-t border-gray-200 p-2">
+            <div className="max-w-3xl mx-auto">
+              <div className="flex overflow-x-auto gap-2 py-2">
+                {selectedImages.map((file, index) => (
+                  <div key={index} className="relative flex-shrink-0">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index}`}
+                      className="h-20 w-20 object-cover rounded-md"
+                    />
+                    <button
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      onClick={() => {
+                        const newSelectedImages = [...selectedImages];
+                        newSelectedImages.splice(index, 1);
+                        setSelectedImages(newSelectedImages);
+
+                        const newImageUrls = [...imageUrls];
+                        newImageUrls.splice(index, 1);
+                        setImageUrls(newImageUrls);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white border-t border-gray-200 p-4">
-          <div className="max-w-3xl mx-auto flex">
+          <div className="max-w-3xl mx-auto flex items-center">
+            <div className="mr-2">
+              <input
+                type="file"
+                id="image-upload"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageUpload}
+                disabled={imageUploadLoading || sending}
+              />
+              <label
+                htmlFor="image-upload"
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-600 cursor-pointer block"
+              >
+                <ImageIcon size={20} />
+              </label>
+            </div>
             <input
               type="text"
               value={newMessage}
@@ -239,11 +342,15 @@ const VendorChatPage = () => {
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
               placeholder="Type your message..."
               className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={sending}
+              disabled={sending || imageUploadLoading}
             />
             <button
               onClick={handleSendMessage}
-              disabled={!newMessage.trim() || sending}
+              disabled={
+                (!newMessage.trim() && imageUrls.length === 0) ||
+                sending ||
+                imageUploadLoading
+              }
               className="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors cursor-pointer"
             >
               <Send size={20} />
@@ -251,9 +358,9 @@ const VendorChatPage = () => {
           </div>
         </div>
 
-        {sending && (
+        {(sending || imageUploadLoading) && (
           <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full text-sm">
-            Sending message...
+            {imageUploadLoading ? "Uploading images..." : "Sending message..."}
           </div>
         )}
       </div>

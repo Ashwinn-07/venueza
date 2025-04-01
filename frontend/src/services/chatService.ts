@@ -6,6 +6,7 @@ export interface SendMessageData {
   receiver: string;
   receiverModel: string;
   content: string;
+  images?: string[];
   room: string;
 }
 
