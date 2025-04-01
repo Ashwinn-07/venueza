@@ -9,7 +9,7 @@ const UserProfileNavigation = () => {
     { name: "Security", path: `${basePath}/security` },
     { name: "Bookings", path: `${basePath}/bookings` },
     { name: "Transactions", path: `${basePath}/transactions` },
-    { name: "Chats", path: `${basePath}/chats` },
+    { name: "Chats", path: `${basePath}/conversations` },
   ];
 
   return (

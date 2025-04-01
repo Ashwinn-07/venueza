@@ -57,6 +57,38 @@ class MessageRepository
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "userPartner",
+        },
+      },
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "_id",
+          foreignField: "_id",
+          as: "vendorPartner",
+        },
+      },
+      {
+        $addFields: {
+          partner: {
+            $ifNull: [
+              { $arrayElemAt: ["$userPartner", 0] },
+              { $arrayElemAt: ["$vendorPartner", 0] },
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          userPartner: 0,
+          vendorPartner: 0,
+        },
+      },
+      {
         $sort: { "lastMessage.createdAt": -1 },
       },
     ]);
