@@ -19,7 +19,7 @@ export interface IAdminService {
   listPendingVendors(
     search: string
   ): Promise<{ vendors: any[]; status: number }>;
-  listPendingVenues(): Promise<{
+  listPendingVenues(searchTerm: string): Promise<{
     status: number;
     venues: IVenue[];
   }>;

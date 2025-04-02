@@ -126,13 +126,20 @@ class AdminService implements IAdminService {
       status: STATUS_CODES.OK,
     };
   }
-  async listPendingVenues(): Promise<{
+  async listPendingVenues(searchTerm: string = ""): Promise<{
     status: number;
     venues: IVenue[];
   }> {
-    const venues = await venueRepository.find({
-      verificationStatus: "pending",
-    });
+    const searchCondition: any = { verificationStatus: "pending" };
+
+    if (searchTerm) {
+      searchCondition.$or = [
+        { name: { $regex: searchTerm, $options: "i" } },
+        { address: { $regex: searchTerm, $options: "i" } },
+      ];
+    }
+
+    const venues = await venueRepository.find(searchCondition);
     return {
       venues,
       status: STATUS_CODES.OK,

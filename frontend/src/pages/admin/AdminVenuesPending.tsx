@@ -18,6 +18,8 @@ const AdminVenuesPending = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [venueToReject, setVenueToReject] = useState(null);
 
+  const [searchLoading, setSearchLoading] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -29,34 +31,40 @@ const AdminVenuesPending = () => {
     fetchPendingVenues();
   }, []);
 
-  const fetchPendingVenues = async () => {
+  const fetchPendingVenues = async (search = "") => {
     try {
       setLoading(true);
-      const result = await listPendingVenues();
+      const result = await listPendingVenues(search);
       setVenues(result.venues || []);
     } catch (err: any) {
       setError(err.message);
       notifyError("Failed to fetch pending venues");
     } finally {
       setLoading(false);
+      setSearchLoading(false);
     }
   };
 
-  const handleSearch = (e: any) => {
+  const handleSearchInput = (e: any) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1);
   };
 
-  const filteredVenues = venues.filter(
-    (venue: any) =>
-      venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      venue.address.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearchSubmit = async () => {
+    setSearchLoading(true);
+    setCurrentPage(1);
+    await fetchPendingVenues(searchTerm);
+  };
+
+  const handleKeyDown = (e: any) => {
+    if (e.key === "Enter") {
+      handleSearchSubmit();
+    }
+  };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentVenues = filteredVenues.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredVenues.length / itemsPerPage);
+  const currentVenues = venues.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(venues.length / itemsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -118,7 +126,7 @@ const AdminVenuesPending = () => {
     setIsDocsModalOpen(true);
   };
 
-  if (loading) {
+  if (loading && !searchLoading) {
     return (
       <div className="flex h-screen bg-gray-50 items-center justify-center">
         <div className="text-lg text-gray-600">Loading pending venues...</div>
@@ -146,23 +154,35 @@ const AdminVenuesPending = () => {
             <div className="p-6 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <VenueNavigation />
-                <div className="relative">
+                <div className="relative flex">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <Search className="w-5 h-5 text-gray-400" />
                   </div>
                   <input
-                    type="search"
+                    type="text"
                     placeholder="Search venues..."
-                    className="pl-10 p-2.5 border border-gray-200 rounded-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
+                    className="pl-10 p-2.5 border border-gray-200 rounded-l-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
                     value={searchTerm}
-                    onChange={handleSearch}
+                    onChange={handleSearchInput}
+                    onKeyDown={handleKeyDown}
                   />
+                  <button
+                    onClick={handleSearchSubmit}
+                    disabled={searchLoading}
+                    className={`${
+                      searchLoading
+                        ? "bg-gray-300"
+                        : "bg-blue-500 hover:bg-blue-600"
+                    } text-white px-4 py-2.5 rounded-r-lg transition duration-150 cursor-pointer`}
+                  >
+                    {searchLoading ? "Searching..." : "Search"}
+                  </button>
                 </div>
               </div>
             </div>
 
             <div className="overflow-x-auto">
-              {filteredVenues.length === 0 ? (
+              {venues.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   {searchTerm
                     ? "No venues match your search criteria"
@@ -298,12 +318,10 @@ const AdminVenuesPending = () => {
                 <p className="text-sm text-gray-600">
                   Showing{" "}
                   <span className="font-medium">
-                    {indexOfFirstItem + 1} -{" "}
-                    {Math.min(indexOfLastItem, filteredVenues.length)}
+                    {venues.length > 0 ? indexOfFirstItem + 1 : 0} -{" "}
+                    {Math.min(indexOfLastItem, venues.length)}
                   </span>{" "}
-                  of{" "}
-                  <span className="font-medium">{filteredVenues.length}</span>{" "}
-                  venues
+                  of <span className="font-medium">{venues.length}</span> venues
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
                   <button

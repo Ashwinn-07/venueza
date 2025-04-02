@@ -110,7 +110,8 @@ class AdminController implements IAdminController {
   }
   async listPendingVenues(req: Request, res: Response): Promise<void> {
     try {
-      const result = await adminService.listPendingVenues();
+      const searchTerm = (req.query.search as string) || "";
+      const result = await adminService.listPendingVenues(searchTerm);
       res.status(result.status).json({
         venues: result.venues,
       });

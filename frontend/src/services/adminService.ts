@@ -23,8 +23,11 @@ export const adminService = {
     );
     return response.data;
   },
-  listPendingVenues: async () => {
-    const response = await adminApi.get("/venues/pending");
+
+  listPendingVenues: async (searchTerm = "") => {
+    const response = await adminApi.get("/venues/pending", {
+      params: { search: searchTerm },
+    });
     return response.data;
   },
   listApprovedVenues: async (searchTerm = "") => {
