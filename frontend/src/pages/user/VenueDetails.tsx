@@ -37,6 +37,10 @@ const VenueDetails = () => {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [selectedImageNames, setSelectedImageNames] = useState<string[]>([]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [reviewsPerPage] = useState(3);
+  const [allReviews, setAllReviews] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchVenueData = async () => {
       try {
@@ -55,7 +59,7 @@ const VenueDetails = () => {
       try {
         setLoadingReviews(true);
         const response = await getReviewsUser(id);
-        setReviews(response.reviews || []);
+        setAllReviews(response.reviews || []);
 
         if (user && response.reviews) {
           const hasReviewed = response.reviews.some(
@@ -75,6 +79,18 @@ const VenueDetails = () => {
       fetchReviews();
     }
   }, [id, getUserVenue, getReviewsUser, user]);
+
+  useEffect(() => {
+    const indexOfLastReview = currentPage * reviewsPerPage;
+    const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+    setReviews(allReviews.slice(indexOfFirstReview, indexOfLastReview));
+  }, [currentPage, reviewsPerPage, allReviews]);
+
+  const totalPages = Math.ceil(allReviews.length / reviewsPerPage);
+
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const nextImage = () => {
     if (!venue || !venue.images || venue.images.length === 0) return;
@@ -109,7 +125,7 @@ const VenueDetails = () => {
       await createReview(venue._id, rating, reviewText, imageUrls);
       notifySuccess("Review posted successfully!");
       const response = await getReviewsUser(id);
-      setReviews(response.reviews || []);
+      setAllReviews(response.reviews || []);
       setUserHasReviewed(true);
       setRating(5);
       setReviewText("");
@@ -120,6 +136,17 @@ const VenueDetails = () => {
       notifyError(error.message || "Failed to post review");
     } finally {
       setIsSubmittingReview(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "open":
+        return "bg-green-100 text-green-800";
+      case "closed":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -147,9 +174,10 @@ const VenueDetails = () => {
     );
   }
 
-  const averageRating = reviews.length
+  const averageRating = allReviews.length
     ? (
-        reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+        allReviews.reduce((sum, review) => sum + review.rating, 0) /
+        allReviews.length
       ).toFixed(1)
     : "No ratings";
 
@@ -250,9 +278,16 @@ const VenueDetails = () => {
 
         <div className="space-y-8">
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              {venue.name}
-            </h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">{venue.name}</h1>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                  venue.status
+                )}`}
+              >
+                {venue.status || "Status not available"}
+              </span>
+            </div>
             <div className="flex items-center text-gray-600 mb-4">
               <MapPin className="w-5 h-5 mr-2 text-[#F4A261]" />
               {venue.address || "Address not available"}
@@ -311,7 +346,9 @@ const VenueDetails = () => {
               <div className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
                 <Star className="w-5 h-5 text-yellow-400 mr-1" />
                 <span className="font-medium">{averageRating}</span>
-                <span className="text-gray-500 ml-1">({reviews.length})</span>
+                <span className="text-gray-500 ml-1">
+                  ({allReviews.length})
+                </span>
               </div>
             </div>
 
@@ -379,6 +416,48 @@ const VenueDetails = () => {
                     )}
                   </div>
                 ))}
+
+                <div className="flex justify-center items-center space-x-2 pt-4">
+                  <button
+                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className={`p-2 rounded-md cursor-pointer ${
+                      currentPage === 1
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+
+                  {Array.from({ length: totalPages }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => paginate(index + 1)}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === index + 1
+                          ? "bg-[#F4A261] text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() =>
+                      paginate(Math.min(totalPages, currentPage + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className={`p-2 rounded-md cursor-pointer ${
+                      currentPage === totalPages
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="py-8 text-center">
