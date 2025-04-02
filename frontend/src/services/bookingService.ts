@@ -78,8 +78,12 @@ export const bookingService = {
     });
     return response.data;
   },
-  getAllBookings: async () => {
-    const response = await adminApi.get("/bookings");
+  getAllBookings: async (search = "") => {
+    const response = await adminApi.get("/bookings", {
+      params: {
+        search,
+      },
+    });
     return response.data;
   },
   getAdminRevenue: async () => {

@@ -235,7 +235,8 @@ class AdminController implements IAdminController {
   }
   async getAllBookings(req: Request, res: Response): Promise<void> {
     try {
-      const result = await bookingService.getAllBookings();
+      const search = (req.query.search as string) || "";
+      const result = await bookingService.getAllBookings(search);
       res.status(result.status).json({
         message: result.message,
         bookings: result.bookings,

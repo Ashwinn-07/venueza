@@ -241,14 +241,20 @@ class BookingService implements IBookingService {
       bookings,
     };
   }
-  async getAllBookings(): Promise<{
+  async getAllBookings(search = ""): Promise<{
     message: string;
     status: number;
     bookings: IBooking[];
   }> {
-    const bookings = await bookingRepository.findAll();
+    const bookings = await bookingRepository.findAllWithSearch(search);
     if (!bookings || bookings.length === 0) {
-      throw new Error("No bookings found");
+      return {
+        message: search
+          ? "No bookings found matching your search"
+          : "No bookings found",
+        status: STATUS_CODES.OK,
+        bookings: [],
+      };
     }
     return {
       message: MESSAGES.SUCCESS.BOOKING_FETCHED,

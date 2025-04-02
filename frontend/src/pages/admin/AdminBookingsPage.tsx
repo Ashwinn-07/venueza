@@ -12,41 +12,37 @@ const AdminBookingsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        setLoading(true);
-        const response = await getAllBookings();
-        setBookings(response.bookings || []);
-      } catch (err: any) {
-        console.error("Error fetching bookings:", err);
-        setError(err.message || "Failed to fetch bookings.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBookings();
-  }, [getAllBookings]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
+  const fetchBookings = async (search = "") => {
+    try {
+      setLoading(true);
+      const response = await getAllBookings(search);
+      setBookings(response.bookings || []);
+      setCurrentPage(1);
+    } catch (err: any) {
+      console.error("Error fetching bookings:", err);
+      setError(err.message || "Failed to fetch bookings.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredBookings = bookings.filter(
-    (booking) =>
-      booking.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.venue?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking._id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchBookings(searchTerm);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentBookings = filteredBookings.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+  const currentBookings = bookings.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(bookings.length / itemsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -82,18 +78,26 @@ const AdminBookingsPage = () => {
             <div className="p-6 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div></div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Search className="w-5 h-5 text-gray-400" />
+                <form onSubmit={handleSearch} className="flex items-center">
+                  <div className="relative flex-grow">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Search className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="search"
+                      placeholder="Search bookings..."
+                      className="pl-10 p-2.5 border border-gray-200 rounded-l-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
+                      value={searchTerm}
+                      onChange={handleInputChange}
+                    />
                   </div>
-                  <input
-                    type="search"
-                    placeholder="Search bookings..."
-                    className="pl-10 p-2.5 border border-gray-200 rounded-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                  />
-                </div>
+                  <button
+                    type="submit"
+                    className="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-r-lg text-sm px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 cursor-pointer"
+                  >
+                    Search
+                  </button>
+                </form>
               </div>
             </div>
 
@@ -179,11 +183,10 @@ const AdminBookingsPage = () => {
                 <p className="text-sm text-gray-600">
                   Showing{" "}
                   <span className="font-medium">
-                    {indexOfFirstItem + 1} -{" "}
-                    {Math.min(indexOfLastItem, filteredBookings.length)}
+                    {bookings.length > 0 ? indexOfFirstItem + 1 : 0} -{" "}
+                    {Math.min(indexOfLastItem, bookings.length)}
                   </span>{" "}
-                  of{" "}
-                  <span className="font-medium">{filteredBookings.length}</span>{" "}
+                  of <span className="font-medium">{bookings.length}</span>{" "}
                   bookings
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
@@ -199,7 +202,7 @@ const AdminBookingsPage = () => {
                   </button>
                   <button
                     onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
+                    disabled={currentPage === totalPages || totalPages === 0}
                     className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next

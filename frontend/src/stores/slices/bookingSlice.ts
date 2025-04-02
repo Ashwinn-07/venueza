@@ -42,7 +42,7 @@ export interface BookingSlice {
       razorpaySignature: string;
     }
   ) => Promise<any>;
-  getAllBookings: () => Promise<any>;
+  getAllBookings: (search: string) => Promise<any>;
   getAdminRevenue: () => Promise<any>;
   getVendorRevenue: () => Promise<any>;
   getVendorDashboard: () => Promise<any>;
@@ -186,13 +186,13 @@ export const createBookingSlice: StateCreator<
       throw error;
     }
   },
-  getAllBookings: async () => {
+  getAllBookings: async (search = "") => {
     try {
       const { isAuthenticated, authType } = get();
       if (!isAuthenticated || authType !== "admin") {
         throw new Error("Authentication required");
       }
-      return await bookingService.getAllBookings();
+      return await bookingService.getAllBookings(search);
     } catch (error) {
       console.error("Failed to fetch admin bookings", error);
       throw error;
