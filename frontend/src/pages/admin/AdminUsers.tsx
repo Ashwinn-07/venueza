@@ -16,12 +16,12 @@ const AdminUsers = () => {
 
   useEffect(() => {
     loadUsers();
-  }, [listAllUsers]);
+  }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = async (search = "") => {
     setIsLoading(true);
     try {
-      const response = await listAllUsers();
+      const response = await listAllUsers(search);
       setUsers(response.users);
     } catch (error) {
       console.error("Failed to load users:", error);
@@ -33,21 +33,19 @@ const AdminUsers = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1);
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    loadUsers(searchTerm);
+  };
 
   const executeStatusChange = async (userId: string, newStatus: string) => {
     setProcessingUserId(userId);
     try {
       await updateUserStatus(userId, newStatus);
-      const response = await listAllUsers();
-      setUsers(response.users);
+      await loadUsers(searchTerm);
 
       if (newStatus === "blocked") {
         notifySuccess("User blocked successfully");
@@ -86,8 +84,8 @@ const AdminUsers = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(users.length / itemsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -112,18 +110,26 @@ const AdminUsers = () => {
 
           <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
             <div className="p-6 border-b border-gray-100">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <Search className="w-5 h-5 text-gray-400" />
+              <form onSubmit={handleSearchSubmit} className="flex">
+                <div className="relative flex-grow">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="search"
+                    placeholder="Search users..."
+                    className="pl-10 p-2.5 border border-gray-200 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                  />
                 </div>
-                <input
-                  type="search"
-                  placeholder="Search users..."
-                  className="pl-10 p-2.5 border border-gray-200 rounded-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                />
-              </div>
+                <button
+                  type="submit"
+                  className="ml-2 px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 cursor-pointer"
+                >
+                  Search
+                </button>
+              </form>
             </div>
 
             <div className="overflow-x-auto">
@@ -215,10 +221,9 @@ const AdminUsers = () => {
                   Showing{" "}
                   <span className="font-medium">
                     {indexOfFirstItem + 1} -{" "}
-                    {Math.min(indexOfLastItem, filteredUsers.length)}
+                    {Math.min(indexOfLastItem, users.length)}
                   </span>{" "}
-                  of <span className="font-medium">{filteredUsers.length}</span>{" "}
-                  users
+                  of <span className="font-medium">{users.length}</span> users
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
                   <button

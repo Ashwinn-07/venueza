@@ -12,7 +12,7 @@ export interface IAdminService {
     totalBookings: number;
     status: number;
   }>;
-  listUsers(): Promise<{ users: any[]; status: number }>;
+  listUsers(search: string): Promise<{ users: any[]; status: number }>;
   listAllVendors(): Promise<{ vendors: any[]; status: number }>;
   listPendingVendors(): Promise<{ vendors: any[]; status: number }>;
   listPendingVenues(): Promise<{

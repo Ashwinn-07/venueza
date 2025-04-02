@@ -5,8 +5,10 @@ export const adminService = {
     const response = await adminApi.get("/dashboard");
     return response.data;
   },
-  listAllUsers: async () => {
-    const response = await adminApi.get("/users");
+  listAllUsers: async (search = "") => {
+    const response = await adminApi.get(
+      `/users${search ? `?search=${search}` : ""}`
+    );
     return response.data;
   },
   listAllVendors: async () => {

@@ -64,7 +64,8 @@ class AdminController implements IAdminController {
   }
   async listUsers(req: Request, res: Response): Promise<void> {
     try {
-      const result = await adminService.listUsers();
+      const search = (req.query.search as string) || "";
+      const result = await adminService.listUsers(search);
       res.status(result.status).json({
         users: result.users,
       });

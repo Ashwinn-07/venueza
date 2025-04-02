@@ -6,7 +6,7 @@ import { VenueSlice } from "./venueSlice";
 
 export interface AdminSlice {
   getDashboardStats: () => Promise<any>;
-  listAllUsers: () => Promise<any>;
+  listAllUsers: (search: string) => Promise<any>;
   listAllVendors: () => Promise<any>;
   listPendingVendors: () => Promise<any>;
   listPendingVenues: () => Promise<any>;
@@ -43,13 +43,13 @@ export const createAdminSlice: StateCreator<
     }
   },
 
-  listAllUsers: async () => {
+  listAllUsers: async (search = "") => {
     try {
       const { authType } = get();
       if (!authType || authType !== "admin")
         throw new Error("Not authorized as admin");
 
-      return await adminService.listAllUsers();
+      return await adminService.listAllUsers(search);
     } catch (error) {
       console.error("Failed to list users", error);
       throw error;

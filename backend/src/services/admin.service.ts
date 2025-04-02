@@ -74,8 +74,8 @@ class AdminService implements IAdminService {
     };
   }
 
-  async listUsers(): Promise<{ users: any[]; status: number }> {
-    const users = await userRepository.find({});
+  async listUsers(search = ""): Promise<{ users: any[]; status: number }> {
+    const users = await userRepository.findBySearchTerm(search);
     return {
       users,
       status: STATUS_CODES.OK,
