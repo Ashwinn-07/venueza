@@ -4,7 +4,7 @@ import { useAuthStore } from "../../stores/authStore";
 
 const VenueList = () => {
   const navigate = useNavigate();
-  const { getVenues } = useAuthStore();
+  const { getVenues, user } = useAuthStore();
   const [venues, setVenues] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -12,6 +12,8 @@ const VenueList = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+
+  const isVendorVerified = user?.status === "active";
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -64,12 +66,24 @@ const VenueList = () => {
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">My Venues</h1>
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-          onClick={() => navigate("/vendor/venues/add")}
-        >
-          Add New Venue
-        </button>
+        {isVendorVerified ? (
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+            onClick={() => navigate("/vendor/venues/add")}
+          >
+            Add New Venue
+          </button>
+        ) : (
+          <div className="flex flex-col items-end">
+            <p className="text-red-600 mb-2">Get verified to add venues</p>
+            <button
+              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors cursor-pointer"
+              onClick={() => navigate("/vendor/settings/profile")}
+            >
+              Get Verified
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-4 mb-4">
