@@ -131,9 +131,12 @@ const VenueDetails = () => {
       setReviewText("");
       setReviewImages([]);
       setSelectedImageNames([]);
-    } catch (error: any) {
-      console.error("Error posting review:", error);
-      notifyError(error.message || "Failed to post review");
+    } catch (err: any) {
+      const errMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Failed to post review";
+      notifyError(errMsg);
     } finally {
       setIsSubmittingReview(false);
     }
