@@ -11,8 +11,10 @@ export const adminService = {
     );
     return response.data;
   },
-  listAllVendors: async () => {
-    const response = await adminApi.get("/vendors");
+  listAllVendors: async (searchQuery = "") => {
+    const response = await adminApi.get("/vendors", {
+      params: { search: searchQuery },
+    });
     return response.data;
   },
   listPendingVendors: async () => {

@@ -13,7 +13,9 @@ export interface IAdminService {
     status: number;
   }>;
   listUsers(search: string): Promise<{ users: any[]; status: number }>;
-  listAllVendors(): Promise<{ vendors: any[]; status: number }>;
+  listAllVendors(
+    searchQuery: string
+  ): Promise<{ vendors: any[]; status: number }>;
   listPendingVendors(): Promise<{ vendors: any[]; status: number }>;
   listPendingVenues(): Promise<{
     status: number;

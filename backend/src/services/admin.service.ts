@@ -82,10 +82,22 @@ class AdminService implements IAdminService {
     };
   }
 
-  async listAllVendors(): Promise<{ vendors: any[]; status: number }> {
-    const vendors = await vendorRepository.find({
+  async listAllVendors(
+    searchQuery: string = ""
+  ): Promise<{ vendors: any[]; status: number }> {
+    const filter: any = {
       status: { $nin: ["pending", "rejected"] },
-    });
+    };
+
+    if (searchQuery && searchQuery.trim() !== "") {
+      filter.$or = [
+        { businessName: { $regex: searchQuery, $options: "i" } },
+        { email: { $regex: searchQuery, $options: "i" } },
+      ];
+    }
+
+    const vendors = await vendorRepository.find(filter);
+
     return {
       vendors,
       status: STATUS_CODES.OK,
