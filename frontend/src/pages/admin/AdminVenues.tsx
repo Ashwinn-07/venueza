@@ -14,42 +14,46 @@ const AdminVenues = () => {
   const { listApprovedVenues } = useAuthStore();
 
   useEffect(() => {
-    const fetchVenues = async () => {
-      try {
-        setLoading(true);
-        const response = await listApprovedVenues();
-
-        const mappedVenues = response.venues.map((venue: any) => ({
-          ...venue,
-          status: venue.status || "open",
-        }));
-        setVenues(mappedVenues);
-      } catch (err) {
-        setError("Failed to load venues. Please try again later.");
-        console.error("Error fetching venues:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchVenues();
-  }, [listApprovedVenues]);
+  }, []);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
+  const fetchVenues = async (search = "") => {
+    try {
+      setLoading(true);
+      const response = await listApprovedVenues(search);
+
+      const mappedVenues = response.venues.map((venue: any) => ({
+        ...venue,
+        status: venue.status || "open",
+      }));
+      setVenues(mappedVenues);
+    } catch (err) {
+      setError("Failed to load venues. Please try again later.");
+      console.error("Error fetching venues:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredVenues = venues.filter(
-    (venue) =>
-      venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      venue.address.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchVenues(searchTerm);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentVenues = filteredVenues.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredVenues.length / itemsPerPage);
+  const currentVenues = venues.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(venues.length / itemsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -88,17 +92,24 @@ const AdminVenues = () => {
             <div className="p-6 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <VenueNavigation />
-                <div className="relative">
+                <div className="relative flex">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <Search className="w-5 h-5 text-gray-400" />
                   </div>
                   <input
-                    type="search"
+                    type="text"
                     placeholder="Search venues..."
-                    className="pl-10 p-2.5 border border-gray-200 rounded-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
+                    className="pl-10 p-2.5 border border-gray-200 rounded-l-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
                     value={searchTerm}
-                    onChange={handleSearch}
+                    onChange={handleInputChange}
+                    onKeyPress={handleKeyPress}
                   />
+                  <button
+                    onClick={handleSearch}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-r-lg transition duration-150 cursor-pointer"
+                  >
+                    Search
+                  </button>
                 </div>
               </div>
             </div>
@@ -208,12 +219,10 @@ const AdminVenues = () => {
                 <p className="text-sm text-gray-600">
                   Showing{" "}
                   <span className="font-medium">
-                    {indexOfFirstItem + 1} -{" "}
-                    {Math.min(indexOfLastItem, filteredVenues.length)}
+                    {venues.length > 0 ? indexOfFirstItem + 1 : 0} -{" "}
+                    {Math.min(indexOfLastItem, venues.length)}
                   </span>{" "}
-                  of{" "}
-                  <span className="font-medium">{filteredVenues.length}</span>{" "}
-                  venues
+                  of <span className="font-medium">{venues.length}</span> venues
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
                   <button
@@ -228,7 +237,7 @@ const AdminVenues = () => {
                   </button>
                   <button
                     onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
+                    disabled={currentPage === totalPages || totalPages === 0}
                     className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next

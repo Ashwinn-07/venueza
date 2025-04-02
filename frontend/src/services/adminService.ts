@@ -25,8 +25,10 @@ export const adminService = {
     const response = await adminApi.get("/venues/pending");
     return response.data;
   },
-  listApprovedVenues: async () => {
-    const response = await adminApi.get("/venues");
+  listApprovedVenues: async (searchTerm = "") => {
+    const response = await adminApi.get("/venues", {
+      params: { search: searchTerm },
+    });
     return response.data;
   },
   updateUserStatus: async (userId: string, status: string) => {

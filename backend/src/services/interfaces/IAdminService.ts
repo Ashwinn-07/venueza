@@ -21,7 +21,7 @@ export interface IAdminService {
     status: number;
     venues: IVenue[];
   }>;
-  listApprovedVenues(): Promise<{
+  listApprovedVenues(searchTerm: string): Promise<{
     status: number;
     venues: IVenue[];
   }>;

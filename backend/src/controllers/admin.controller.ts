@@ -125,7 +125,8 @@ class AdminController implements IAdminController {
   }
   async listApprovedVenues(req: Request, res: Response): Promise<void> {
     try {
-      const result = await adminService.listApprovedVenues();
+      const searchTerm = (req.query.search as string) || "";
+      const result = await adminService.listApprovedVenues(searchTerm);
       res.status(result.status).json({
         venues: result.venues,
       });

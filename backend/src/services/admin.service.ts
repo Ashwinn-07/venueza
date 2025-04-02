@@ -123,10 +123,21 @@ class AdminService implements IAdminService {
       status: STATUS_CODES.OK,
     };
   }
-  async listApprovedVenues(): Promise<{ status: number; venues: IVenue[] }> {
-    const venues = await venueRepository.find({
+  async listApprovedVenues(
+    searchTerm = ""
+  ): Promise<{ status: number; venues: IVenue[] }> {
+    let query: any = {
       verificationStatus: "approved",
-    });
+    };
+
+    if (searchTerm && searchTerm.trim() !== "") {
+      query.$or = [
+        { name: { $regex: searchTerm, $options: "i" } },
+        { address: { $regex: searchTerm, $options: "i" } },
+      ];
+    }
+
+    const venues = await venueRepository.find(query);
     return {
       venues,
       status: STATUS_CODES.OK,
