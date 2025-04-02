@@ -48,7 +48,9 @@ const UserLogin = () => {
       navigate("/user/home");
     } catch (err: any) {
       const errMsg =
-        err.response?.data?.message || "Failed to login. Please try again.";
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Failed to login. Please try again.";
       setError(errMsg);
       notifyError(errMsg);
     } finally {
