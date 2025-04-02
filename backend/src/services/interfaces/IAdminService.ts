@@ -16,7 +16,9 @@ export interface IAdminService {
   listAllVendors(
     searchQuery: string
   ): Promise<{ vendors: any[]; status: number }>;
-  listPendingVendors(): Promise<{ vendors: any[]; status: number }>;
+  listPendingVendors(
+    search: string
+  ): Promise<{ vendors: any[]; status: number }>;
   listPendingVenues(): Promise<{
     status: number;
     venues: IVenue[];

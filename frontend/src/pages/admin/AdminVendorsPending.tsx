@@ -22,39 +22,40 @@ const AdminVendorsPending = () => {
 
   const [modalParent] = useAnimation();
 
-  useEffect(() => {
-    const loadPendingVendors = async () => {
-      try {
-        const response = await listPendingVendors();
-        setPendingVendors(response.vendors);
-      } catch (error) {
-        console.error("Failed to load pending vendors:", error);
-        notifyError("Failed to load pending vendors.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadPendingVendors();
-  }, [listPendingVendors]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
+  const loadPendingVendors = async (search: string = "") => {
+    setIsLoading(true);
+    try {
+      const response = await listPendingVendors(search);
+      setPendingVendors(response.vendors);
+    } catch (error) {
+      console.error("Failed to load pending vendors:", error);
+      notifyError("Failed to load pending vendors.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const filteredPendingVendors = pendingVendors.filter(
-    (vendor) =>
-      vendor.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vendor.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    loadPendingVendors();
+  }, []);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    loadPendingVendors(searchTerm);
+  };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPendingVendors = filteredPendingVendors.slice(
+  const currentPendingVendors = pendingVendors.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
-  const totalPages = Math.ceil(filteredPendingVendors.length / itemsPerPage);
+  const totalPages = Math.ceil(pendingVendors.length / itemsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -67,8 +68,7 @@ const AdminVendorsPending = () => {
   const handleApproveVendor = async (vendorId: any) => {
     try {
       await updateVendorStatus(vendorId, "active");
-      const response = await listPendingVendors();
-      setPendingVendors(response.vendors);
+      loadPendingVendors(searchTerm);
       notifySuccess("Vendor approved successfully");
     } catch (error) {
       console.error("Failed to approve vendor:", error);
@@ -93,9 +93,7 @@ const AdminVendorsPending = () => {
         "blocked",
         rejectionReason.trim() || ""
       );
-      const response = await listPendingVendors();
-      setPendingVendors(response.vendors);
-
+      loadPendingVendors(searchTerm);
       notifySuccess("Vendor rejected successfully");
 
       setIsRejectionModalOpen(false);
@@ -133,18 +131,26 @@ const AdminVendorsPending = () => {
             <div className="p-6 border-b border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <VendorNavigation />
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Search className="w-5 h-5 text-gray-400" />
+                <form onSubmit={handleSearchSubmit} className="flex">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Search className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <input
+                      type="search"
+                      placeholder="Search vendors..."
+                      className="pl-10 p-2.5 border border-gray-200 rounded-l-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                    />
                   </div>
-                  <input
-                    type="search"
-                    placeholder="Search vendors..."
-                    className="pl-10 p-2.5 border border-gray-200 rounded-lg w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                  />
-                </div>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-r-lg transition duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+                  >
+                    Search
+                  </button>
+                </form>
               </div>
             </div>
 
@@ -235,13 +241,11 @@ const AdminVendorsPending = () => {
                 <p className="text-sm text-gray-600">
                   Showing{" "}
                   <span className="font-medium">
-                    {indexOfFirstItem + 1} -{" "}
-                    {Math.min(indexOfLastItem, filteredPendingVendors.length)}
+                    {pendingVendors.length > 0 ? indexOfFirstItem + 1 : 0} -{" "}
+                    {Math.min(indexOfLastItem, pendingVendors.length)}
                   </span>{" "}
                   of{" "}
-                  <span className="font-medium">
-                    {filteredPendingVendors.length}
-                  </span>{" "}
+                  <span className="font-medium">{pendingVendors.length}</span>{" "}
                   vendors
                 </p>
                 <nav className="relative z-0 inline-flex shadow-sm rounded-md">
@@ -257,7 +261,7 @@ const AdminVendorsPending = () => {
                   </button>
                   <button
                     onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
+                    disabled={currentPage === totalPages || totalPages === 0}
                     className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next

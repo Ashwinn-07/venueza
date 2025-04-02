@@ -8,7 +8,7 @@ export interface AdminSlice {
   getDashboardStats: () => Promise<any>;
   listAllUsers: (search: string) => Promise<any>;
   listAllVendors: (searchQuery: string) => Promise<any>;
-  listPendingVendors: () => Promise<any>;
+  listPendingVendors: (search: string) => Promise<any>;
   listPendingVenues: () => Promise<any>;
   listApprovedVenues: (searchTerm: string) => Promise<any>;
   updateUserStatus: (userId: string, status: string) => Promise<any>;
@@ -69,13 +69,13 @@ export const createAdminSlice: StateCreator<
     }
   },
 
-  listPendingVendors: async () => {
+  listPendingVendors: async (search = "") => {
     try {
       const { authType } = get();
       if (!authType || authType !== "admin")
         throw new Error("Not authorized as admin");
 
-      return await adminService.listPendingVendors();
+      return await adminService.listPendingVendors(search);
     } catch (error) {
       console.error("Failed to list pending vendors", error);
       throw error;

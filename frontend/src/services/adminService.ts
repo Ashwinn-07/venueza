@@ -17,8 +17,10 @@ export const adminService = {
     });
     return response.data;
   },
-  listPendingVendors: async () => {
-    const response = await adminApi.get("/vendors/pending");
+  listPendingVendors: async (search = "") => {
+    const response = await adminApi.get(
+      `/vendors/pending${search ? `?search=${search}` : ""}`
+    );
     return response.data;
   },
   listPendingVenues: async () => {
