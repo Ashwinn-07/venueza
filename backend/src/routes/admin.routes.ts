@@ -4,69 +4,39 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 import reviewController from "../controllers/review.controller";
 
 const adminRoutes = Router();
+const adminAuth = authMiddleware(["admin"]);
+const multiRoleAuth = authMiddleware(["user", "vendor", "admin"]);
 
-adminRoutes.post("/login", adminController.login);
-adminRoutes.post("/logout", adminController.logout);
+adminRoutes
+  .post("/login", adminController.login)
+  .post("/logout", adminController.logout);
 
-adminRoutes.get(
-  "/dashboard",
-  authMiddleware(["admin"]),
-  adminController.getAdminDashboardStats
-);
-adminRoutes.get("/users", authMiddleware(["admin"]), adminController.listUsers);
-adminRoutes.patch(
-  "/users/:id",
-  authMiddleware(["admin"]),
-  adminController.updateUserStatus
-);
-adminRoutes.get(
-  "/vendors",
-  authMiddleware(["admin"]),
-  adminController.listAllVendors
-);
-adminRoutes.patch(
-  "/vendors/:id",
-  authMiddleware(["admin"]),
-  adminController.updateVendorStatus
-);
-adminRoutes.get(
-  "/vendors/pending",
-  authMiddleware(["admin"]),
-  adminController.listPendingVendors
-);
-adminRoutes.get(
-  "/venues/pending",
-  authMiddleware(["admin"]),
-  adminController.listPendingVenues
-);
-adminRoutes.get(
-  "/venues",
-  authMiddleware(["admin"]),
-  adminController.listApprovedVenues
-);
-adminRoutes.patch(
-  "/venues/:id",
-  authMiddleware(["admin"]),
-  adminController.updateVenueVerificationStatus
-);
-adminRoutes.get(
-  "/bookings",
-  authMiddleware(["admin"]),
-  adminController.getAllBookings
-);
-adminRoutes.get(
-  "/revenue",
-  authMiddleware(["admin"]),
-  adminController.getAdminRevenue
-);
-adminRoutes.get(
-  "/reviews/:venueId",
-  authMiddleware(["user", "vendor", "admin"]),
-  reviewController.getReviews
-);
-adminRoutes.delete(
-  "/reviews/:reviewId",
-  authMiddleware(["admin"]),
-  reviewController.deleteReview
-);
+adminRoutes
+  .get("/dashboard", adminAuth, adminController.getAdminDashboardStats)
+  .get("/revenue", adminAuth, adminController.getAdminRevenue);
+
+adminRoutes
+  .get("/users", adminAuth, adminController.listUsers)
+  .patch("/users/:id", adminAuth, adminController.updateUserStatus);
+
+adminRoutes
+  .get("/vendors", adminAuth, adminController.listAllVendors)
+  .get("/vendors/pending", adminAuth, adminController.listPendingVendors)
+  .patch("/vendors/:id", adminAuth, adminController.updateVendorStatus);
+
+adminRoutes
+  .get("/venues", adminAuth, adminController.listApprovedVenues)
+  .get("/venues/pending", adminAuth, adminController.listPendingVenues)
+  .patch(
+    "/venues/:id",
+    adminAuth,
+    adminController.updateVenueVerificationStatus
+  );
+
+adminRoutes.get("/bookings", adminAuth, adminController.getAllBookings);
+
+adminRoutes
+  .get("/reviews/:venueId", multiRoleAuth, reviewController.getReviews)
+  .delete("/reviews/:reviewId", adminAuth, reviewController.deleteReview);
+
 export default adminRoutes;

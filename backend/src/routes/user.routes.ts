@@ -9,130 +9,78 @@ import chatController from "../controllers/chat.controller";
 import notificationController from "../controllers/notification.controller";
 
 const userRoutes = Router();
+const userAuth = authMiddleware(["user"]);
+const multiRoleAuth = authMiddleware(["user", "vendor", "admin"]);
 
-userRoutes.post("/signup", userController.register);
-userRoutes.post("/login", userController.login);
-userRoutes.post("/verify-otp", userController.verifyOTP);
-userRoutes.post("/resend-otp", userController.resendOTP);
-userRoutes.post("/forgot-password", userController.forgotPassword);
-userRoutes.post("/reset-password", userController.resetPassword);
+userRoutes
+  .post("/signup", userController.register)
+  .post("/login", userController.login)
+  .post("/verify-otp", userController.verifyOTP)
+  .post("/resend-otp", userController.resendOTP)
+  .post("/forgot-password", userController.forgotPassword)
+  .post("/reset-password", userController.resetPassword)
+  .post("/logout", userController.logout);
 
-userRoutes.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
-userRoutes.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: "/login",
-  }),
-  userController.googleCallback
-);
-userRoutes.post("/logout", userController.logout);
+userRoutes
+  .get(
+    "/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"] })
+  )
+  .get(
+    "/auth/google/callback",
+    passport.authenticate("google", {
+      session: false,
+      failureRedirect: "/login",
+    }),
+    userController.googleCallback
+  );
 
-userRoutes.put(
-  "/profile",
-  authMiddleware(["user"]),
-  userController.updateUserProfile
-);
+userRoutes
+  .put("/profile", userAuth, userController.updateUserProfile)
+  .patch("/security", userAuth, userController.changeUserPassword);
 
-userRoutes.patch(
-  "/security",
-  authMiddleware(["user"]),
-  userController.changeUserPassword
-);
+userRoutes
+  .get("/home", userAuth, venueController.getFeaturedVenues)
+  .get("/venues", userAuth, venueController.getAllVenues)
+  .get("/venues/:id", userAuth, venueController.getVenue)
+  .get(
+    "/venues/:venueId/booked-dates",
+    userAuth,
+    bookingController.getBookedDatesForVenue
+  );
 
-userRoutes.get(
-  "/home",
-  authMiddleware(["user"]),
-  venueController.getFeaturedVenues
-);
-userRoutes.get(
-  "/venues",
-  authMiddleware(["user"]),
-  venueController.getAllVenues
-);
-userRoutes.get(
-  "/venues/:venueId/booked-dates",
-  authMiddleware(["user"]),
-  bookingController.getBookedDatesForVenue
-);
+userRoutes
+  .post("/bookings", userAuth, bookingController.createBooking)
+  .get("/bookings", userAuth, bookingController.getUserBookings)
+  .get("/bookings/:id", userAuth, bookingController.getBooking)
+  .patch("/bookings/verify", userAuth, bookingController.verifyPayment)
+  .post(
+    "/bookings/balance",
+    userAuth,
+    bookingController.createBalancePaymentOrder
+  )
+  .patch(
+    "/bookings/balance/verify",
+    userAuth,
+    bookingController.verifyBalancePayment
+  )
+  .patch("/bookings/cancel", userAuth, bookingController.userCancelBooking);
 
-userRoutes.get(
-  "/venues/:id",
-  authMiddleware(["user"]),
-  venueController.getVenue
-);
-userRoutes.post(
-  "/bookings",
-  authMiddleware(["user"]),
-  bookingController.createBooking
-);
-userRoutes.patch(
-  "/bookings/verify",
-  authMiddleware(["user"]),
-  bookingController.verifyPayment
-);
-userRoutes.get(
-  "/bookings/:id",
-  authMiddleware(["user"]),
-  bookingController.getBooking
-);
-userRoutes.get(
-  "/bookings",
-  authMiddleware(["user"]),
-  bookingController.getUserBookings
-);
-userRoutes.post(
-  "/bookings/balance",
-  authMiddleware(["user"]),
-  bookingController.createBalancePaymentOrder
-);
-userRoutes.patch(
-  "/bookings/balance/verify",
-  authMiddleware(["user"]),
-  bookingController.verifyBalancePayment
-);
-userRoutes.patch(
-  "/bookings/cancel",
-  authMiddleware(["user"]),
-  bookingController.userCancelBooking
-);
-userRoutes.get(
-  "/reviews/:venueId",
-  authMiddleware(["user", "vendor", "admin"]),
-  reviewController.getReviews
-);
-userRoutes.post(
-  "/reviews",
-  authMiddleware(["user"]),
-  reviewController.createReview
-);
-userRoutes.post(
-  "/messages",
-  authMiddleware(["user"]),
-  chatController.sendMessage
-);
-userRoutes.get(
-  "/conversation",
-  authMiddleware(["user"]),
-  chatController.getConversation
-);
-userRoutes.get(
-  "/conversations",
-  authMiddleware(["user"]),
-  chatController.getConversations
-);
-userRoutes.get(
-  "/notifications",
-  authMiddleware(["user"]),
-  notificationController.getNotifications
-);
-userRoutes.patch(
-  "/notifications/:notificationId/read",
-  authMiddleware(["user"]),
-  notificationController.markNotificationAsRead
-);
+userRoutes
+  .get("/reviews/:venueId", multiRoleAuth, reviewController.getReviews)
+  .post("/reviews", userAuth, reviewController.createReview);
+
+userRoutes
+  .post("/messages", userAuth, chatController.sendMessage)
+  .get("/conversation", userAuth, chatController.getConversation)
+  .get("/conversations", userAuth, chatController.getConversations);
+
+userRoutes
+  .get("/notifications", userAuth, notificationController.getNotifications)
+  .patch(
+    "/notifications/:notificationId/read",
+    userAuth,
+    notificationController.markNotificationAsRead
+  );
 
 export default userRoutes;

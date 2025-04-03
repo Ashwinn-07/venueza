@@ -8,115 +8,66 @@ import chatController from "../controllers/chat.controller";
 import notificationController from "../controllers/notification.controller";
 
 const vendorRoutes = Router();
+const vendorAuth = authMiddleware(["vendor"]);
+const multiRoleAuth = authMiddleware(["user", "vendor", "admin"]);
 
-vendorRoutes.post("/signup", vendorController.register);
-vendorRoutes.post("/login", vendorController.login);
-vendorRoutes.post("/verify-otp", vendorController.verifyOTP);
-vendorRoutes.post("/resend-otp", vendorController.resendOTP);
-vendorRoutes.post("/forgot-password", vendorController.forgotPassword);
-vendorRoutes.post("/reset-password", vendorController.resetPassword);
-vendorRoutes.post("/logout", vendorController.logout);
+vendorRoutes
+  .post("/signup", vendorController.register)
+  .post("/login", vendorController.login)
+  .post("/verify-otp", vendorController.verifyOTP)
+  .post("/resend-otp", vendorController.resendOTP)
+  .post("/forgot-password", vendorController.forgotPassword)
+  .post("/reset-password", vendorController.resetPassword)
+  .post("/logout", vendorController.logout);
 
-vendorRoutes.put(
-  "/settings/profile",
-  authMiddleware(["vendor"]),
-  vendorController.updateVendorProfile
-);
-vendorRoutes.patch(
-  "/settings/security",
-  authMiddleware(["vendor"]),
-  vendorController.changeVendorPassword
-);
-vendorRoutes.post(
-  "/settings/documents",
-  authMiddleware(["vendor"]),
-  vendorController.uploadDocuments
-);
+vendorRoutes
+  .put("/settings/profile", vendorAuth, vendorController.updateVendorProfile)
+  .patch(
+    "/settings/security",
+    vendorAuth,
+    vendorController.changeVendorPassword
+  )
+  .post("/settings/documents", vendorAuth, vendorController.uploadDocuments);
 
-vendorRoutes.get(
-  "/venues",
-  authMiddleware(["vendor"]),
-  venueController.getVenuesByVendor
-);
-vendorRoutes.post(
-  "/venues",
-  authMiddleware(["vendor"]),
-  venueController.createVenue
-);
-vendorRoutes.get(
-  "/venues/:id",
-  authMiddleware(["vendor"]),
-  venueController.getVenue
-);
-vendorRoutes.put(
-  "/venues/:id",
-  authMiddleware(["vendor"]),
-  venueController.updateVenue
-);
-vendorRoutes.post(
-  "/venues/block-dates",
-  authMiddleware(["vendor"]),
-  vendorController.addBlockedDate
-);
-vendorRoutes.get(
-  "/bookings",
-  authMiddleware(["vendor"]),
-  bookingController.getBookingsByVendor
-);
-vendorRoutes.get(
-  "/revenue",
-  authMiddleware(["vendor"]),
-  vendorController.getVendorRevenue
-);
-vendorRoutes.get(
-  "/dashboard",
-  authMiddleware(["vendor"]),
-  vendorController.getDashboardData
-);
-vendorRoutes.patch(
-  "/bookings/cancel",
-  authMiddleware(["vendor"]),
-  bookingController.vendorCancelBooking
-);
-vendorRoutes.get(
-  "/venues/:venueId/booked-dates",
-  authMiddleware(["vendor"]),
-  bookingController.getBookedDatesForVenue
-);
-vendorRoutes.get(
-  "/reviews/:venueId",
-  authMiddleware(["user", "vendor", "admin"]),
-  reviewController.getReviews
-);
-vendorRoutes.patch(
-  "/reviews/:reviewId/reply",
-  authMiddleware(["vendor"]),
-  reviewController.vendorReplyReview
-);
-vendorRoutes.post(
-  "/messages",
-  authMiddleware(["vendor"]),
-  chatController.sendMessage
-);
-vendorRoutes.get(
-  "/conversation",
-  authMiddleware(["vendor"]),
-  chatController.getConversation
-);
-vendorRoutes.get(
-  "/conversations",
-  authMiddleware(["vendor"]),
-  chatController.getConversations
-);
-vendorRoutes.get(
-  "/notifications",
-  authMiddleware(["vendor"]),
-  notificationController.getNotifications
-);
-vendorRoutes.patch(
-  "/notifications/:notificationId/read",
-  authMiddleware(["vendor"]),
-  notificationController.markNotificationAsRead
-);
+vendorRoutes
+  .get("/venues", vendorAuth, venueController.getVenuesByVendor)
+  .post("/venues", vendorAuth, venueController.createVenue)
+  .get("/venues/:id", vendorAuth, venueController.getVenue)
+  .put("/venues/:id", vendorAuth, venueController.updateVenue)
+  .post("/venues/block-dates", vendorAuth, vendorController.addBlockedDate)
+  .get(
+    "/venues/:venueId/booked-dates",
+    vendorAuth,
+    bookingController.getBookedDatesForVenue
+  );
+
+vendorRoutes
+  .get("/bookings", vendorAuth, bookingController.getBookingsByVendor)
+  .patch("/bookings/cancel", vendorAuth, bookingController.vendorCancelBooking);
+
+vendorRoutes
+  .get("/revenue", vendorAuth, vendorController.getVendorRevenue)
+  .get("/dashboard", vendorAuth, vendorController.getDashboardData);
+
+vendorRoutes
+  .get("/reviews/:venueId", multiRoleAuth, reviewController.getReviews)
+  .patch(
+    "/reviews/:reviewId/reply",
+    vendorAuth,
+    reviewController.vendorReplyReview
+  );
+
+vendorRoutes
+  .post("/messages", vendorAuth, chatController.sendMessage)
+  .get("/conversation", vendorAuth, chatController.getConversation)
+  .get("/conversations", vendorAuth, chatController.getConversations);
+
+vendorRoutes
+  .get("/notifications", vendorAuth, notificationController.getNotifications)
+  .patch(
+    "/notifications/:notificationId/read",
+    vendorAuth,
+    notificationController.markNotificationAsRead
+  );
 
 export default vendorRoutes;
