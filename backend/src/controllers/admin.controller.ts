@@ -268,6 +268,23 @@ class AdminController implements IAdminController {
       });
     }
   }
+  async getTransactionHistory(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await bookingService.getTransactionHistory();
+      res.status(result.status).json({
+        message: result.message,
+        data: result.data,
+      });
+    } catch (error) {
+      console.error("Error fetching transaction history:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch transaction history",
+      });
+    }
+  }
 }
 
 export default new AdminController();

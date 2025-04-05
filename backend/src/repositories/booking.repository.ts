@@ -159,6 +159,25 @@ class BookingRepository
 
     return result;
   }
+  async getTransactionHistory(): Promise<any[]> {
+    const transactions = await Booking.aggregate([
+      {
+        $match: { status: { $in: ["fully_paid", "confirmed"] } },
+      },
+      {
+        $project: {
+          bookingId: "$_id",
+          totalPrice: 1,
+          advanceAmount: 1,
+          balanceDue: 1,
+          commissionAmt: 1,
+          bookingDate: "$createdAt",
+        },
+      },
+      { $sort: { bookingDate: -1 } },
+    ]);
+    return transactions;
+  }
 }
 
 export default new BookingRepository();

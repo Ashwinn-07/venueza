@@ -80,4 +80,9 @@ export interface IBookingService {
     booking: IBooking;
     refund?: any;
   }>;
+  getTransactionHistory(): Promise<{
+    message: string;
+    status: number;
+    data: any[];
+  }>;
 }

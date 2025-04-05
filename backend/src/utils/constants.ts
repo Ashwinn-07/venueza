@@ -46,6 +46,7 @@ export const MESSAGES = {
     NOTIFICATION_CREATED: "Notification created successfully",
     NOTIFICATIONS_FETCHED: "Notifications fetched successfully",
     NOTIFICATION_UPDATED: "Notification updated successfully",
+    TRANSACTION_HISTORY_FETCHED: "Transaction history fetched successfully",
   },
   ERROR: {
     INVALID_CREDENTIALS: "Invalid credentials",

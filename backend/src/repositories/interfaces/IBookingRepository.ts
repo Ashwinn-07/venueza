@@ -12,4 +12,5 @@ export interface IBookingRepository extends IBaseRepository<IBooking> {
   getVendorRevenue(
     vendorId: string
   ): Promise<{ month: number; revenue: number }[]>;
+  getTransactionHistory(): Promise<any[]>;
 }

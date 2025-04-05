@@ -39,4 +39,10 @@ adminRoutes
   .get("/reviews/:venueId", multiRoleAuth, reviewController.getReviews)
   .delete("/reviews/:reviewId", adminAuth, reviewController.deleteReview);
 
+adminRoutes.get(
+  "/transactions",
+  adminAuth,
+  adminController.getTransactionHistory
+);
+
 export default adminRoutes;
