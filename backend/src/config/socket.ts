@@ -1,8 +1,9 @@
+import { Server as HttpServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 
 export let io: SocketIOServer;
 
-export const initializeSocket = (server: any): void => {
+export const initializeSocket = (server: HttpServer): void => {
   io = new SocketIOServer(server, {
     cors: {
       origin: process.env.FRONTEND_URL,
