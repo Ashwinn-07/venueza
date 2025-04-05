@@ -47,21 +47,24 @@ const UserBookings = () => {
 
   const filterBookings = () => {
     const now = new Date();
+    const nonPendingBookings = allBookings.filter(
+      (booking) => booking.status !== "pending"
+    );
     let filtered: any[] = [];
 
     switch (activeTab) {
       case "upcoming":
-        filtered = allBookings.filter(
+        filtered = nonPendingBookings.filter(
           (booking) => new Date(booking.endDate) > now
         );
         break;
       case "past":
-        filtered = allBookings.filter(
+        filtered = nonPendingBookings.filter(
           (booking) => new Date(booking.endDate) <= now
         );
         break;
       case "all":
-        filtered = allBookings;
+        filtered = nonPendingBookings;
         break;
     }
 
