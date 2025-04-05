@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { bookingService } from "../../services";
+import { bookingService, vendorService } from "../../services";
 import { AuthSlice } from "./authSlice";
 import { ProfileSlice } from "./profileSlice";
 import { VenueSlice } from "./venueSlice";
@@ -51,6 +51,7 @@ export interface BookingSlice {
     bookingId: string,
     cancellationReason: string
   ) => Promise<any>;
+  getVendorTransactionHistory: () => Promise<any>;
 }
 
 export const createBookingSlice: StateCreator<
@@ -258,6 +259,18 @@ export const createBookingSlice: StateCreator<
       );
     } catch (error) {
       console.error("Failed to cancel booking by vendor", error);
+      throw error;
+    }
+  },
+  getVendorTransactionHistory: async () => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "vendor") {
+        throw new Error("Authentication required");
+      }
+      return await vendorService.getTransactionHistory();
+    } catch (error) {
+      console.error("Failed to fetch vendor transaction history", error);
       throw error;
     }
   },

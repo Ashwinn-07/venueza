@@ -98,6 +98,9 @@ const VendorConversationsPage = lazy(
 const AdminTransactionHistory = lazy(
   () => import("./pages/admin/AdminTransactionHistory")
 );
+const VendorTransactionHistory = lazy(
+  () => import("./pages/vendor/VendorTransactionHistory")
+);
 
 const App = () => {
   return (
@@ -452,6 +455,14 @@ const App = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <VendorChatPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/vendor/transactions"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <VendorTransactionHistory />
                 </Suspense>
               }
             />

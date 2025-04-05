@@ -35,4 +35,8 @@ export const vendorService = {
     const response = await vendorApi.put(`/venues/${venueId}`, venueData);
     return response.data;
   },
+  getTransactionHistory: async () => {
+    const response = await vendorApi.get("/transactions");
+    return response.data;
+  },
 };
