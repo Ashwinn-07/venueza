@@ -18,7 +18,7 @@ const VenueList = () => {
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await getVenues();
+        const response = await getVenues(filter);
         setVenues(response.result?.venues || []);
       } catch (err: any) {
         setError(err.message || "Failed to fetch venues.");
@@ -28,19 +28,12 @@ const VenueList = () => {
       }
     };
     fetchVenues();
-  }, [getVenues]);
-
-  const filteredVenues = venues.filter((venue) => {
-    if (filter === "approved") return venue.verificationStatus === "approved";
-    if (filter === "rejected") return venue.verificationStatus === "rejected";
-    if (filter === "pending") return venue.verificationStatus === "pending";
-    return true;
-  });
+  }, [getVenues, filter]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentVenues = filteredVenues.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredVenues.length / itemsPerPage);
+  const currentVenues = venues.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(venues.length / itemsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -113,7 +106,7 @@ const VenueList = () => {
         </button>
       </div>
 
-      {filteredVenues.length === 0 ? (
+      {venues.length === 0 ? (
         <p className="text-gray-600">No venues found for this category.</p>
       ) : (
         <>
@@ -201,10 +194,9 @@ const VenueList = () => {
               Showing{" "}
               <span className="font-medium">
                 {indexOfFirstItem + 1} -{" "}
-                {Math.min(indexOfLastItem, filteredVenues.length)}
+                {Math.min(indexOfLastItem, venues.length)}
               </span>{" "}
-              of <span className="font-medium">{filteredVenues.length}</span>{" "}
-              venues
+              of <span className="font-medium">{venues.length}</span> venues
             </p>
             <nav className="relative z-0 inline-flex shadow-sm rounded-md">
               <button

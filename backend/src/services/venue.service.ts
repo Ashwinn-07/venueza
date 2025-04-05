@@ -74,11 +74,15 @@ class VenueService implements IVenueService {
     };
   }
   async getVenuesByVendor(
-    vendorId: string
+    vendorId: string,
+    filter: string = "all"
   ): Promise<{ message: string; status: number; venues: IVenue[] }> {
-    const venues = await venueRepository.findByVendor(vendorId);
+    let venues = await venueRepository.findByVendor(vendorId);
     if (!venues) {
       throw new Error("could not fetch venues");
+    }
+    if (filter !== "all") {
+      venues = venues.filter((venue) => venue.verificationStatus === filter);
     }
     return {
       message: MESSAGES.SUCCESS.VENUE_FETCHED,

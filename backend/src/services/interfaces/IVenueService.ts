@@ -11,7 +11,8 @@ export interface IVenueService {
     updateData: Partial<IVenue>
   ): Promise<{ message: string; status: number; venue: IVenue }>;
   getVenuesByVendor(
-    vendorId: string
+    vendorId: string,
+    filter: string
   ): Promise<{ message: string; status: number; venues: IVenue[] }>;
   getVenueById(
     venueId: string

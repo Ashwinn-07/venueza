@@ -23,8 +23,8 @@ export const vendorService = {
     const response = await vendorApi.post("/venues", venueData);
     return response.data;
   },
-  getVenues: async () => {
-    const response = await vendorApi.get("/venues");
+  getVenues: async (filter = "all") => {
+    const response = await vendorApi.get(`/venues?filter=${filter}`);
     return response.data;
   },
   getVenue: async (venueId: string) => {

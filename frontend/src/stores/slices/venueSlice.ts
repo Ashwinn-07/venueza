@@ -6,7 +6,7 @@ import { AdminSlice } from "./adminSlice";
 
 export interface VenueSlice {
   createVenue: (venueData: any) => Promise<any>;
-  getVenues: () => Promise<any>;
+  getVenues: (filter: string) => Promise<any>;
   getVenue: (venueId: string) => Promise<any>;
   updateVenue: (venueId: string, venueData: any) => Promise<any>;
   getUserVenues: (params?: {
@@ -39,13 +39,13 @@ export const createVenueSlice: StateCreator<
     }
   },
 
-  getVenues: async () => {
+  getVenues: async (filter = "all") => {
     try {
       const { authType } = get();
       if (!authType || authType !== "vendor")
         throw new Error("Not authorized as vendor");
 
-      return await vendorService.getVenues();
+      return await vendorService.getVenues(filter);
     } catch (error) {
       console.error("Failed to get venues", error);
       throw error;
