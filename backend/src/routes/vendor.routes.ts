@@ -70,4 +70,10 @@ vendorRoutes
     notificationController.markNotificationAsRead
   );
 
+vendorRoutes.get(
+  "/transactions",
+  vendorAuth,
+  vendorController.getTransactionHistory
+);
+
 export default vendorRoutes;

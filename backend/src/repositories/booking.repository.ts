@@ -178,6 +178,29 @@ class BookingRepository
     ]);
     return transactions;
   }
+  async getVendorTransactionHistory(vendorId: string): Promise<any[]> {
+    const venues = await Venue.find({ vendor: vendorId }).select("_id").exec();
+    const venueIds = venues.map((v: IVenue) => v._id);
+
+    const transactions = await Booking.aggregate([
+      {
+        $match: {
+          venue: { $in: venueIds },
+          status: { $in: ["fully_paid", "confirmed"] },
+        },
+      },
+      {
+        $project: {
+          bookingId: "$_id",
+          totalPrice: 1,
+          vendorReceives: 1,
+          bookingDate: "$createdAt",
+        },
+      },
+      { $sort: { bookingDate: -1 } },
+    ]);
+    return transactions;
+  }
 }
 
 export default new BookingRepository();

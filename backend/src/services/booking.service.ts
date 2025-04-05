@@ -386,6 +386,18 @@ class BookingService implements IBookingService {
       data: transactions,
     };
   }
+  async getVendorTransactionHistory(
+    vendorId: string
+  ): Promise<{ message: string; status: number; data: any[] }> {
+    const transactions = await bookingRepository.getVendorTransactionHistory(
+      vendorId
+    );
+    return {
+      message: MESSAGES.SUCCESS.TRANSACTION_HISTORY_FETCHED,
+      status: STATUS_CODES.OK,
+      data: transactions,
+    };
+  }
 }
 
 export default new BookingService();

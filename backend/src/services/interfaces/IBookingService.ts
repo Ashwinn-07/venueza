@@ -85,4 +85,7 @@ export interface IBookingService {
     status: number;
     data: any[];
   }>;
+  getVendorTransactionHistory(
+    vendorId: string
+  ): Promise<{ message: string; status: number; data: any[] }>;
 }

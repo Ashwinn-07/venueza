@@ -290,6 +290,24 @@ class VendorController implements IVendorController {
       });
     }
   }
+  async getTransactionHistory(req: Request, res: Response): Promise<void> {
+    try {
+      const vendorId = (req as any).userId;
+      const result = await bookingService.getVendorTransactionHistory(vendorId);
+      res.status(result.status).json({
+        message: result.message,
+        data: result.data,
+      });
+    } catch (error) {
+      console.error("Error fetching vendor transaction history:", error);
+      res.status(STATUS_CODES.BAD_REQUEST).json({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vendor transaction history",
+      });
+    }
+  }
 }
 
 export default new VendorController();
