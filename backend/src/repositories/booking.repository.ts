@@ -170,7 +170,7 @@ class BookingRepository
           totalPrice: 1,
           advanceAmount: 1,
           balanceDue: 1,
-          commissionAmt: 1,
+          commission: { $multiply: ["$totalPrice", 0.05] },
           bookingDate: "$createdAt",
         },
       },

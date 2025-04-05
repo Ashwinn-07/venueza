@@ -68,4 +68,8 @@ export const adminService = {
     const response = await adminApi.patch(`/venues/${venueId}`, payload);
     return response.data;
   },
+  getTransactionHistory: async () => {
+    const response = await adminApi.get("/transactions");
+    return response.data;
+  },
 };

@@ -22,6 +22,7 @@ export interface AdminSlice {
     verificationStatus: string,
     rejectionReason?: string
   ) => Promise<any>;
+  getTransactionHistory: () => Promise<any>;
 }
 
 export const createAdminSlice: StateCreator<
@@ -155,6 +156,17 @@ export const createAdminSlice: StateCreator<
       );
     } catch (error) {
       console.error("Failed to update venue verification status", error);
+      throw error;
+    }
+  },
+  getTransactionHistory: async () => {
+    try {
+      const { isAuthenticated, authType } = get();
+      if (!isAuthenticated || authType !== "admin")
+        throw new Error("Not authorized as admin");
+      return await adminService.getTransactionHistory();
+    } catch (error) {
+      console.error("Failed to fetch transaction history", error);
       throw error;
     }
   },
