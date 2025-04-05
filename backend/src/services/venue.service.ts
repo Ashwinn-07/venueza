@@ -14,6 +14,20 @@ class VenueService implements IVenueService {
     if (errors.length > 0) {
       throw new Error(errors.join(" "));
     }
+
+    if (venueData.name && venueData.location?.coordinates) {
+      const similarVenues = await venueRepository.findSimilarVenues(
+        venueData.name,
+        venueData.location.coordinates
+      );
+
+      if (similarVenues.length > 0) {
+        throw new Error(
+          "A similar venue already exists at this location. Please verify if this is a duplicate entry."
+        );
+      }
+    }
+
     const data = {
       ...venueData,
       vendor: new mongoose.Types.ObjectId(vendorId),

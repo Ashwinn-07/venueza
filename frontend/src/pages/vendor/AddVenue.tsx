@@ -190,9 +190,12 @@ const AddVenue = () => {
       notifySuccess("Venue created successfully!");
 
       navigate("/vendor/venues");
-    } catch (error: any) {
-      console.error("Failed to create venue:", error);
-      notifyError("Failed to create venue. Please try again.");
+    } catch (err: any) {
+      const errMsg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Failed to create venue. Please try again.";
+      notifyError(errMsg);
     }
   };
 
