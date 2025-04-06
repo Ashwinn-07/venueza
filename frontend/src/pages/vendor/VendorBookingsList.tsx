@@ -10,8 +10,6 @@ const VendorBookingsList = () => {
   const [error, setError] = useState<string>("");
   const [filter, setFilter] = useState<string>("all");
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -23,7 +21,7 @@ const VendorBookingsList = () => {
     const fetchBookings = async () => {
       try {
         setIsLoading(true);
-        const response = await getBookingsByVendor();
+        const response = await getBookingsByVendor(filter);
         setBookings(response.bookings || []);
       } catch (err: any) {
         setError(err.message || "Failed to fetch bookings.");
@@ -33,50 +31,12 @@ const VendorBookingsList = () => {
       }
     };
     fetchBookings();
-  }, [getBookingsByVendor]);
-
-  const filteredBookings = bookings.filter((booking) => {
-    let statusFiltered = true;
-    if (filter === "pending") statusFiltered = booking.status === "pending";
-    if (filter === "advance_paid")
-      statusFiltered = booking.status === "advance_paid";
-    if (filter === "balance_pending")
-      statusFiltered = booking.status === "balance_pending";
-    if (filter === "fully_paid")
-      statusFiltered =
-        booking.status === "fully_paid" || booking.status === "confirmed";
-    if (filter === "cancelled")
-      statusFiltered =
-        booking.status === "cancelled" ||
-        booking.status === "cancelled_by_user" ||
-        booking.status === "cancelled_by_vendor";
-
-    if (!searchQuery.trim()) {
-      return statusFiltered;
-    }
-
-    const query = searchQuery.toLowerCase();
-
-    return (
-      statusFiltered &&
-      ((booking._id && booking._id.toLowerCase().includes(query)) ||
-        (booking.venue?.name &&
-          booking.venue.name.toLowerCase().includes(query)) ||
-        (booking.user?.name &&
-          booking.user.name.toLowerCase().includes(query)) ||
-        (booking.user?.email &&
-          booking.user.email.toLowerCase().includes(query)) ||
-        (booking.status && booking.status.toLowerCase().includes(query)))
-    );
-  });
+  }, [getBookingsByVendor, filter]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentBookings = filteredBookings.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+  const currentBookings = bookings.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(bookings.length / itemsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -88,12 +48,10 @@ const VendorBookingsList = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter, searchQuery]);
+  }, [filter]);
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
       case "advance_paid":
         return "bg-blue-100 text-blue-800";
       case "balance_pending":
@@ -124,7 +82,7 @@ const VendorBookingsList = () => {
     try {
       await cancelBookingByVendor(selectedBookingId, cancelReason);
       notifySuccess("Booking cancelled and refund processed.");
-      const response = await getBookingsByVendor();
+      const response = await getBookingsByVendor(filter);
       setBookings(response.bookings || []);
     } catch (err: any) {
       console.error("Error cancelling booking:", err);
@@ -138,10 +96,6 @@ const VendorBookingsList = () => {
   const cancelModal = () => {
     setShowModal(false);
     setSelectedBookingId("");
-  };
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
   };
 
   if (isLoading) {
@@ -163,34 +117,6 @@ const VendorBookingsList = () => {
         </p>
       </div>
 
-      <div className="mb-6">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <svg
-              className="w-5 h-5 text-gray-500"
-              aria-hidden="true"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
-          </div>
-          <input
-            type="text"
-            id="search-bookings"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
-            placeholder="Search by ID, venue, customer name, email, or status..."
-            value={searchQuery}
-            onChange={handleSearch}
-          />
-        </div>
-      </div>
-
       <div className="flex gap-4 mb-6 overflow-x-auto">
         <button
           className={`px-4 py-2 rounded cursor-pointer ${
@@ -199,14 +125,6 @@ const VendorBookingsList = () => {
           onClick={() => setFilter("all")}
         >
           All Bookings
-        </button>
-        <button
-          className={`px-4 py-2 rounded cursor-pointer ${
-            filter === "pending" ? "bg-yellow-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("pending")}
-        >
-          Pending
         </button>
         <button
           className={`px-4 py-2 rounded cursor-pointer ${
@@ -244,11 +162,9 @@ const VendorBookingsList = () => {
         </button>
       </div>
 
-      {filteredBookings.length === 0 ? (
+      {bookings.length === 0 ? (
         <div className="text-center py-8 bg-gray-50 rounded-lg">
-          <p className="text-gray-600">
-            No bookings found for this category or search query.
-          </p>
+          <p className="text-gray-600">No bookings found for this category.</p>
         </div>
       ) : (
         <>
@@ -354,10 +270,9 @@ const VendorBookingsList = () => {
               Showing{" "}
               <span className="font-medium">
                 {indexOfFirstItem + 1} -{" "}
-                {Math.min(indexOfLastItem, filteredBookings.length)}
+                {Math.min(indexOfLastItem, bookings.length)}
               </span>{" "}
-              of <span className="font-medium">{filteredBookings.length}</span>{" "}
-              bookings
+              of <span className="font-medium">{bookings.length}</span> bookings
             </p>
             <nav className="relative z-0 inline-flex shadow-sm rounded-md">
               <button

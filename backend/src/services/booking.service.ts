@@ -229,11 +229,34 @@ class BookingService implements IBookingService {
     };
   }
   async getBookingsByVendorId(
-    vendorId: string
+    vendorId: string,
+    filter: string = "all"
   ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
-    const bookings = await bookingRepository.findByVendor(vendorId);
+    let bookings = await bookingRepository.findByVendor(vendorId);
     if (!bookings) {
       throw new Error("No bookings found");
+    }
+    bookings = bookings.filter((booking) => booking.status !== "pending");
+    if (filter !== "all") {
+      if (filter === "advance_paid") {
+        bookings = bookings.filter(
+          (booking) => booking.status === "advance_paid"
+        );
+      } else if (filter === "balance_pending") {
+        bookings = bookings.filter(
+          (booking) => booking.status === "balance_pending"
+        );
+      } else if (filter === "fully_paid") {
+        bookings = bookings.filter(
+          (booking) => booking.status === "fully_paid"
+        );
+      } else if (filter === "cancelled") {
+        bookings = bookings.filter(
+          (booking) =>
+            booking.status === "cancelled_by_user" ||
+            booking.status === "cancelled_by_vendor"
+        );
+      }
     }
     return {
       message: MESSAGES.SUCCESS.BOOKING_FETCHED,

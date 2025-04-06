@@ -41,7 +41,8 @@ export interface IBookingService {
     data: { startDate: Date; endDate: Date; reason?: string }
   ): Promise<{ message: string; blockedDate: any }>;
   getBookingsByVendorId(
-    vendorId: string
+    vendorId: string,
+    filter: string
   ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
   getAllBookings(search: string): Promise<{
     message: string;

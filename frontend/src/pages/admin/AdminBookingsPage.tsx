@@ -16,7 +16,10 @@ const AdminBookingsPage = () => {
     try {
       setLoading(true);
       const response = await getAllBookings(search);
-      setBookings(response.bookings || []);
+      const filteredBookings = (response.bookings || []).filter(
+        (booking: any) => !booking.status.includes("pending")
+      );
+      setBookings(filteredBookings);
       setCurrentPage(1);
     } catch (err: any) {
       console.error("Error fetching bookings:", err);
