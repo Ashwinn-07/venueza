@@ -14,6 +14,8 @@ const VendorTransactionHistory = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5;
 
   const fetchTransactions = async () => {
     try {
@@ -88,6 +90,22 @@ const VendorTransactionHistory = () => {
     );
   }
 
+  const totalPages = Math.ceil(transactions.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTransactions = transactions.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -95,13 +113,15 @@ const VendorTransactionHistory = () => {
           <h1 className="text-3xl font-bold text-gray-900">
             Transaction History
           </h1>
-          <button
-            onClick={exportToCSV}
-            className="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-lg hover:bg-green-100 transition cursor-pointer"
-          >
-            <Download className="h-4 w-4" />
-            <span>Export CSV</span>
-          </button>
+          {transactions.length > 0 && (
+            <button
+              onClick={exportToCSV}
+              className="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-lg hover:bg-green-100 transition cursor-pointer"
+            >
+              <Download className="h-4 w-4" />
+              <span>Export CSV</span>
+            </button>
+          )}
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -124,8 +144,8 @@ const VendorTransactionHistory = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {transactions.length > 0 ? (
-                  transactions.map((transaction, index) => (
+                {currentTransactions.length > 0 ? (
+                  currentTransactions.map((transaction, index) => (
                     <tr
                       key={transaction.bookingId}
                       className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
@@ -158,6 +178,28 @@ const VendorTransactionHistory = () => {
             </table>
           </div>
         </div>
+
+        {transactions.length > 0 && (
+          <div className="mt-6 flex justify-between items-center">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-600 cursor-pointer">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
           <div className="flex items-start space-x-3">

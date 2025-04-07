@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import UserProfileNavigation from "../../components/user/UserProfileNavigation";
 import { useAuthStore } from "../../stores/authStore";
 import { format } from "date-fns";
+import { Download } from "lucide-react";
 
 const TransactionHistoryPage = () => {
   const { getBookingsByUser } = useAuthStore();
@@ -14,7 +15,7 @@ const TransactionHistoryPage = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await getBookingsByUser();
+      const response = await getBookingsByUser("all");
       setBookings(response.bookings || []);
     } catch (err: any) {
       console.error("Error fetching transaction history:", err);
@@ -27,6 +28,57 @@ const TransactionHistoryPage = () => {
   useEffect(() => {
     fetchBookings();
   }, [getBookingsByUser]);
+
+  const exportToCSV = () => {
+    const headers = [
+      "Booking ID",
+      "Venue",
+      "Start Date",
+      "End Date",
+      "Advance (₹)",
+      "Balance (₹)",
+      "Refund (₹)",
+      "Status",
+      "Total Price (₹)",
+    ];
+
+    const csvRows = [
+      headers.join(","),
+      ...bookings.map((booking) =>
+        [
+          booking._id,
+          booking.venue?.name || "N/A",
+          format(new Date(booking.startDate), "MMM dd, yyyy"),
+          format(new Date(booking.endDate), "MMM dd, yyyy"),
+          booking.advancePaid ? booking.advanceAmount : "-",
+          booking.status === "fully_paid"
+            ? booking.totalPrice - booking.advanceAmount
+            : "-",
+          booking.status === "cancelled_by_vendor"
+            ? booking.advanceAmount
+            : "-",
+          booking.status
+            .split("_")
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(" "),
+          booking.totalPrice || "-",
+        ].join(",")
+      ),
+    ];
+
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "user_transaction_history.csv");
+    link.style.visibility = "hidden";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (loading) {
     return (
@@ -65,7 +117,18 @@ const TransactionHistoryPage = () => {
             <UserProfileNavigation />
           </div>
           <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6">Transaction History</h1>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">Transaction History</h1>
+              {bookings.length > 0 && (
+                <button
+                  onClick={exportToCSV}
+                  className="flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-lg hover:bg-green-100 transition cursor-pointer"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export CSV</span>
+                </button>
+              )}
+            </div>
             {bookings.length === 0 ? (
               <div className="text-center py-8 text-gray-600">
                 No transactions found.
