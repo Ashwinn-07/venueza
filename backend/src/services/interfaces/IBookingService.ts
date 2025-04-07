@@ -31,7 +31,8 @@ export interface IBookingService {
     bookingId: string
   ): Promise<{ message: string; status: number; booking: IBooking }>;
   getBookingsByUserId(
-    userId: string
+    userId: string,
+    filterType: string
   ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
   getBookedDatesForVenue(
     venueId: string

@@ -185,16 +185,47 @@ class BookingService implements IBookingService {
     };
   }
   async getBookingsByUserId(
-    userId: string
+    userId: string,
+    filterType: string = "all"
   ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
-    const bookings = await bookingRepository.findByUser(userId);
-    if (!bookings) {
-      throw new Error("No bookings found for this user");
+    const allBookings = await bookingRepository.findByUser(userId);
+
+    if (!allBookings || allBookings.length === 0) {
+      return {
+        message: "No bookings found for this user",
+        status: STATUS_CODES.OK,
+        bookings: [],
+      };
     }
+
+    const nonPendingBookings = allBookings.filter(
+      (booking) => booking.status !== "pending"
+    );
+
+    let filteredBookings;
+    const now = new Date();
+
+    switch (filterType) {
+      case "upcoming":
+        filteredBookings = nonPendingBookings.filter(
+          (booking) => new Date(booking.endDate) > now
+        );
+        break;
+      case "past":
+        filteredBookings = nonPendingBookings.filter(
+          (booking) => new Date(booking.endDate) <= now
+        );
+        break;
+      case "all":
+      default:
+        filteredBookings = nonPendingBookings;
+        break;
+    }
+
     return {
       message: MESSAGES.SUCCESS.BOOKING_FETCHED,
       status: STATUS_CODES.OK,
-      bookings,
+      bookings: filteredBookings,
     };
   }
   async getBookedDatesForVenue(

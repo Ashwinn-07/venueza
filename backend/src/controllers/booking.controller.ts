@@ -107,7 +107,11 @@ class BookingController implements IBookingController {
   async getUserBookings(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).userId;
-      const result = await bookingService.getBookingsByUserId(userId);
+      const filterType = (req.query.filter as string) || "all";
+      const result = await bookingService.getBookingsByUserId(
+        userId,
+        filterType
+      );
       res.status(result.status).json({
         message: result.message,
         bookings: result.bookings,

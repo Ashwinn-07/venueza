@@ -10,8 +10,7 @@ const UserBookings = () => {
   const navigate = useNavigate();
   const { isAuthenticated, getBookingsByUser, cancelBookingByUser } =
     useAuthStore();
-  const [allBookings, setAllBookings] = useState<any[]>([]);
-  const [filteredBookings, setFilteredBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"upcoming" | "past" | "all">(
     "upcoming"
@@ -26,50 +25,19 @@ const UserBookings = () => {
     }
 
     fetchBookings();
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-    filterBookings();
-  }, [activeTab, allBookings]);
+  }, [isAuthenticated, navigate, activeTab]);
 
   const fetchBookings = async () => {
     setIsLoading(true);
     try {
-      const response = await getBookingsByUser();
-      setAllBookings(response.bookings);
+      const response = await getBookingsByUser(activeTab);
+      setBookings(response.bookings);
     } catch (error: any) {
       console.error("Error fetching bookings", error);
       notifyError(error.message || "Failed to fetch bookings");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const filterBookings = () => {
-    const now = new Date();
-    const nonPendingBookings = allBookings.filter(
-      (booking) => booking.status !== "pending"
-    );
-    let filtered: any[] = [];
-
-    switch (activeTab) {
-      case "upcoming":
-        filtered = nonPendingBookings.filter(
-          (booking) => new Date(booking.endDate) > now
-        );
-        break;
-      case "past":
-        filtered = nonPendingBookings.filter(
-          (booking) => new Date(booking.endDate) <= now
-        );
-        break;
-      case "all":
-        filtered = nonPendingBookings;
-        break;
-    }
-
-    setFilteredBookings(filtered);
-    setCurrentPage(1);
   };
 
   const getStatusLabel = (status: string) => {
@@ -101,6 +69,7 @@ const UserBookings = () => {
       notifyError(error.message || "Cancellation failed");
     }
   };
+
   const handleCancelBookingConfirm = (bookingId: string) => {
     confirmAlert({
       title: "Confirm Cancellation",
@@ -129,7 +98,7 @@ const UserBookings = () => {
 
   const indexOfLastBooking = currentPage * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
-  const currentBookings = filteredBookings.slice(
+  const currentBookings = bookings.slice(
     indexOfFirstBooking,
     indexOfLastBooking
   );
@@ -204,7 +173,7 @@ const UserBookings = () => {
                     ></path>
                   </svg>
                 </div>
-              ) : filteredBookings.length === 0 ? (
+              ) : bookings.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No bookings found.</p>
                   <button
@@ -366,9 +335,7 @@ const UserBookings = () => {
                     <nav className="inline-flex rounded-md shadow-sm">
                       {Array.from(
                         {
-                          length: Math.ceil(
-                            filteredBookings.length / bookingsPerPage
-                          ),
+                          length: Math.ceil(bookings.length / bookingsPerPage),
                         },
                         (_, i) => (
                           <button
@@ -382,9 +349,7 @@ const UserBookings = () => {
                               i === 0
                                 ? "rounded-l-md"
                                 : i ===
-                                  Math.ceil(
-                                    filteredBookings.length / bookingsPerPage
-                                  ) -
+                                  Math.ceil(bookings.length / bookingsPerPage) -
                                     1
                                 ? "rounded-r-md"
                                 : ""

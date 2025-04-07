@@ -35,8 +35,8 @@ export const bookingService = {
     const response = await userApi.get(`/bookings/${bookingId}`);
     return response.data;
   },
-  getBookingsByUser: async () => {
-    const response = await userApi.get("/bookings");
+  getBookingsByUser: async (filterType = "upcoming") => {
+    const response = await userApi.get(`/bookings?filter=${filterType}`);
     return response.data;
   },
   getBookingsByVendor: async (filter: string = "all") => {
