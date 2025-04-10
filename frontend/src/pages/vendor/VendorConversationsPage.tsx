@@ -187,7 +187,7 @@ const VendorConversationsPage = () => {
                               isUnread ? "font-bold" : ""
                             }`}
                           >
-                            {conversation.partner.name}
+                            {conversation.partner.name || "Unknown User"}
                           </h3>
                           <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
                             {conversation.lastMessage?.createdAt &&
