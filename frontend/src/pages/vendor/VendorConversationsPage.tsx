@@ -162,21 +162,15 @@ const VendorConversationsPage = () => {
                       onClick={() => handleChatSelect(conversation.partner._id)}
                       className="flex items-center p-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-gray-100 hover:border-gray-200"
                     >
-                      {conversation?.partner?.profileImage ? (
+                      {conversation.partner.profileImage ? (
                         <img
                           src={conversation.partner.profileImage}
-                          alt={conversation.partner.name || "User"}
+                          alt={conversation.partner.name}
                           className="w-12 h-12 rounded-full object-cover"
                         />
-                      ) : conversation?.partner ? (
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {getInitials(
-                            conversation.partner.name || "Unknown User"
-                          )}
-                        </div>
                       ) : (
-                        <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
-                          ?
+                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          {getInitials(conversation.partner.name)}
                         </div>
                       )}
 
@@ -187,7 +181,7 @@ const VendorConversationsPage = () => {
                               isUnread ? "font-bold" : ""
                             }`}
                           >
-                            {conversation.partner.name || "Unknown User"}
+                            {conversation.partner.name}
                           </h3>
                           <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
                             {conversation.lastMessage?.createdAt &&

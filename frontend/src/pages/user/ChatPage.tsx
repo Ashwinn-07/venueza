@@ -55,8 +55,9 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (!socket || !user || !vendorId) return;
+    const senderId = user.userId || user.id;
 
-    const room = [user.id, vendorId].sort().join("-");
+    const room = [senderId, vendorId].sort().join("-");
 
     socket.emit("joinRoom", room);
 
@@ -75,7 +76,8 @@ const ChatPage = () => {
     const fetchConversation = async () => {
       try {
         setLoading(true);
-        const result = await getConversation(user.id, vendorId);
+        const senderId = user.userId || user.id;
+        const result = await getConversation(senderId, vendorId);
 
         if (result && result.data) {
           setMessages(result.data || []);
@@ -134,10 +136,12 @@ const ChatPage = () => {
     try {
       setSending(true);
 
-      const room = [user.id, vendorId].sort().join("-");
+      const senderId = user.userId || user.id;
+
+      const room = [senderId, vendorId].sort().join("-");
 
       const messageData = {
-        sender: user.id,
+        sender: senderId,
         senderModel: "User",
         receiver: vendorId,
         receiverModel: "Vendor",
@@ -260,7 +264,8 @@ const ChatPage = () => {
                         ? message.sender._id
                         : message.sender;
 
-                    const isCurrentUser = senderId === user?.id;
+                    const isCurrentUser =
+                      senderId === (user?.userId || user?.id);
 
                     return (
                       <div
