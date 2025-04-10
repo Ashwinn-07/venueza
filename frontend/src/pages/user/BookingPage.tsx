@@ -228,22 +228,26 @@ const BookingPage = () => {
                 <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Venue price per day:</span>
-                    <span className="font-medium">₹{venue.price}</span>
+                    <span className="font-medium">
+                      ₹{venue.price.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Total booking amount:</span>
-                    <span className="font-semibold">₹{totalPrice}</span>
+                    <span className="font-semibold">
+                      ₹{totalPrice.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center border-t pt-3 border-dashed border-gray-300">
                     <span className="text-gray-600">Advance amount (20%):</span>
                     <span className="font-semibold text-blue-600">
-                      ₹{advanceAmount}
+                      ₹{advanceAmount.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Balance due at venue:</span>
                     <span className="font-semibold">
-                      ₹{totalPrice - advanceAmount}
+                      ₹{(totalPrice - advanceAmount).toFixed(2)}
                     </span>
                   </div>
                 </div>
