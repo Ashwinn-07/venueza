@@ -20,7 +20,7 @@ const BlockDatesPage = () => {
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await getVenues();
+        const response = await getVenues("all");
         const approvedVenues = (response.result?.venues || []).filter(
           (venue: any) => venue.verificationStatus === "approved"
         );

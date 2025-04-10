@@ -102,7 +102,7 @@ const VenueCalendarPage = () => {
     const fetchVenues = async () => {
       try {
         setLoading(true);
-        const response = await getVenues();
+        const response = await getVenues("all");
         const approvedVenues = (response.result?.venues || []).filter(
           (venue: any) => venue.verificationStatus === "approved"
         );

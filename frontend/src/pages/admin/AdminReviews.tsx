@@ -25,7 +25,7 @@ const AdminReviews = () => {
   useEffect(() => {
     const loadVenues = async () => {
       try {
-        const response = await listApprovedVenues();
+        const response = await listApprovedVenues("");
         setVenues(response.venues);
       } catch (error) {
         console.error("Failed to load venues:", error);

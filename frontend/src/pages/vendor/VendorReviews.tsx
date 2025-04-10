@@ -31,7 +31,7 @@ const VendorReviews = () => {
   useEffect(() => {
     const loadVenues = async () => {
       try {
-        const response = await getVenues();
+        const response = await getVenues("all");
         setVenues(response.result?.venues);
         if (response.venues && response.venues.length > 0) {
           setSelectedVenue(response.venues[0]);
