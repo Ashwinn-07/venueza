@@ -170,7 +170,9 @@ const VendorConversationsPage = () => {
                         />
                       ) : conversation?.partner ? (
                         <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {getInitials(conversation.partner.name)}
+                          {getInitials(
+                            conversation.partner.name || "Unknown User"
+                          )}
                         </div>
                       ) : (
                         <div className="w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center text-white font-semibold">
