@@ -59,8 +59,19 @@ class MessageRepository
       {
         $lookup: {
           from: "users",
-          localField: "_id",
-          foreignField: "_id",
+          let: { partnerId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ["$_id", "$$partnerId"] },
+                    { $eq: ["$userId", "$$partnerId"] },
+                  ],
+                },
+              },
+            },
+          ],
           as: "userPartner",
         },
       },
