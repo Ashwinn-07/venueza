@@ -14,12 +14,13 @@ const BookingPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [advanceAmount, setAdvanceAmount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [excludedDates, setExcludedDates] = useState<Date[]>([]);
+  const [datesInitialized, setDatesInitialized] = useState(false);
 
   const getDatesInRange = (start: Date, end: Date): Date[] => {
     const dates: Date[] = [];
@@ -31,6 +32,25 @@ const BookingPage = () => {
     return dates;
   };
 
+  const findFirstAvailableDate = (excludedDates: Date[]): Date => {
+    const today = new Date();
+
+    const candidate = new Date(today);
+    candidate.setDate(today.getDate() + 6);
+
+    while (isDateExcluded(candidate, excludedDates)) {
+      candidate.setDate(candidate.getDate() + 1);
+    }
+
+    return candidate;
+  };
+
+  const isDateExcluded = (date: Date, excludedDates: Date[]): boolean => {
+    return excludedDates.some(
+      (excludedDate) => excludedDate.toDateString() === date.toDateString()
+    );
+  };
+
   useEffect(() => {
     const fetchVenueData = async () => {
       if (!venueId) return;
@@ -39,8 +59,6 @@ const BookingPage = () => {
         const response = await getUserVenue(venueId);
         const venueData = response.result?.venue;
         setVenue(venueData);
-        setTotalPrice(venueData.price || 0);
-        setAdvanceAmount((venueData.price || 0) * 0.2);
       } catch (err) {
         console.error("Error fetching venue:", err);
         setError("Failed to load venue details. Please try again later.");
@@ -75,12 +93,40 @@ const BookingPage = () => {
 
         const excluded = allBookedDates.concat(blockedDays);
         setExcludedDates(excluded);
+
+        if (!datesInitialized) {
+          const validStartDate = findFirstAvailableDate(excluded);
+          const validEndDate = new Date(validStartDate);
+          validEndDate.setDate(validStartDate.getDate() + 1);
+
+          if (isDateExcluded(validEndDate, excluded)) {
+            let nextDate = new Date(validEndDate);
+            while (isDateExcluded(nextDate, excluded)) {
+              nextDate.setDate(nextDate.getDate() + 1);
+            }
+            validEndDate.setTime(nextDate.getTime());
+          }
+
+          setStartDate(validStartDate);
+          setEndDate(validEndDate);
+          setDatesInitialized(true);
+
+          if (venue && venue.price) {
+            calculatePrice(validStartDate, validEndDate);
+          }
+        }
       } catch (err) {
         console.error("Error fetching booked dates:", err);
       }
     };
     fetchBookedDates();
-  }, [venueId, getBookedDatesForVenue]);
+  }, [venueId, getBookedDatesForVenue, venue, datesInitialized]);
+
+  useEffect(() => {
+    if (venue && startDate && endDate) {
+      calculatePrice(startDate, endDate);
+    }
+  }, [venue, startDate, endDate]);
 
   const calculatePrice = (start: Date, end: Date) => {
     if (!venue || !venue.price) return;
@@ -95,19 +141,34 @@ const BookingPage = () => {
   const handleStartDateChange = (date: Date | null) => {
     if (!date) return;
     setStartDate(date);
-    calculatePrice(date, endDate);
+
+    if (!endDate || endDate <= date) {
+      let newEndDate = new Date(date);
+      newEndDate.setDate(date.getDate() + 1);
+
+      while (isDateExcluded(newEndDate, excludedDates)) {
+        newEndDate.setDate(newEndDate.getDate() + 1);
+      }
+
+      setEndDate(newEndDate);
+      calculatePrice(date, newEndDate);
+    } else {
+      calculatePrice(date, endDate);
+    }
   };
 
   const handleEndDateChange = (date: Date | null) => {
     if (!date) return;
     setEndDate(date);
-    calculatePrice(startDate, date);
+    if (startDate) {
+      calculatePrice(startDate, date);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!venueId || !venue) {
-      setError("Invalid venue information");
+    if (!venueId || !venue || !startDate || !endDate) {
+      setError("Invalid venue or date information");
       return;
     }
     try {
@@ -146,10 +207,12 @@ const BookingPage = () => {
     );
   }
 
-  if (!venue) {
+  if (!venue || !startDate || !endDate) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Venue not found</div>
+        <div className="text-xl text-gray-600">
+          Loading booking information...
+        </div>
       </div>
     );
   }
