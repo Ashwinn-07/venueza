@@ -84,7 +84,10 @@ const ViewAllVenues = () => {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">All Venues</h1>
-          <VenueSearch onSearch={handleSearch} />
+          <VenueSearch
+            onSearch={handleSearch}
+            initialCriteria={searchCriteria}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">

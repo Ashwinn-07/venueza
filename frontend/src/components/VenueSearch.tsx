@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, MapPin, Users, IndianRupee } from "lucide-react";
 
-const VenueSearch = ({ onSearch }: any) => {
+const VenueSearch = ({ onSearch, initialCriteria = {} }: any) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [criteria, setCriteria] = useState({
-    query: "",
-    location: "",
-    capacity: "",
-    price: "",
+    query: initialCriteria.query || "",
+    location: initialCriteria.location || "",
+    capacity: initialCriteria.capacity || "",
+    price: initialCriteria.price || "",
   });
+
+  useEffect(() => {
+    setCriteria({
+      query: initialCriteria.query || "",
+      location: initialCriteria.location || "",
+      capacity: initialCriteria.capacity || "",
+      price: initialCriteria.price || "",
+    });
+  }, [initialCriteria]);
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
