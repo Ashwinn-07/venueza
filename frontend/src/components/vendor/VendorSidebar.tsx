@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useAuthStore } from "../../stores/authStore";
 import { confirmAlert } from "react-confirm-alert";
@@ -6,6 +6,7 @@ import "react-confirm-alert/src/react-confirm-alert.css";
 
 const VendorSidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuthStore();
   const menuItems = [
     { icon: "🏠", text: "Dashboard", path: "/vendor/dashboard" },
@@ -19,6 +20,7 @@ const VendorSidebar = () => {
     { icon: "⚙️", text: "Settings", path: "/vendor/settings/profile" },
     { icon: "⛔", text: "Block Dates", path: "/vendor/venues/block-dates" },
   ];
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -30,6 +32,7 @@ const VendorSidebar = () => {
       notifyError(errMsg);
     }
   };
+
   const handleLogoutConfirm = () => {
     confirmAlert({
       title: "Confirm Logout",
@@ -47,6 +50,18 @@ const VendorSidebar = () => {
     });
   };
 
+  const isActive = (path: any) => {
+    if (path === "/vendor/settings/profile") {
+      return location.pathname.startsWith("/vendor/settings");
+    }
+
+    if (path === "/vendor/venues") {
+      return location.pathname === path;
+    }
+
+    return location.pathname === path;
+  };
+
   return (
     <div className="w-64 bg-white h-screen border-r border-gray-200 flex flex-col">
       <div className="p-6 border-b border-gray-200">
@@ -59,19 +74,26 @@ const VendorSidebar = () => {
       </div>
 
       <div className="flex-1 py-4">
-        {menuItems.map((item, index) => (
-          <Link
-            key={index}
-            to={item.path}
-            className="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <span className="mr-3 text-lg">{item.icon}</span>
-            <span className="text-sm">{item.text}</span>
-          </Link>
-        ))}
+        {menuItems.map((item, index) => {
+          const active = isActive(item.path);
+          return (
+            <Link
+              key={index}
+              to={item.path}
+              className={`flex items-center px-6 py-3 transition-colors ${
+                active
+                  ? "bg-blue-50 text-blue-600 font-medium border-l-4 border-blue-600"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              <span className="mr-3 text-lg">{item.icon}</span>
+              <span className="text-sm">{item.text}</span>
+            </Link>
+          );
+        })}
       </div>
 
-      <div className="py-4 border-t border-gray-200 flex items-center px-6  text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
+      <div className="py-4 border-t border-gray-200 flex items-center px-6 text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
         <span className="mr-3 text-lg">🚪</span>
         <span onClick={handleLogoutConfirm} className="text-sm">
           Logout
