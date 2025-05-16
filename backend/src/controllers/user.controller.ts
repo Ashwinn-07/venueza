@@ -1,13 +1,16 @@
 import { Request, Response } from "express";
-import userService from "../services/user.service";
+import { IUserService } from "../services/interfaces/IUserService";
 import { IUserController } from "./interfaces/IUserController";
 import { STATUS_CODES } from "../utils/constants";
-import jwt from "jsonwebtoken";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class UserController implements IUserController {
-  async register(req: Request, res: Response): Promise<void> {
+@injectable()
+export class UserController implements IUserController {
+  constructor(@inject(TOKENS.IUserService) private userService: IUserService) {}
+  register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await userService.registerUser(req.body);
+      const result = await this.userService.registerUser(req.body);
       res.status(result.status).json({
         message: result.message,
       });
@@ -17,11 +20,11 @@ class UserController implements IUserController {
         error: error instanceof Error ? error.message : "Registration failed",
       });
     }
-  }
-  async verifyOTP(req: Request, res: Response): Promise<void> {
+  };
+  verifyOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp } = req.body;
-      const result = await userService.verifyOTP(email, otp);
+      const result = await this.userService.verifyOTP(email, otp);
       res.status(result.status).json({
         message: result.message,
       });
@@ -32,8 +35,8 @@ class UserController implements IUserController {
           error instanceof Error ? error.message : "OTP verification failed",
       });
     }
-  }
-  async resendOTP(req: Request, res: Response): Promise<void> {
+  };
+  resendOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
 
@@ -44,7 +47,7 @@ class UserController implements IUserController {
         return;
       }
 
-      const result = await userService.resendOTP(email);
+      const result = await this.userService.resendOTP(email);
       res.status(result.status).json({
         message: result.message,
       });
@@ -54,11 +57,11 @@ class UserController implements IUserController {
         error: error instanceof Error ? error.message : "Failed to resend OTP",
       });
     }
-  }
-  async login(req: Request, res: Response): Promise<void> {
+  };
+  login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
-      const result = await userService.loginUser(email, password);
+      const result = await this.userService.loginUser(email, password);
       res.cookie("auth-token", result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -83,11 +86,11 @@ class UserController implements IUserController {
         error: error instanceof Error ? error.message : "Login Failed",
       });
     }
-  }
-  async googleCallback(req: Request, res: Response): Promise<void> {
+  };
+  googleCallback = async (req: Request, res: Response): Promise<void> => {
     try {
       const user = req.user as any;
-      const result = await userService.processGoogleAuth(user);
+      const result = await this.userService.processGoogleAuth(user);
       res.cookie("auth-token", result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -105,11 +108,11 @@ class UserController implements IUserController {
         `${process.env.FRONTEND_URL}/user/login?error=google_auth_failed`
       );
     }
-  }
-  async forgotPassword(req: Request, res: Response): Promise<void> {
+  };
+  forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
-      const result = await userService.forgotPassword(email);
+      const result = await this.userService.forgotPassword(email);
       res.status(result.status).json({ message: result.message });
     } catch (error) {
       console.error("Forgot password error:", error);
@@ -120,11 +123,11 @@ class UserController implements IUserController {
             : "Failed to process forgot password request",
       });
     }
-  }
-  async resetPassword(req: Request, res: Response): Promise<void> {
+  };
+  resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp, password, confirmPassword } = req.body;
-      const result = await userService.resetPassword(
+      const result = await this.userService.resetPassword(
         email,
         otp,
         password,
@@ -138,8 +141,8 @@ class UserController implements IUserController {
           error instanceof Error ? error.message : "Failed to reset password",
       });
     }
-  }
-  async logout(req: Request, res: Response): Promise<void> {
+  };
+  logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie("auth-token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -150,12 +153,15 @@ class UserController implements IUserController {
     res.status(STATUS_CODES.OK).json({
       message: "Logged out successfully",
     });
-  }
-  async updateUserProfile(req: Request, res: Response): Promise<void> {
+  };
+  updateUserProfile = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const updatedData = req.body;
-      const result = await userService.updateUserProfile(userId, updatedData);
+      const result = await this.userService.updateUserProfile(
+        userId,
+        updatedData
+      );
       res.status(result.status).json({
         message: result.message,
         user: {
@@ -174,8 +180,8 @@ class UserController implements IUserController {
           error instanceof Error ? error.message : "Failed to update profile",
       });
     }
-  }
-  async changeUserPassword(req: Request, res: Response): Promise<void> {
+  };
+  changeUserPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const { currentPassword, newPassword, confirmNewPassword } = req.body;
@@ -186,7 +192,7 @@ class UserController implements IUserController {
         return;
       }
 
-      const result = await userService.changeUserPassword(
+      const result = await this.userService.changeUserPassword(
         userId,
         currentPassword,
         newPassword,
@@ -200,7 +206,5 @@ class UserController implements IUserController {
           error instanceof Error ? error.message : "Failed to change password",
       });
     }
-  }
+  };
 }
-
-export default new UserController();

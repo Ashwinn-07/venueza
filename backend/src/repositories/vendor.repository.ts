@@ -1,8 +1,10 @@
 import Vendor, { IVendor } from "../models/vendor.model";
 import { IVendorRepository } from "./interfaces/IVendorRepository";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
+import { injectable } from "tsyringe";
 
-class VendorRepository
+@injectable()
+export class VendorRepository
   extends BaseRepository<IVendor>
   implements IVendorRepository
 {
@@ -14,5 +16,3 @@ class VendorRepository
     return await Vendor.findOne({ email: email });
   }
 }
-
-export default new VendorRepository();

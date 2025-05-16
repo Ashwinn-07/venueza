@@ -1,8 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import userRepository from "../repositories/user.repository";
+import { inject, injectable } from "tsyringe";
 import { IUser } from "../models/user.model";
 import { IUserService } from "./interfaces/IUserService";
+import { IUserRepository } from "../repositories/interfaces/IUserRepository";
+
 import OTPService from "../utils/OTPService";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
 import {
@@ -11,12 +13,18 @@ import {
   isValidPhone,
   isValidOTP,
 } from "../utils/validators";
+import { TOKENS } from "../config/tokens";
 
 interface SignupData extends Partial<IUser> {
   confirmPassword?: string;
 }
 
-class UserService implements IUserService {
+@injectable()
+export class UserService implements IUserService {
+  constructor(
+    @inject(TOKENS.IUserRepository)
+    private userRepo: IUserRepository
+  ) {}
   private sanitizeUser(user: IUser) {
     const { password, otp, __v, ...sanitizedUser } = user.toObject();
     return sanitizedUser;
@@ -42,7 +50,7 @@ class UserService implements IUserService {
     if (password !== confirmPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
-    const existingUser = await userRepository.findByEmail(email);
+    const existingUser = await this.userRepo.findByEmail(email);
     if (existingUser) {
       throw new Error(MESSAGES.ERROR.EMAIL_EXISTS);
     }
@@ -54,7 +62,7 @@ class UserService implements IUserService {
 
     console.log(otp);
 
-    await userRepository.create({
+    await this.userRepo.create({
       ...userData,
       password: hashedPassword,
       isVerified: false,
@@ -69,7 +77,7 @@ class UserService implements IUserService {
     if (!isValidOTP(otp)) {
       throw new Error("OTP must be a 6-digit number");
     }
-    const user = await userRepository.findByEmail(email);
+    const user = await this.userRepo.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -78,12 +86,12 @@ class UserService implements IUserService {
     }
     user.isVerified = true;
     user.otp = undefined;
-    await userRepository.update(user._id.toString(), user);
+    await this.userRepo.update(user._id.toString(), user);
 
     return { message: MESSAGES.SUCCESS.OTP_VERIFIED, status: STATUS_CODES.OK };
   }
   async resendOTP(email: string): Promise<{ message: string; status: number }> {
-    const user = await userRepository.findByEmail(email);
+    const user = await this.userRepo.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -99,7 +107,7 @@ class UserService implements IUserService {
     console.log(newOtp);
 
     user.otp = newOtp;
-    await userRepository.update(user._id.toString(), user);
+    await this.userRepo.update(user._id.toString(), user);
 
     return { message: MESSAGES.SUCCESS.OTP_RESENT, status: STATUS_CODES.OK };
   }
@@ -113,7 +121,7 @@ class UserService implements IUserService {
     if (!password) {
       throw new Error("Password is required");
     }
-    const user = await userRepository.findByEmail(email);
+    const user = await this.userRepo.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
     }
@@ -150,14 +158,14 @@ class UserService implements IUserService {
     profile: any
   ): Promise<{ user: IUser; token: string; message: string; status: number }> {
     const email = profile.email;
-    let user = await userRepository.findByEmail(email);
+    let user = await this.userRepo.findByEmail(email);
     if (user) {
       if (!user.googleId) {
         user.googleId = profile.id;
-        await userRepository.update(user._id.toString(), user);
+        await this.userRepo.update(user._id.toString(), user);
       }
     } else {
-      user = await userRepository.create({
+      user = await this.userRepo.create({
         googleId: profile.id,
         name: profile.displayName,
         email,
@@ -196,13 +204,13 @@ class UserService implements IUserService {
     if (!isValidEmail(email)) {
       throw new Error("Invalid email format");
     }
-    const user = await userRepository.findByEmail(email);
+    const user = await this.userRepo.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
     const otp = OTPService.generateOTP();
     user.otp = otp;
-    await userRepository.update(user._id.toString(), user);
+    await this.userRepo.update(user._id.toString(), user);
     await OTPService.sendOTP(email, otp);
     console.log(otp);
     return { message: MESSAGES.SUCCESS.OTP_SENT, status: STATUS_CODES.OK };
@@ -224,7 +232,7 @@ class UserService implements IUserService {
     if (password != confirmPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
-    const user = await userRepository.findByEmail(email);
+    const user = await this.userRepo.findByEmail(email);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -234,7 +242,7 @@ class UserService implements IUserService {
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.otp = undefined;
-    await userRepository.update(user._id.toString(), user);
+    await this.userRepo.update(user._id.toString(), user);
 
     return {
       message: MESSAGES.SUCCESS.PASSWORD_RESET,
@@ -245,7 +253,7 @@ class UserService implements IUserService {
     userId: string,
     updatedData: Partial<IUser>
   ): Promise<{ message: string; status: number; user: IUser }> {
-    const user = await userRepository.findById(userId);
+    const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -275,7 +283,7 @@ class UserService implements IUserService {
         }
       }
     }
-    const updateUser = await userRepository.update(userId, fieldsToUpdate);
+    const updateUser = await this.userRepo.update(userId, fieldsToUpdate);
     if (!updateUser) {
       throw new Error(MESSAGES.ERROR.PROFILE_UPDATE_FAILED);
     }
@@ -299,7 +307,7 @@ class UserService implements IUserService {
     if (newPassword != confirmNewPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
-    const user = await userRepository.findById(userId);
+    const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -320,12 +328,10 @@ class UserService implements IUserService {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
     }
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await userRepository.update(userId, { password: hashedPassword });
+    await this.userRepo.update(userId, { password: hashedPassword });
     return {
       message: MESSAGES.SUCCESS.PASSWORD_UPDATED,
       status: STATUS_CODES.OK,
     };
   }
 }
-
-export default new UserService();

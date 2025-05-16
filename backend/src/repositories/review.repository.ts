@@ -1,8 +1,10 @@
+import { injectable } from "tsyringe";
 import Review, { IReview } from "../models/review.model";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
 import { IReviewRepository } from "./interfaces/IReviewRepository";
 
-class ReviewRepository
+@injectable()
+export class ReviewRepository
   extends BaseRepository<IReview>
   implements IReviewRepository
 {
@@ -32,5 +34,3 @@ class ReviewRepository
     return Review.findByIdAndDelete(reviewId).exec();
   }
 }
-
-export default new ReviewRepository();

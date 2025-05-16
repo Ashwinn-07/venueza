@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
 import Message, { IMessage } from "../models/message.model";
-import BaseRepository from "./base.repository";
-import { IMessageReposiotry } from "./interfaces/IMessageReposiotry";
+import { BaseRepository } from "./base.repository";
+import { IMessageRepository } from "./interfaces/IMessageReposiotry";
+import { injectable } from "tsyringe";
 
-class MessageRepository
+@injectable()
+export class MessageRepository
   extends BaseRepository<IMessage>
-  implements IMessageReposiotry
+  implements IMessageRepository
 {
   constructor() {
     super(Message);
@@ -106,5 +108,3 @@ class MessageRepository
     return result;
   }
 }
-
-export default new MessageRepository();

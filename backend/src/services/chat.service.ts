@@ -1,16 +1,23 @@
+import { inject, injectable } from "tsyringe";
 import mongoose from "mongoose";
-import messageRepository from "../repositories/message.repository";
 import { IMessage } from "../models/message.model";
 import { IChatService, SendMessageInput } from "./interfaces/IChatService";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
+import { IMessageRepository } from "../repositories/interfaces/IMessageReposiotry";
+import { TOKENS } from "../config/tokens";
 
-class ChatService implements IChatService {
+@injectable()
+export class ChatService implements IChatService {
+  constructor(
+    @inject(TOKENS.IMessageRepository)
+    private messageRepo: IMessageRepository
+  ) {}
   async sendMessage(
     input: SendMessageInput
   ): Promise<{ message: string; status: number; data: IMessage }> {
     const senderObj = new mongoose.Types.ObjectId(input.sender);
     const receiverObj = new mongoose.Types.ObjectId(input.receiver);
-    const message = await messageRepository.create({
+    const message = await this.messageRepo.create({
       sender: senderObj,
       senderModel: input.senderModel,
       receiver: receiverObj,
@@ -28,7 +35,7 @@ class ChatService implements IChatService {
     sender: string,
     receiver: string
   ): Promise<{ message: string; status: number; data: IMessage[] }> {
-    const messages = await messageRepository.findConversation(sender, receiver);
+    const messages = await this.messageRepo.findConversation(sender, receiver);
     return {
       message: MESSAGES.SUCCESS.CONVERSATION_FETCHED,
       status: STATUS_CODES.OK,
@@ -38,9 +45,7 @@ class ChatService implements IChatService {
   async getConversations(
     userId: string
   ): Promise<{ message: string; status: number; data: any[] }> {
-    const conversations = await messageRepository.aggregateConversations(
-      userId
-    );
+    const conversations = await this.messageRepo.aggregateConversations(userId);
     return {
       message: MESSAGES.SUCCESS.CONVERSATIONS_FETCHED,
       status: STATUS_CODES.OK,
@@ -48,5 +53,3 @@ class ChatService implements IChatService {
     };
   }
 }
-
-export default new ChatService();

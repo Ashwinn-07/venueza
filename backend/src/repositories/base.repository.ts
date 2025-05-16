@@ -1,7 +1,9 @@
 import { Model, Document, ObjectId, FilterQuery } from "mongoose";
 import { IBaseRepository } from "./interfaces/IBaseRepository";
 
-class BaseRepository<T extends Document> implements IBaseRepository<T> {
+export abstract class BaseRepository<T extends Document>
+  implements IBaseRepository<T>
+{
   private model: Model<T>;
   constructor(model: Model<T>) {
     this.model = model;
@@ -34,5 +36,3 @@ class BaseRepository<T extends Document> implements IBaseRepository<T> {
     return await this.model.find(condition).skip(skip).limit(limit).exec();
   }
 }
-
-export default BaseRepository;

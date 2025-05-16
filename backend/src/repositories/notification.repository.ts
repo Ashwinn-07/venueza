@@ -1,8 +1,10 @@
+import { injectable } from "tsyringe";
 import Notification, { INotification } from "../models/notification.model";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
 import { INotificationRepository } from "./interfaces/INotificationRepository";
 
-class NotificationRepository
+@injectable()
+export class NotificationRepository
   extends BaseRepository<INotification>
   implements INotificationRepository
 {
@@ -16,5 +18,3 @@ class NotificationRepository
       .exec();
   }
 }
-
-export default new NotificationRepository();

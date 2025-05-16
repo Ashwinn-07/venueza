@@ -1,0 +1,20 @@
+export const TOKENS = {
+  IAdminRepository: Symbol.for("IAdminRepository"),
+  IBlockedDateRepository: Symbol.for("IBlockedDateRepository"),
+  IBookingRepository: Symbol.for("IBookingRepository"),
+  IMessageRepository: Symbol.for("IMessageRepository"),
+  INotificationRepository: Symbol.for("INotificationRepository"),
+  IReviewRepository: Symbol.for("IReviewRepository"),
+  IUserRepository: Symbol.for("IUserRepository"),
+  IVendorRepository: Symbol.for("IVendorRepository"),
+  IVenueRepository: Symbol.for("IVenueRepository"),
+
+  IAdminService: Symbol.for("IAdminService"),
+  IBookingService: Symbol.for("IBookingService"),
+  IChatService: Symbol.for("IChatService"),
+  INotificationService: Symbol.for("INotificationService"),
+  IReviewService: Symbol.for("IReviewService"),
+  IUserService: Symbol.for("IUserService"),
+  IVendorService: Symbol.for("IVendorService"),
+  IVenueService: Symbol.for("IVenueService"),
+};

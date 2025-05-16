@@ -1,8 +1,13 @@
 import User, { IUser } from "../models/user.model";
 import { IUserRepository } from "./interfaces/IUserRepository";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
+import { injectable } from "tsyringe";
 
-class UserRepository extends BaseRepository<IUser> implements IUserRepository {
+@injectable()
+export class UserRepository
+  extends BaseRepository<IUser>
+  implements IUserRepository
+{
   constructor() {
     super(User);
   }
@@ -24,5 +29,3 @@ class UserRepository extends BaseRepository<IUser> implements IUserRepository {
     });
   }
 }
-
-export default new UserRepository();

@@ -29,8 +29,10 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "razorpay": "^2.9.6",
+    "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "tsyringe": "^4.10.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -1,10 +1,12 @@
 import { PipelineStage } from "mongoose";
 import Booking, { IBooking } from "../models/booking.model";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
 import { IBookingRepository } from "./interfaces/IBookingRepository";
 import Venue, { IVenue } from "../models/venue.model";
+import { injectable } from "tsyringe";
 
-class BookingRepository
+@injectable()
+export class BookingRepository
   extends BaseRepository<IBooking>
   implements IBookingRepository
 {
@@ -202,5 +204,3 @@ class BookingRepository
     return transactions;
   }
 }
-
-export default new BookingRepository();

@@ -1,12 +1,20 @@
-import reviewRepository from "../repositories/review.repository";
-import bookingRepository from "../repositories/booking.repository";
+import { inject, injectable } from "tsyringe";
+import mongoose from "mongoose";
 import { IReview } from "../models/review.model";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
 import { IReviewService } from "./interfaces/IReviewService";
-import mongoose from "mongoose";
-import venueRepository from "../repositories/venue.repository";
+import { IReviewRepository } from "../repositories/interfaces/IReviewRepository";
+import { IBookingRepository } from "../repositories/interfaces/IBookingRepository";
+import { TOKENS } from "../config/tokens";
 
-class ReviewService implements IReviewService {
+@injectable()
+export class ReviewService implements IReviewService {
+  constructor(
+    @inject(TOKENS.IReviewRepository)
+    private reviewRepo: IReviewRepository,
+    @inject(TOKENS.IBookingRepository)
+    private bookingRepo: IBookingRepository
+  ) {}
   async createReview(
     userId: string,
     venueId: string,
@@ -14,7 +22,7 @@ class ReviewService implements IReviewService {
     reviewText: string,
     images: string[]
   ): Promise<{ message: string; status: number; review: IReview }> {
-    const booking = await bookingRepository.findOne({
+    const booking = await this.bookingRepo.findOne({
       user: userId,
       venue: venueId,
       status: { $in: ["confirmed", "fully_paid"] },
@@ -24,14 +32,14 @@ class ReviewService implements IReviewService {
         "You have not booked this venue or your booking is not confirmed."
       );
     }
-    const existingReview = await reviewRepository.findByUserAndVenue(
+    const existingReview = await this.reviewRepo.findByUserAndVenue(
       userId,
       venueId
     );
     if (existingReview) {
       throw new Error("You have already posted a review for this venue");
     }
-    const review = await reviewRepository.create({
+    const review = await this.reviewRepo.create({
       user: new mongoose.Types.ObjectId(userId),
       venue: new mongoose.Types.ObjectId(venueId),
       rating,
@@ -47,7 +55,7 @@ class ReviewService implements IReviewService {
   async getReviewsForVenue(
     venueId: string
   ): Promise<{ message: string; status: number; reviews: IReview[] }> {
-    const reviews = await reviewRepository.findByVenue(venueId);
+    const reviews = await this.reviewRepo.findByVenue(venueId);
     return {
       message: MESSAGES.SUCCESS.REVIEW_FETCHED,
       status: STATUS_CODES.OK,
@@ -58,11 +66,11 @@ class ReviewService implements IReviewService {
     reviewId: string,
     reply: string
   ): Promise<{ message: string; status: number; review: IReview }> {
-    const review = await reviewRepository.findById(reviewId);
+    const review = await this.reviewRepo.findById(reviewId);
     if (!review) {
       throw new Error("No Review found");
     }
-    const updatedReview = await reviewRepository.updateReply(reviewId, reply);
+    const updatedReview = await this.reviewRepo.updateReply(reviewId, reply);
     return {
       message: MESSAGES.SUCCESS.REPLY_ADDED,
       status: STATUS_CODES.OK,
@@ -73,19 +81,17 @@ class ReviewService implements IReviewService {
     reviewId: string,
     currentUserRole: string
   ): Promise<{ message: string; status: number }> {
-    const review = await reviewRepository.findById(reviewId);
+    const review = await this.reviewRepo.findById(reviewId);
     if (!review) {
       throw new Error("Review not found");
     }
     if (currentUserRole !== "admin") {
       throw new Error("Unauthorized: Only admins can delete reviews");
     }
-    await reviewRepository.delete(reviewId);
+    await this.reviewRepo.delete(reviewId);
     return {
       message: MESSAGES.SUCCESS.REVIEW_DELETED,
       status: STATUS_CODES.OK,
     };
   }
 }
-
-export default new ReviewService();

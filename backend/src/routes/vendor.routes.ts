@@ -1,15 +1,23 @@
 import { Router } from "express";
-import vendorController from "../controllers/vendor.controller";
+import { VendorController } from "../controllers/vendor.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import venueController from "../controllers/venue.controller";
-import bookingController from "../controllers/booking.controller";
-import reviewController from "../controllers/review.controller";
-import chatController from "../controllers/chat.controller";
-import notificationController from "../controllers/notification.controller";
+import { VenueController } from "../controllers/venue.controller";
+import { BookingController } from "../controllers/booking.controller";
+import { ReviewController } from "../controllers/review.controller";
+import { ChatController } from "../controllers/chat.controller";
+import { NotificationController } from "../controllers/notification.controller";
+import { container } from "tsyringe";
 
 const vendorRoutes = Router();
 const vendorAuth = authMiddleware(["vendor"]);
 const multiRoleAuth = authMiddleware(["user", "vendor", "admin"]);
+
+const vendorController = container.resolve(VendorController);
+const venueController = container.resolve(VenueController);
+const bookingController = container.resolve(BookingController);
+const reviewController = container.resolve(ReviewController);
+const chatController = container.resolve(ChatController);
+const notificationController = container.resolve(NotificationController);
 
 vendorRoutes
   .post("/signup", vendorController.register)

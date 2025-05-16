@@ -1,16 +1,24 @@
 import { Router } from "express";
-import userController from "../controllers/user.controller";
+import { UserController } from "../controllers/user.controller";
 import passport from "../config/passport";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import venueController from "../controllers/venue.controller";
-import bookingController from "../controllers/booking.controller";
-import reviewController from "../controllers/review.controller";
-import chatController from "../controllers/chat.controller";
-import notificationController from "../controllers/notification.controller";
+import { VenueController } from "../controllers/venue.controller";
+import { BookingController } from "../controllers/booking.controller";
+import { ReviewController } from "../controllers/review.controller";
+import { ChatController } from "../controllers/chat.controller";
+import { NotificationController } from "../controllers/notification.controller";
+import { container } from "tsyringe";
 
 const userRoutes = Router();
 const userAuth = authMiddleware(["user"]);
 const multiRoleAuth = authMiddleware(["user", "vendor", "admin"]);
+
+const userController = container.resolve(UserController);
+const venueController = container.resolve(VenueController);
+const bookingController = container.resolve(BookingController);
+const reviewController = container.resolve(ReviewController);
+const chatController = container.resolve(ChatController);
+const notificationController = container.resolve(NotificationController);
 
 userRoutes
   .post("/signup", userController.register)

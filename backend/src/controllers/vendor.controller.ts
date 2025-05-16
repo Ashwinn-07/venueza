@@ -1,13 +1,21 @@
 import { Request, Response } from "express";
-import vendorService from "../services/vendor.service";
+import { IVendorService } from "../services/interfaces/IVendorService";
 import { IVendorController } from "./interfaces/IVendorController";
 import { STATUS_CODES } from "../utils/constants";
-import bookingService from "../services/booking.service";
+import { IBookingService } from "../services/interfaces/IBookingService";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class VendorController implements IVendorController {
-  async register(req: Request, res: Response): Promise<void> {
+@injectable()
+export class VendorController implements IVendorController {
+  constructor(
+    @inject(TOKENS.IVendorService) private vendorService: IVendorService,
+    @inject(TOKENS.IBookingService)
+    private bookingService: IBookingService
+  ) {}
+  register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await vendorService.registerVendor(req.body);
+      const result = await this.vendorService.registerVendor(req.body);
       res.status(result.status).json({
         message: result.message,
       });
@@ -17,11 +25,11 @@ class VendorController implements IVendorController {
         error: error instanceof Error ? error.message : "Registration failed",
       });
     }
-  }
-  async verifyOTP(req: Request, res: Response): Promise<void> {
+  };
+  verifyOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp } = req.body;
-      const result = await vendorService.verifyOTP(email, otp);
+      const result = await this.vendorService.verifyOTP(email, otp);
       res.status(result.status).json({
         message: result.message,
       });
@@ -32,8 +40,8 @@ class VendorController implements IVendorController {
           error instanceof Error ? error.message : "OTP verification failed",
       });
     }
-  }
-  async resendOTP(req: Request, res: Response): Promise<void> {
+  };
+  resendOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
 
@@ -44,7 +52,7 @@ class VendorController implements IVendorController {
         return;
       }
 
-      const result = await vendorService.resendOTP(email);
+      const result = await this.vendorService.resendOTP(email);
       res.status(result.status).json({
         message: result.message,
       });
@@ -54,11 +62,11 @@ class VendorController implements IVendorController {
         error: error instanceof Error ? error.message : "Failed to resend OTP",
       });
     }
-  }
-  async forgotPassword(req: Request, res: Response): Promise<void> {
+  };
+  forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
-      const result = await vendorService.forgotPassword(email);
+      const result = await this.vendorService.forgotPassword(email);
       res.status(result.status).json({ message: result.message });
     } catch (error) {
       console.error("Forgot password error:", error);
@@ -69,11 +77,11 @@ class VendorController implements IVendorController {
             : "Failed to process forgot password request",
       });
     }
-  }
-  async resetPassword(req: Request, res: Response): Promise<void> {
+  };
+  resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp, password, confirmPassword } = req.body;
-      const result = await vendorService.resetPassword(
+      const result = await this.vendorService.resetPassword(
         email,
         otp,
         password,
@@ -87,11 +95,11 @@ class VendorController implements IVendorController {
           error instanceof Error ? error.message : "Failed to reset password",
       });
     }
-  }
-  async login(req: Request, res: Response): Promise<void> {
+  };
+  login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
-      const result = await vendorService.loginVendor(email, password);
+      const result = await this.vendorService.loginVendor(email, password);
       res.cookie("auth-token", result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -118,8 +126,8 @@ class VendorController implements IVendorController {
         error: error instanceof Error ? error.message : "Login Failed",
       });
     }
-  }
-  async logout(req: Request, res: Response): Promise<void> {
+  };
+  logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie("auth-token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -130,12 +138,12 @@ class VendorController implements IVendorController {
     res.status(STATUS_CODES.OK).json({
       message: "Logged out successfully",
     });
-  }
-  async updateVendorProfile(req: Request, res: Response): Promise<void> {
+  };
+  updateVendorProfile = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const updatedData = req.body;
-      const result = await vendorService.updateVendorProfile(
+      const result = await this.vendorService.updateVendorProfile(
         userId,
         updatedData
       );
@@ -159,8 +167,8 @@ class VendorController implements IVendorController {
           error instanceof Error ? error.message : "Failed to update profile",
       });
     }
-  }
-  async changeVendorPassword(req: Request, res: Response): Promise<void> {
+  };
+  changeVendorPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const { currentPassword, newPassword, confirmNewPassword } = req.body;
@@ -171,7 +179,7 @@ class VendorController implements IVendorController {
         return;
       }
 
-      const result = await vendorService.changeVendorPassword(
+      const result = await this.vendorService.changeVendorPassword(
         userId,
         currentPassword,
         newPassword,
@@ -185,8 +193,8 @@ class VendorController implements IVendorController {
           error instanceof Error ? error.message : "Failed to change password",
       });
     }
-  }
-  async uploadDocuments(req: Request, res: Response): Promise<void> {
+  };
+  uploadDocuments = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const { documentUrls } = req.body;
@@ -200,7 +208,7 @@ class VendorController implements IVendorController {
           .json({ error: "Documents are required." });
         return;
       }
-      const result = await vendorService.uploadDocuments(
+      const result = await this.vendorService.uploadDocuments(
         vendorId,
         documentUrls
       );
@@ -225,15 +233,15 @@ class VendorController implements IVendorController {
           error instanceof Error ? error.message : "Failed to upload documents",
       });
     }
-  }
-  async addBlockedDate(req: Request, res: Response): Promise<void> {
+  };
+  addBlockedDate = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const { venueId, startDate, endDate, reason } = req.body;
       if (!venueId || !startDate || !endDate) {
         throw new Error("Missing required fields");
       }
-      const result = await bookingService.addBlockedDateForVenue(venueId, {
+      const result = await this.bookingService.addBlockedDateForVenue(venueId, {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         reason,
@@ -249,14 +257,14 @@ class VendorController implements IVendorController {
           error instanceof Error ? error.message : "Failed to add blocked date",
       });
     }
-  }
-  async getVendorRevenue(req: Request, res: Response): Promise<void> {
+  };
+  getVendorRevenue = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       if (!vendorId) {
         throw new Error("Vendor ID is missing");
       }
-      const result = await bookingService.getVendorRevenue(vendorId);
+      const result = await this.bookingService.getVendorRevenue(vendorId);
       res.status(result.status).json({
         message: result.message,
         revenue: result.revenue,
@@ -268,14 +276,16 @@ class VendorController implements IVendorController {
           error instanceof Error ? error.message : "Failed to fetch revenue",
       });
     }
-  }
-  async getDashboardData(req: Request, res: Response): Promise<void> {
+  };
+  getDashboardData = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       if (!vendorId) {
         throw new Error("Vendor ID is missing");
       }
-      const result = await bookingService.getDashboardDataForVendor(vendorId);
+      const result = await this.bookingService.getDashboardDataForVendor(
+        vendorId
+      );
       res.status(result.status).json({
         message: result.message,
         dashboardData: result.dashboardData,
@@ -289,11 +299,16 @@ class VendorController implements IVendorController {
             : "Failed to fetch vendor dashboard data",
       });
     }
-  }
-  async getTransactionHistory(req: Request, res: Response): Promise<void> {
+  };
+  getTransactionHistory = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
-      const result = await bookingService.getVendorTransactionHistory(vendorId);
+      const result = await this.bookingService.getVendorTransactionHistory(
+        vendorId
+      );
       res.status(result.status).json({
         message: result.message,
         data: result.data,
@@ -307,7 +322,5 @@ class VendorController implements IVendorController {
             : "Failed to fetch vendor transaction history",
       });
     }
-  }
+  };
 }
-
-export default new VendorController();

@@ -1,14 +1,20 @@
 import { Request, Response } from "express";
-import bookingService from "../services/booking.service";
+import { IBookingService } from "../services/interfaces/IBookingService";
 import { IBookingController } from "./interfaces/IBookingController";
 import { STATUS_CODES } from "../utils/constants";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class BookingController implements IBookingController {
-  async createBooking(req: Request, res: Response): Promise<void> {
+@injectable()
+export class BookingController implements IBookingController {
+  constructor(
+    @inject(TOKENS.IBookingService) private bookingService: IBookingService
+  ) {}
+  createBooking = async (req: Request, res: Response): Promise<void> => {
     try {
       const { venueId, startDate, endDate, totalPrice } = req.body;
       const userId = (req as any).userId;
-      const result = await bookingService.createBooking(userId, venueId, {
+      const result = await this.bookingService.createBooking(userId, venueId, {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         totalPrice: Number(totalPrice),
@@ -25,11 +31,11 @@ class BookingController implements IBookingController {
           error instanceof Error ? error.message : "Failed to create booking",
       });
     }
-  }
-  async verifyPayment(req: Request, res: Response): Promise<void> {
+  };
+  verifyPayment = async (req: Request, res: Response): Promise<void> => {
     try {
       const { bookingId, paymentId, razorpaySignature } = req.body;
-      const result = await bookingService.verifyPayment(
+      const result = await this.bookingService.verifyPayment(
         bookingId,
         paymentId,
         razorpaySignature
@@ -45,11 +51,16 @@ class BookingController implements IBookingController {
           error instanceof Error ? error.message : "Failed to verify payment",
       });
     }
-  }
-  async createBalancePaymentOrder(req: Request, res: Response): Promise<void> {
+  };
+  createBalancePaymentOrder = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const { bookingId } = req.body;
-      const result = await bookingService.createBalancePaymentOrder(bookingId);
+      const result = await this.bookingService.createBalancePaymentOrder(
+        bookingId
+      );
       res.status(result.status).json({
         message: result.message,
         booking: result.booking,
@@ -64,11 +75,11 @@ class BookingController implements IBookingController {
             : "Failed to create balance payment order",
       });
     }
-  }
-  async verifyBalancePayment(req: Request, res: Response): Promise<void> {
+  };
+  verifyBalancePayment = async (req: Request, res: Response): Promise<void> => {
     try {
       const { bookingId, paymentId, razorpaySignature } = req.body;
-      const result = await bookingService.verifyBalancePayment(
+      const result = await this.bookingService.verifyBalancePayment(
         bookingId,
         paymentId,
         razorpaySignature
@@ -86,12 +97,12 @@ class BookingController implements IBookingController {
             : "Failed to verify balance payment",
       });
     }
-  }
-  async getBooking(req: Request, res: Response): Promise<void> {
+  };
+  getBooking = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
 
-      const result = await bookingService.getBookingById(id);
+      const result = await this.bookingService.getBookingById(id);
       res.status(result.status).json({
         message: result.message,
         booking: result.booking,
@@ -103,12 +114,12 @@ class BookingController implements IBookingController {
           error instanceof Error ? error.message : "Failed to fetch booking",
       });
     }
-  }
-  async getUserBookings(req: Request, res: Response): Promise<void> {
+  };
+  getUserBookings = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const filterType = (req.query.filter as string) || "all";
-      const result = await bookingService.getBookingsByUserId(
+      const result = await this.bookingService.getBookingsByUserId(
         userId,
         filterType
       );
@@ -123,11 +134,16 @@ class BookingController implements IBookingController {
           error instanceof Error ? error.message : "Failed to fetch bookings",
       });
     }
-  }
-  async getBookedDatesForVenue(req: Request, res: Response): Promise<void> {
+  };
+  getBookedDatesForVenue = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const { venueId } = req.params;
-      const bookedDates = await bookingService.getBookedDatesForVenue(venueId);
+      const bookedDates = await this.bookingService.getBookedDatesForVenue(
+        venueId
+      );
       res.status(STATUS_CODES.OK).json({
         message: "Booked dates fetched successfully",
         bookedDates,
@@ -141,12 +157,12 @@ class BookingController implements IBookingController {
             : "Failed to fetch booked dates",
       });
     }
-  }
-  async getBookingsByVendor(req: Request, res: Response): Promise<void> {
+  };
+  getBookingsByVendor = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const filter = (req.query.filter as string) || "all";
-      const result = await bookingService.getBookingsByVendorId(
+      const result = await this.bookingService.getBookingsByVendorId(
         vendorId,
         filter
       );
@@ -161,11 +177,11 @@ class BookingController implements IBookingController {
           error instanceof Error ? error.message : "Failed to fetch bookings",
       });
     }
-  }
-  async userCancelBooking(req: Request, res: Response): Promise<void> {
+  };
+  userCancelBooking = async (req: Request, res: Response): Promise<void> => {
     try {
       const { bookingId } = req.body;
-      const result = await bookingService.cancelBookingByUser(bookingId);
+      const result = await this.bookingService.cancelBookingByUser(bookingId);
       res.status(result.status).json({
         message: result.message,
         booking: result.booking,
@@ -177,11 +193,11 @@ class BookingController implements IBookingController {
           error instanceof Error ? error.message : "Failed to cancel booking",
       });
     }
-  }
-  async vendorCancelBooking(req: Request, res: Response): Promise<void> {
+  };
+  vendorCancelBooking = async (req: Request, res: Response): Promise<void> => {
     try {
       const { bookingId, cancellationReason } = req.body;
-      const result = await bookingService.cancelBookingByVendor(
+      const result = await this.bookingService.cancelBookingByVendor(
         bookingId,
         cancellationReason
       );
@@ -197,7 +213,5 @@ class BookingController implements IBookingController {
           error instanceof Error ? error.message : "Failed to cancel booking",
       });
     }
-  }
+  };
 }
-
-export default new BookingController();

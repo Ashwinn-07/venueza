@@ -1,13 +1,20 @@
 import { Request, Response } from "express";
-import notificationService from "../services/notification.service";
+import { INotificationService } from "../services/interfaces/INotificationService";
 import { STATUS_CODES } from "../utils/constants";
 import { INotificationController } from "./interfaces/INotificationController";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class NotificationController implements INotificationController {
-  async getNotifications(req: Request, res: Response): Promise<void> {
+@injectable()
+export class NotificationController implements INotificationController {
+  constructor(
+    @inject(TOKENS.INotificationService)
+    private notificationService: INotificationService
+  ) {}
+  getNotifications = async (req: Request, res: Response): Promise<void> => {
     try {
       const recipient = (req as any).userId;
-      const result = await notificationService.getNotifications(recipient);
+      const result = await this.notificationService.getNotifications(recipient);
       res.status(result.status).json({
         message: result.message,
         data: result.data,
@@ -21,11 +28,14 @@ class NotificationController implements INotificationController {
             : "Failed to fetch notifications",
       });
     }
-  }
-  async markNotificationAsRead(req: Request, res: Response): Promise<void> {
+  };
+  markNotificationAsRead = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
       const { notificationId } = req.params;
-      const result = await notificationService.markAsRead(notificationId);
+      const result = await this.notificationService.markAsRead(notificationId);
       res.status(result.status).json({
         message: result.message,
         data: result.data,
@@ -39,7 +49,5 @@ class NotificationController implements INotificationController {
             : "Failed to mark notification as read",
       });
     }
-  }
+  };
 }
-
-export default new NotificationController();

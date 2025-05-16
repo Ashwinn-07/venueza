@@ -1,17 +1,24 @@
-import notificationRepository from "../repositories/notification.repository";
+import { inject, injectable } from "tsyringe";
+import mongoose from "mongoose";
 import { INotificationService } from "./interfaces/INotificationService";
 import { INotification } from "../models/notification.model";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
-import mongoose from "mongoose";
+import { INotificationRepository } from "../repositories/interfaces/INotificationRepository";
+import { TOKENS } from "../config/tokens";
 
-class NotificationService implements INotificationService {
+@injectable()
+export class NotificationService implements INotificationService {
+  constructor(
+    @inject(TOKENS.INotificationRepository)
+    private notificationRepo: INotificationRepository
+  ) {}
   async createNotification(
     recipient: string,
     recipientModel: string,
     type: string,
     message: string
   ): Promise<{ message: string; status: number; data: INotification }> {
-    const notification = await notificationRepository.create({
+    const notification = await this.notificationRepo.create({
       recipient: new mongoose.Types.ObjectId(recipient),
       recipientModel,
       type,
@@ -27,7 +34,7 @@ class NotificationService implements INotificationService {
   async getNotifications(
     recipientId: string
   ): Promise<{ message: string; status: number; data: INotification[] }> {
-    const notifications = await notificationRepository.findByRecipient(
+    const notifications = await this.notificationRepo.findByRecipient(
       recipientId
     );
     return {
@@ -39,7 +46,7 @@ class NotificationService implements INotificationService {
   async markAsRead(
     notificationId: string
   ): Promise<{ message: string; status: number; data: INotification | null }> {
-    const updatedNotification = await notificationRepository.update(
+    const updatedNotification = await this.notificationRepo.update(
       notificationId,
       { read: true }
     );
@@ -50,5 +57,3 @@ class NotificationService implements INotificationService {
     };
   }
 }
-
-export default new NotificationService();

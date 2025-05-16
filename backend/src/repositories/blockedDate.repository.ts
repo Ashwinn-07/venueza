@@ -1,8 +1,10 @@
 import { IBlockedDateRepository } from "./interfaces/IBlockedDateRepository";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
 import BlockedDate, { IBlockedDate } from "../models/blockedDate.model";
+import { injectable } from "tsyringe";
 
-class BlockedDateRepository
+@injectable()
+export class BlockedDateRepository
   extends BaseRepository<IBlockedDate>
   implements IBlockedDateRepository
 {
@@ -22,5 +24,3 @@ class BlockedDateRepository
     return await BlockedDate.create(data);
   }
 }
-
-export default new BlockedDateRepository();

@@ -1,12 +1,20 @@
 import { Request, Response } from "express";
-import chatService from "../services/chat.service";
+import { IChatService } from "../services/interfaces/IChatService";
 import { IChatController } from "./interfaces/IChatController";
 import { io } from "../config/socket";
 import { STATUS_CODES } from "../utils/constants";
-import notificationService from "../services/notification.service";
+import { INotificationService } from "../services/interfaces/INotificationService";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class ChatController implements IChatController {
-  async sendMessage(req: Request, res: Response): Promise<void> {
+@injectable()
+export class ChatController implements IChatController {
+  constructor(
+    @inject(TOKENS.IChatService) private chatService: IChatService,
+    @inject(TOKENS.INotificationService)
+    private notificationService: INotificationService
+  ) {}
+  sendMessage = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         sender,
@@ -17,7 +25,7 @@ class ChatController implements IChatController {
         images,
         room,
       } = req.body;
-      const result = await chatService.sendMessage({
+      const result = await this.chatService.sendMessage({
         sender,
         senderModel,
         receiver,
@@ -31,7 +39,7 @@ class ChatController implements IChatController {
         io.emit("receiveMessage", { ...result.data.toObject(), room: "all" });
       }
 
-      const notification = await notificationService.createNotification(
+      const notification = await this.notificationService.createNotification(
         receiver,
         receiverModel,
         "chat",
@@ -50,14 +58,14 @@ class ChatController implements IChatController {
           error instanceof Error ? error.message : "Failed to send message",
       });
     }
-  }
-  async getConversation(req: Request, res: Response): Promise<void> {
+  };
+  getConversation = async (req: Request, res: Response): Promise<void> => {
     try {
       const { sender, receiver } = req.query;
       if (!sender || !receiver) {
         throw new Error("Sender and receiver are required");
       }
-      const result = await chatService.getConversation(
+      const result = await this.chatService.getConversation(
         String(sender),
         String(receiver)
       );
@@ -74,11 +82,11 @@ class ChatController implements IChatController {
             : "Failed to fetch conversation",
       });
     }
-  }
-  async getConversations(req: Request, res: Response): Promise<void> {
+  };
+  getConversations = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
-      const result = await chatService.getConversations(userId);
+      const result = await this.chatService.getConversations(userId);
       res.status(result.status).json({
         message: result.message,
         data: result.data,
@@ -92,7 +100,5 @@ class ChatController implements IChatController {
             : "Failed to fetch conversations",
       });
     }
-  }
+  };
 }
-
-export default new ChatController();

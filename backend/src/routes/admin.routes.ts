@@ -1,11 +1,15 @@
 import { Router } from "express";
-import adminController from "../controllers/admin.controller";
+import { AdminController } from "../controllers/admin.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import reviewController from "../controllers/review.controller";
+import { ReviewController } from "../controllers/review.controller";
+import { container } from "tsyringe";
 
 const adminRoutes = Router();
 const adminAuth = authMiddleware(["admin"]);
 const multiRoleAuth = authMiddleware(["user", "vendor", "admin"]);
+
+const adminController = container.resolve(AdminController);
+const reviewController = container.resolve(ReviewController);
 
 adminRoutes
   .post("/login", adminController.login)

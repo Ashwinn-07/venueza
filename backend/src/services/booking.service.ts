@@ -1,14 +1,22 @@
 import crypto from "crypto";
-import bookingRepository from "../repositories/booking.repository";
+import { inject, injectable } from "tsyringe";
+import mongoose from "mongoose";
 import { IBooking } from "../models/booking.model";
 import { IBookingService } from "./interfaces/IBookingService";
 import { STATUS_CODES, MESSAGES } from "../utils/constants";
 import razorpayInstance from "../utils/razorpay";
-import mongoose from "mongoose";
-import blockedDateRepository from "../repositories/blockedDate.repository";
 import { issueRefund } from "../utils/issueRefund";
+import { IBookingRepository } from "../repositories/interfaces/IBookingRepository";
+import { IBlockedDateRepository } from "../repositories/interfaces/IBlockedDateRepository";
+import { TOKENS } from "../config/tokens";
 
-class BookingService implements IBookingService {
+@injectable()
+export class BookingService implements IBookingService {
+  constructor(
+    @inject(TOKENS.IBookingRepository) private bookingRepo: IBookingRepository,
+    @inject(TOKENS.IBlockedDateRepository)
+    private blockedDateRepo: IBlockedDateRepository
+  ) {}
   async createBooking(
     userId: string,
     venueId: string,
@@ -19,7 +27,7 @@ class BookingService implements IBookingService {
     booking: IBooking;
     razorpayOrder: any;
   }> {
-    const conflictBooking = await bookingRepository.findOne({
+    const conflictBooking = await this.bookingRepo.findOne({
       venue: venueId,
       startDate: { $lt: bookingData.endDate },
       endDate: { $gt: bookingData.startDate },
@@ -43,7 +51,7 @@ class BookingService implements IBookingService {
       advancePaid: false,
       status: "pending" as "pending",
     };
-    const booking = await bookingRepository.create(data);
+    const booking = await this.bookingRepo.create(data);
     if (!booking) {
       throw new Error("Failed to create booking");
     }
@@ -54,7 +62,7 @@ class BookingService implements IBookingService {
     };
     const order = await razorpayInstance.orders.create(options);
     booking.razorpayOrderId = order.id;
-    await bookingRepository.update(booking._id.toString(), booking);
+    await this.bookingRepo.update(booking._id.toString(), booking);
     return {
       message: MESSAGES.SUCCESS.BOOKING_CREATED,
       status: STATUS_CODES.CREATED,
@@ -67,7 +75,7 @@ class BookingService implements IBookingService {
     paymentId: string,
     razorpaySignature: string
   ): Promise<{ message: string; status: number; booking: IBooking }> {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }
@@ -86,7 +94,7 @@ class BookingService implements IBookingService {
     booking.status = "advance_paid" as any;
     booking.advancePaid = true;
     booking.paymentId = paymentId;
-    const updatedBooking = await bookingRepository.update(bookingId, booking);
+    const updatedBooking = await this.bookingRepo.update(bookingId, booking);
     if (!updatedBooking) {
       throw new Error("Failed to update booking after payment");
     }
@@ -102,7 +110,7 @@ class BookingService implements IBookingService {
     booking: IBooking;
     razorpayOrder: any;
   }> {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }
@@ -119,7 +127,7 @@ class BookingService implements IBookingService {
     const order = await razorpayInstance.orders.create(options);
     booking.razorpayBalanceOrderId = order.id;
     booking.status = "balance_pending" as any;
-    await bookingRepository.update(booking._id.toString(), booking);
+    await this.bookingRepo.update(booking._id.toString(), booking);
     return {
       message: "Balance payment order created successfully",
       status: STATUS_CODES.OK,
@@ -132,7 +140,7 @@ class BookingService implements IBookingService {
     paymentId: string,
     razorpaySignature: string
   ): Promise<{ message: string; status: number; booking: IBooking }> {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }
@@ -161,7 +169,7 @@ class BookingService implements IBookingService {
     booking.balanceDue = 0;
     booking.status = "fully_paid" as any;
     booking.balancePaymentId = paymentId;
-    const updatedBooking = await bookingRepository.update(bookingId, booking);
+    const updatedBooking = await this.bookingRepo.update(bookingId, booking);
     if (!updatedBooking) {
       throw new Error("Failed to update booking after balance payment");
     }
@@ -174,7 +182,7 @@ class BookingService implements IBookingService {
   async getBookingById(
     bookingId: string
   ): Promise<{ message: string; status: number; booking: IBooking }> {
-    const booking = await bookingRepository.findByIdPopulated(bookingId);
+    const booking = await this.bookingRepo.findByIdPopulated(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }
@@ -188,7 +196,7 @@ class BookingService implements IBookingService {
     userId: string,
     filterType: string = "all"
   ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
-    const allBookings = await bookingRepository.findByUser(userId);
+    const allBookings = await this.bookingRepo.findByUser(userId);
 
     if (!allBookings || allBookings.length === 0) {
       return {
@@ -231,12 +239,12 @@ class BookingService implements IBookingService {
   async getBookedDatesForVenue(
     venueId: string
   ): Promise<{ startDate: Date; endDate: Date }[]> {
-    const bookings = await bookingRepository.findByVenue(venueId);
+    const bookings = await this.bookingRepo.findByVenue(venueId);
     const onlineDates = bookings.map((booking) => ({
       startDate: booking.startDate,
       endDate: booking.endDate,
     }));
-    const blockedDates = await blockedDateRepository.findBlockedDatesByVenue(
+    const blockedDates = await this.blockedDateRepo.findBlockedDatesByVenue(
       venueId
     );
     const offlineDates = blockedDates.map((block) => ({
@@ -250,7 +258,7 @@ class BookingService implements IBookingService {
     venueId: string,
     data: { startDate: Date; endDate: Date; reason?: string }
   ): Promise<{ message: string; blockedDate: any }> {
-    const blockedDate = await blockedDateRepository.createBlockedDate({
+    const blockedDate = await this.blockedDateRepo.createBlockedDate({
       venue: venueId,
       ...data,
     });
@@ -263,7 +271,7 @@ class BookingService implements IBookingService {
     vendorId: string,
     filter: string = "all"
   ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
-    let bookings = await bookingRepository.findByVendor(vendorId);
+    let bookings = await this.bookingRepo.findByVendor(vendorId);
     if (!bookings) {
       throw new Error("No bookings found");
     }
@@ -300,7 +308,7 @@ class BookingService implements IBookingService {
     status: number;
     bookings: IBooking[];
   }> {
-    const bookings = await bookingRepository.findAllWithSearch(search);
+    const bookings = await this.bookingRepo.findAllWithSearch(search);
     if (!bookings || bookings.length === 0) {
       return {
         message: search
@@ -321,7 +329,7 @@ class BookingService implements IBookingService {
     status: number;
     revenue: { month: number; revenue: number }[];
   }> {
-    const revenue = await bookingRepository.getTotalCommission();
+    const revenue = await this.bookingRepo.getTotalCommission();
     return {
       message: MESSAGES.SUCCESS.REVENUE_FETCHED,
       status: STATUS_CODES.OK,
@@ -333,7 +341,7 @@ class BookingService implements IBookingService {
     status: number;
     revenue: { month: number; revenue: number }[];
   }> {
-    const revenue = await bookingRepository.getVendorRevenue(vendorId);
+    const revenue = await this.bookingRepo.getVendorRevenue(vendorId);
     return {
       message: MESSAGES.SUCCESS.REVENUE_FETCHED,
       status: STATUS_CODES.OK,
@@ -350,7 +358,7 @@ class BookingService implements IBookingService {
       monthlyRevenue: { month: number; revenue: number }[];
     };
   }> {
-    const bookings = await bookingRepository.findByVendor(vendorId);
+    const bookings = await this.bookingRepo.findByVendor(vendorId);
     const totalBookings = bookings.length;
     const vendorRevenue = bookings.reduce((sum: any, booking: any) => {
       return sum + (booking.vendorReceives || 0);
@@ -359,7 +367,7 @@ class BookingService implements IBookingService {
     const upcomingBookings = bookings.filter(
       (booking: any) => new Date(booking.startDate) > now
     ).length;
-    const monthlyRevenue = await bookingRepository.getVendorRevenue(vendorId);
+    const monthlyRevenue = await this.bookingRepo.getVendorRevenue(vendorId);
     return {
       message: "Vendor dashboard data fetched successfully",
       status: STATUS_CODES.OK,
@@ -374,7 +382,7 @@ class BookingService implements IBookingService {
   async cancelBookingByUser(
     bookingId: string
   ): Promise<{ message: string; status: number; booking: IBooking }> {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }
@@ -382,7 +390,7 @@ class BookingService implements IBookingService {
       throw new Error("Booking cannot be cancelled at this stage");
     }
     booking.status = "cancelled_by_user" as any;
-    const updatedBooking = await bookingRepository.update(bookingId, booking);
+    const updatedBooking = await this.bookingRepo.update(bookingId, booking);
     if (!updatedBooking) {
       throw new Error("Bookings status update failed");
     }
@@ -401,7 +409,7 @@ class BookingService implements IBookingService {
     booking: IBooking;
     refund?: any;
   }> {
-    const booking = await bookingRepository.findById(bookingId);
+    const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }
@@ -417,7 +425,7 @@ class BookingService implements IBookingService {
     booking.balanceDue = booking.totalPrice;
 
     booking.refundId = refundResult.id;
-    const updatedBooking = await bookingRepository.update(bookingId, booking);
+    const updatedBooking = await this.bookingRepo.update(bookingId, booking);
     if (!updatedBooking) {
       throw new Error("Bookings status update failed");
     }
@@ -433,7 +441,7 @@ class BookingService implements IBookingService {
     status: number;
     data: any[];
   }> {
-    const transactions = await bookingRepository.getTransactionHistory();
+    const transactions = await this.bookingRepo.getTransactionHistory();
     return {
       message: MESSAGES.SUCCESS.TRANSACTION_HISTORY_FETCHED,
       status: STATUS_CODES.OK,
@@ -443,7 +451,7 @@ class BookingService implements IBookingService {
   async getVendorTransactionHistory(
     vendorId: string
   ): Promise<{ message: string; status: number; data: any[] }> {
-    const transactions = await bookingRepository.getVendorTransactionHistory(
+    const transactions = await this.bookingRepo.getVendorTransactionHistory(
       vendorId
     );
     return {
@@ -453,5 +461,3 @@ class BookingService implements IBookingService {
     };
   }
 }
-
-export default new BookingService();

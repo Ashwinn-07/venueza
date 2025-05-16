@@ -1,8 +1,10 @@
 import { IAdminRepository } from "./interfaces/IAdminRepository";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
 import Admin, { IAdmin } from "../models/admin.model";
+import { injectable } from "tsyringe";
 
-class AdminRepository
+@injectable()
+export class AdminRepository
   extends BaseRepository<IAdmin>
   implements IAdminRepository
 {
@@ -14,5 +16,3 @@ class AdminRepository
     return await Admin.findOne({ email: email });
   }
 }
-
-export default new AdminRepository();

@@ -1,11 +1,18 @@
 import mongoose from "mongoose";
-import venueRepository from "../repositories/venue.repository";
+import { inject, injectable } from "tsyringe";
 import { IVenue } from "../models/venue.model";
 import { IVenueService } from "./interfaces/IVenueService";
+import { IVenueRepository } from "../repositories/interfaces/IVenueRepository";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
 import { validateVenueData } from "../utils/venueValidators";
+import { TOKENS } from "../config/tokens";
 
-class VenueService implements IVenueService {
+@injectable()
+export class VenueService implements IVenueService {
+  constructor(
+    @inject(TOKENS.IVenueRepository)
+    private venueRepo: IVenueRepository
+  ) {}
   async createVenue(
     vendorId: string,
     venueData: Partial<IVenue>
@@ -16,7 +23,7 @@ class VenueService implements IVenueService {
     }
 
     if (venueData.name && venueData.location?.coordinates) {
-      const similarVenues = await venueRepository.findSimilarVenues(
+      const similarVenues = await this.venueRepo.findSimilarVenues(
         venueData.name,
         venueData.location.coordinates
       );
@@ -34,7 +41,7 @@ class VenueService implements IVenueService {
       status: "closed" as "closed",
       verificationStatus: "pending" as "pending",
     };
-    const venue = await venueRepository.create(data);
+    const venue = await this.venueRepo.create(data);
     if (!venue) {
       throw new Error("Failed to create venue");
     }
@@ -49,7 +56,7 @@ class VenueService implements IVenueService {
     venueId: string,
     updateData: Partial<IVenue>
   ): Promise<{ message: string; status: number; venue: IVenue }> {
-    const existingVenue = await venueRepository.findById(venueId);
+    const existingVenue = await this.venueRepo.findById(venueId);
     if (!existingVenue) {
       throw new Error("No venues found");
     }
@@ -63,7 +70,7 @@ class VenueService implements IVenueService {
     if (errors.length > 0) {
       throw new Error(errors.join(" "));
     }
-    const updatedVenue = await venueRepository.update(venueId, updateData);
+    const updatedVenue = await this.venueRepo.update(venueId, updateData);
     if (!updatedVenue) {
       throw new Error("Could not update the venue");
     }
@@ -77,7 +84,7 @@ class VenueService implements IVenueService {
     vendorId: string,
     filter: string = "all"
   ): Promise<{ message: string; status: number; venues: IVenue[] }> {
-    let venues = await venueRepository.findByVendor(vendorId);
+    let venues = await this.venueRepo.findByVendor(vendorId);
     if (!venues) {
       throw new Error("could not fetch venues");
     }
@@ -93,7 +100,7 @@ class VenueService implements IVenueService {
   async getVenueById(
     venueId: string
   ): Promise<{ message: string; status: number; venue: IVenue }> {
-    const venue = await venueRepository.findByVenueId(venueId);
+    const venue = await this.venueRepo.findByVenueId(venueId);
     if (!venue) {
       throw new Error("Venue not found");
     }
@@ -133,12 +140,12 @@ class VenueService implements IVenueService {
     }
     const skip = (page - 1) * limit;
 
-    const venuesPromise = venueRepository.findWithPagination(
+    const venuesPromise = this.venueRepo.findWithPagination(
       filter,
       skip,
       limit
     );
-    const countPromise = venueRepository.countDocuments(filter);
+    const countPromise = this.venueRepo.countDocuments(filter);
 
     const [venues, totalCount] = await Promise.all([
       venuesPromise,
@@ -156,7 +163,7 @@ class VenueService implements IVenueService {
     status: number;
     venues: IVenue[];
   }> {
-    const venues = await venueRepository.find({
+    const venues = await this.venueRepo.find({
       verificationStatus: "approved",
     });
     const sortedVenues = venues.sort((a, b) => a.name.localeCompare(b.name));
@@ -168,5 +175,3 @@ class VenueService implements IVenueService {
     };
   }
 }
-
-export default new VenueService();

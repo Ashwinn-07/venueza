@@ -1,15 +1,23 @@
 import { Request, Response } from "express";
-import adminService from "../services/admin.service";
+import { IAdminService } from "../services/interfaces/IAdminService";
 import { IAdminController } from "./interfaces/IAdminController";
 import { STATUS_CODES } from "../utils/constants";
-import vendorRepository from "../repositories/vendor.repository";
-import bookingService from "../services/booking.service";
+import { VendorRepository } from "../repositories/vendor.repository";
+import { IBookingService } from "../services/interfaces/IBookingService";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class AdminController implements IAdminController {
-  async login(req: Request, res: Response): Promise<void> {
+@injectable()
+export class AdminController implements IAdminController {
+  constructor(
+    @inject(TOKENS.IAdminService) private adminService: IAdminService,
+    @inject(TOKENS.IBookingService) private bookingService: IBookingService,
+    @inject(TOKENS.IVendorRepository) private vendorRepository: VendorRepository
+  ) {}
+  login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
-      const result = await adminService.loginAdmin(email, password);
+      const result = await this.adminService.loginAdmin(email, password);
       res.cookie("auth-token", result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -31,8 +39,8 @@ class AdminController implements IAdminController {
         error: error instanceof Error ? error.message : "Login Failed",
       });
     }
-  }
-  async logout(req: Request, res: Response): Promise<void> {
+  };
+  logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie("auth-token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -43,10 +51,13 @@ class AdminController implements IAdminController {
     res.status(STATUS_CODES.OK).json({
       message: "Logged out successfully",
     });
-  }
-  async getAdminDashboardStats(req: Request, res: Response): Promise<void> {
+  };
+  getAdminDashboardStats = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
-      const result = await adminService.getAdminDashboardStats();
+      const result = await this.adminService.getAdminDashboardStats();
       res.status(result.status).json({
         totalUsers: result.totalUsers,
         totalVendors: result.totalVendors,
@@ -61,11 +72,11 @@ class AdminController implements IAdminController {
             : "Failed to fetch dashboard statistics",
       });
     }
-  }
-  async listUsers(req: Request, res: Response): Promise<void> {
+  };
+  listUsers = async (req: Request, res: Response): Promise<void> => {
     try {
       const search = (req.query.search as string) || "";
-      const result = await adminService.listUsers(search);
+      const result = await this.adminService.listUsers(search);
       res.status(result.status).json({
         users: result.users,
       });
@@ -75,11 +86,11 @@ class AdminController implements IAdminController {
         error: error instanceof Error ? error.message : "Failed to fetch users",
       });
     }
-  }
-  async listAllVendors(req: Request, res: Response): Promise<void> {
+  };
+  listAllVendors = async (req: Request, res: Response): Promise<void> => {
     try {
       const searchQuery = (req.query.search as string) || "";
-      const result = await adminService.listAllVendors(searchQuery);
+      const result = await this.adminService.listAllVendors(searchQuery);
       res.status(result.status).json({
         vendors: result.vendors,
       });
@@ -90,11 +101,11 @@ class AdminController implements IAdminController {
           error instanceof Error ? error.message : "Failed to fetch vendors",
       });
     }
-  }
-  async listPendingVendors(req: Request, res: Response): Promise<void> {
+  };
+  listPendingVendors = async (req: Request, res: Response): Promise<void> => {
     try {
       const search = (req.query.search as string) || "";
-      const result = await adminService.listPendingVendors(search);
+      const result = await this.adminService.listPendingVendors(search);
       res.status(result.status).json({
         vendors: result.vendors,
       });
@@ -107,11 +118,11 @@ class AdminController implements IAdminController {
             : "Failed to fetch pending vendors",
       });
     }
-  }
-  async listPendingVenues(req: Request, res: Response): Promise<void> {
+  };
+  listPendingVenues = async (req: Request, res: Response): Promise<void> => {
     try {
       const searchTerm = (req.query.search as string) || "";
-      const result = await adminService.listPendingVenues(searchTerm);
+      const result = await this.adminService.listPendingVenues(searchTerm);
       res.status(result.status).json({
         venues: result.venues,
       });
@@ -124,11 +135,11 @@ class AdminController implements IAdminController {
             : "Failed to fetch pending venues",
       });
     }
-  }
-  async listApprovedVenues(req: Request, res: Response): Promise<void> {
+  };
+  listApprovedVenues = async (req: Request, res: Response): Promise<void> => {
     try {
       const searchTerm = (req.query.search as string) || "";
-      const result = await adminService.listApprovedVenues(searchTerm);
+      const result = await this.adminService.listApprovedVenues(searchTerm);
       res.status(result.status).json({
         venues: result.venues,
       });
@@ -141,29 +152,32 @@ class AdminController implements IAdminController {
             : "Failed to fetch approved venues",
       });
     }
-  }
-  async updateVendorStatus(req: Request, res: Response): Promise<void> {
+  };
+  updateVendorStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id: vendorId } = req.params;
       const { status, rejectionReason } = req.body;
-      const currentVendor = await vendorRepository.findById(vendorId);
+      const currentVendor = await this.vendorRepository.findById(vendorId);
       if (!currentVendor) {
         throw new Error("vendor not found");
       }
       let result;
       if (currentVendor.status === "pending") {
         if (status === "active") {
-          result = await adminService.approveVendor(vendorId);
+          result = await this.adminService.approveVendor(vendorId);
         } else if (status === "blocked") {
-          result = await adminService.rejectVendor(vendorId, rejectionReason);
+          result = await this.adminService.rejectVendor(
+            vendorId,
+            rejectionReason
+          );
         } else {
           throw new Error("Invalid status update for a pending vendor");
         }
       } else {
         if (status === "active") {
-          result = await adminService.unblockVendor(vendorId);
+          result = await this.adminService.unblockVendor(vendorId);
         } else if (status === "blocked") {
-          result = await adminService.blockVendor(vendorId);
+          result = await this.adminService.blockVendor(vendorId);
         } else {
           throw new Error("Invalid status update");
         }
@@ -181,16 +195,16 @@ class AdminController implements IAdminController {
             : "Failed to update vendor status",
       });
     }
-  }
-  async updateUserStatus(req: Request, res: Response): Promise<void> {
+  };
+  updateUserStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id: userId } = req.params;
       const { status } = req.body;
       let result;
       if (status === "active") {
-        result = await adminService.unblockUser(userId);
+        result = await this.adminService.unblockUser(userId);
       } else if (status === "blocked") {
-        result = await adminService.blockUser(userId);
+        result = await this.adminService.blockUser(userId);
       } else {
         throw new Error("Invalid status");
       }
@@ -207,19 +221,19 @@ class AdminController implements IAdminController {
             : "Failed to update user status",
       });
     }
-  }
-  async updateVenueVerificationStatus(
+  };
+  updateVenueVerificationStatus = async (
     req: Request,
     res: Response
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
       const { id: venueId } = req.params;
       const { verificationStatus, rejectionReason } = req.body;
       let result;
       if (verificationStatus === "approved") {
-        result = await adminService.approveVenue(venueId);
+        result = await this.adminService.approveVenue(venueId);
       } else if (verificationStatus === "rejected") {
-        result = await adminService.rejectVenue(venueId, rejectionReason);
+        result = await this.adminService.rejectVenue(venueId, rejectionReason);
       } else {
         throw new Error("Invalid verification status update");
       }
@@ -236,11 +250,11 @@ class AdminController implements IAdminController {
             : "Failed to update venue verification status",
       });
     }
-  }
-  async getAllBookings(req: Request, res: Response): Promise<void> {
+  };
+  getAllBookings = async (req: Request, res: Response): Promise<void> => {
     try {
       const search = (req.query.search as string) || "";
-      const result = await bookingService.getAllBookings(search);
+      const result = await this.bookingService.getAllBookings(search);
       res.status(result.status).json({
         message: result.message,
         bookings: result.bookings,
@@ -252,10 +266,10 @@ class AdminController implements IAdminController {
           error instanceof Error ? error.message : "Failed to fetch bookings",
       });
     }
-  }
-  async getAdminRevenue(req: Request, res: Response): Promise<void> {
+  };
+  getAdminRevenue = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await bookingService.getAdminRevenue();
+      const result = await this.bookingService.getAdminRevenue();
       res.status(result.status).json({
         message: result.message,
         revenue: result.revenue,
@@ -267,10 +281,13 @@ class AdminController implements IAdminController {
           error instanceof Error ? error.message : "Failed to fetch revenue",
       });
     }
-  }
-  async getTransactionHistory(req: Request, res: Response): Promise<void> {
+  };
+  getTransactionHistory = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     try {
-      const result = await bookingService.getTransactionHistory();
+      const result = await this.bookingService.getTransactionHistory();
       res.status(result.status).json({
         message: result.message,
         data: result.data,
@@ -284,7 +301,5 @@ class AdminController implements IAdminController {
             : "Failed to fetch transaction history",
       });
     }
-  }
+  };
 }
-
-export default new AdminController();

@@ -1,8 +1,10 @@
+import { injectable } from "tsyringe";
 import Venue, { IVenue } from "../models/venue.model";
-import BaseRepository from "./base.repository";
+import { BaseRepository } from "./base.repository";
 import { IVenueRepository } from "./interfaces/IVenueRepository";
 
-class VenueRepository
+@injectable()
+export class VenueRepository
   extends BaseRepository<IVenue>
   implements IVenueRepository
 {
@@ -46,5 +48,3 @@ class VenueRepository
     return nearbyVenues;
   }
 }
-
-export default new VenueRepository();

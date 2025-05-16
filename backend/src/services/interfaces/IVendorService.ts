@@ -1,13 +1,23 @@
 import { IVendor } from "../../models/vendor.model";
 
 export interface IVendorService {
-  registerVendor(vendorData: Partial<IVendor>): Promise<{ message: string }>;
-  verifyOTP(email: string, otp: string): Promise<{ message: string }>;
+  registerVendor(
+    vendorData: Partial<IVendor>
+  ): Promise<{ message: string; status: number }>;
+  verifyOTP(
+    email: string,
+    otp: string
+  ): Promise<{ message: string; status: number }>;
   resendOTP(email: string): Promise<{ message: string; status: number }>;
   loginVendor(
     email: string,
     password: string
-  ): Promise<{ vendor: IVendor; token: string }>;
+  ): Promise<{
+    vendor: IVendor;
+    token: string;
+    message: string;
+    status: number;
+  }>;
   forgotPassword(email: string): Promise<{ message: string; status: number }>;
   resetPassword(
     email: string,

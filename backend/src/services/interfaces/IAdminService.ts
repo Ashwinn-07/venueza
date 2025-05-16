@@ -5,7 +5,7 @@ export interface IAdminService {
   loginAdmin(
     email: string,
     password: string
-  ): Promise<{ admin: IAdmin; token: string }>;
+  ): Promise<{ admin: IAdmin; token: string; message: string; status: number }>;
   getAdminDashboardStats(): Promise<{
     totalUsers: number;
     totalVendors: number;
@@ -31,7 +31,8 @@ export interface IAdminService {
     vendorId: string
   ): Promise<{ message: string; status: number; vendor: any }>;
   rejectVendor(
-    vendorId: string
+    vendorId: string,
+    rejectionReason?: string
   ): Promise<{ message: string; status: number; vendor: any }>;
   blockVendor(
     vendorId: string
@@ -49,6 +50,7 @@ export interface IAdminService {
     venueId: string
   ): Promise<{ message: string; status: number; venue: IVenue }>;
   rejectVenue(
-    venueId: string
+    venueId: string,
+    rejectionReason?: string
   ): Promise<{ message: string; status: number; venue: IVenue }>;
 }

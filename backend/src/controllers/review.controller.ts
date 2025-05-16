@@ -1,14 +1,20 @@
 import { Request, Response } from "express";
-import reviewService from "../services/review.service";
+import { IReviewService } from "../services/interfaces/IReviewService";
 import { STATUS_CODES } from "../utils/constants";
 import { IReviewController } from "./interfaces/IReviewController";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class ReviewController implements IReviewController {
-  async createReview(req: Request, res: Response): Promise<void> {
+@injectable()
+export class ReviewController implements IReviewController {
+  constructor(
+    @inject(TOKENS.IReviewService) private reviewService: IReviewService
+  ) {}
+  createReview = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const { venueId, rating, reviewText, images } = req.body;
-      const result = await reviewService.createReview(
+      const result = await this.reviewService.createReview(
         userId,
         venueId,
         rating,
@@ -26,11 +32,11 @@ class ReviewController implements IReviewController {
           error instanceof Error ? error.message : "Failed to create review",
       });
     }
-  }
-  async getReviews(req: Request, res: Response): Promise<void> {
+  };
+  getReviews = async (req: Request, res: Response): Promise<void> => {
     try {
       const { venueId } = req.params;
-      const result = await reviewService.getReviewsForVenue(venueId);
+      const result = await this.reviewService.getReviewsForVenue(venueId);
       res.status(result.status).json({
         message: result.message,
         reviews: result.reviews,
@@ -42,12 +48,15 @@ class ReviewController implements IReviewController {
           error instanceof Error ? error.message : "Failed to fetch reviews",
       });
     }
-  }
-  async vendorReplyReview(req: Request, res: Response): Promise<void> {
+  };
+  vendorReplyReview = async (req: Request, res: Response): Promise<void> => {
     try {
       const reviewId = req.params.reviewId;
       const { reply } = req.body;
-      const result = await reviewService.vendorReplyReview(reviewId, reply);
+      const result = await this.reviewService.vendorReplyReview(
+        reviewId,
+        reply
+      );
       res.status(result.status).json({
         message: result.message,
         review: result.review,
@@ -59,12 +68,12 @@ class ReviewController implements IReviewController {
           error instanceof Error ? error.message : "Failed to add vendor reply",
       });
     }
-  }
-  async deleteReview(req: Request, res: Response): Promise<void> {
+  };
+  deleteReview = async (req: Request, res: Response): Promise<void> => {
     try {
       const reviewId = req.params.reviewId;
       const currentUserRole = (req as any).userType;
-      const result = await reviewService.deleteReview(
+      const result = await this.reviewService.deleteReview(
         reviewId,
         currentUserRole
       );
@@ -78,7 +87,5 @@ class ReviewController implements IReviewController {
           error instanceof Error ? error.message : "Failed to delete review",
       });
     }
-  }
+  };
 }
-
-export default new ReviewController();

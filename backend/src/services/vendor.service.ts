@@ -1,8 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import vendorRepository from "../repositories/vendor.repository";
+import { inject, injectable } from "tsyringe";
 import { IVendor } from "../models/vendor.model";
 import { IVendorService } from "./interfaces/IVendorService";
+import { IVendorRepository } from "../repositories/interfaces/IVendorRepository";
 import OTPService from "../utils/OTPService";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
 import {
@@ -11,8 +12,14 @@ import {
   isValidPhone,
   isValidOTP,
 } from "../utils/validators";
+import { TOKENS } from "../config/tokens";
 
-class VendorService implements IVendorService {
+@injectable()
+export class VendorService implements IVendorService {
+  constructor(
+    @inject(TOKENS.IVendorRepository)
+    private vendorRepo: IVendorRepository
+  ) {}
   private sanitizeVendor(vendor: IVendor) {
     const { password, otp, __v, ...sanitizedVendor } = vendor.toObject();
     return sanitizedVendor;
@@ -36,7 +43,7 @@ class VendorService implements IVendorService {
     if (phone && !isValidPhone(phone)) {
       throw new Error("Invalid phone number format");
     }
-    const existingVendor = await vendorRepository.findByEmail(email);
+    const existingVendor = await this.vendorRepo.findByEmail(email);
     if (existingVendor) {
       throw new Error(MESSAGES.ERROR.EMAIL_EXISTS);
     }
@@ -48,7 +55,7 @@ class VendorService implements IVendorService {
 
     console.log(otp);
 
-    await vendorRepository.create({
+    await this.vendorRepo.create({
       ...vendorData,
       password: hashedPassword,
       isVerified: false,
@@ -63,7 +70,7 @@ class VendorService implements IVendorService {
     if (!isValidOTP(otp)) {
       throw new Error("OTP must be a 6-digit number");
     }
-    const vendor = await vendorRepository.findByEmail(email);
+    const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -72,12 +79,12 @@ class VendorService implements IVendorService {
     }
     vendor.isVerified = true;
     vendor.otp = undefined;
-    await vendorRepository.update(vendor._id.toString(), vendor);
+    await this.vendorRepo.update(vendor._id.toString(), vendor);
 
     return { message: MESSAGES.SUCCESS.OTP_VERIFIED, status: STATUS_CODES.OK };
   }
   async resendOTP(email: string): Promise<{ message: string; status: number }> {
-    const vendor = await vendorRepository.findByEmail(email);
+    const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -93,7 +100,7 @@ class VendorService implements IVendorService {
     console.log(newOtp);
 
     vendor.otp = newOtp;
-    await vendorRepository.update(vendor._id.toString(), vendor);
+    await this.vendorRepo.update(vendor._id.toString(), vendor);
 
     return { message: MESSAGES.SUCCESS.OTP_RESENT, status: STATUS_CODES.OK };
   }
@@ -112,7 +119,7 @@ class VendorService implements IVendorService {
     if (!password) {
       throw new Error("Password is required");
     }
-    const vendor = await vendorRepository.findByEmail(email);
+    const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
     }
@@ -146,13 +153,13 @@ class VendorService implements IVendorService {
   async forgotPassword(
     email: string
   ): Promise<{ message: string; status: number }> {
-    const vendor = await vendorRepository.findByEmail(email);
+    const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
     const otp = OTPService.generateOTP();
     vendor.otp = otp;
-    await vendorRepository.update(vendor._id.toString(), vendor);
+    await this.vendorRepo.update(vendor._id.toString(), vendor);
     await OTPService.sendOTP(email, otp);
     console.log(otp);
     return { message: MESSAGES.SUCCESS.OTP_SENT, status: STATUS_CODES.OK };
@@ -174,7 +181,7 @@ class VendorService implements IVendorService {
     if (password != confirmPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
-    const vendor = await vendorRepository.findByEmail(email);
+    const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -184,7 +191,7 @@ class VendorService implements IVendorService {
     const hashedPassword = await bcrypt.hash(password, 10);
     vendor.password = hashedPassword;
     vendor.otp = undefined;
-    await vendorRepository.update(vendor._id.toString(), vendor);
+    await this.vendorRepo.update(vendor._id.toString(), vendor);
 
     return {
       message: MESSAGES.SUCCESS.PASSWORD_RESET,
@@ -196,7 +203,7 @@ class VendorService implements IVendorService {
     vendorId: string,
     updatedData: Partial<IVendor>
   ): Promise<{ message: string; status: number; vendor: IVendor }> {
-    const vendor = await vendorRepository.findById(vendorId);
+    const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -251,7 +258,7 @@ class VendorService implements IVendorService {
       }
     }
 
-    const updatedVendor = await vendorRepository.update(
+    const updatedVendor = await this.vendorRepo.update(
       vendorId,
       fieldsToUpdate
     );
@@ -281,7 +288,7 @@ class VendorService implements IVendorService {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
 
-    const vendor = await vendorRepository.findById(vendorId);
+    const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -295,7 +302,7 @@ class VendorService implements IVendorService {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await vendorRepository.update(vendorId, { password: hashedPassword });
+    await this.vendorRepo.update(vendorId, { password: hashedPassword });
 
     return {
       message: MESSAGES.SUCCESS.PASSWORD_UPDATED,
@@ -306,7 +313,7 @@ class VendorService implements IVendorService {
     vendorId: string,
     documentUrls: string[]
   ): Promise<{ message: string; status: number; vendor: IVendor }> {
-    const vendor = await vendorRepository.findById(vendorId);
+    const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
@@ -316,7 +323,7 @@ class VendorService implements IVendorService {
     }
     vendor.status = "pending";
 
-    const updatedVendor = await vendorRepository.update(vendorId, {
+    const updatedVendor = await this.vendorRepo.update(vendorId, {
       documents: vendor.documents,
       status: vendor.status,
     });
@@ -331,5 +338,3 @@ class VendorService implements IVendorService {
     };
   }
 }
-
-export default new VendorService();

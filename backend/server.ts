@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
+import "reflect-metadata";
+import "./src/config/di-container";
 import app from "./src/app";
 import connectDB from "./src/config/db";
 import http from "http";

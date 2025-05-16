@@ -1,22 +1,33 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import adminRepository from "../repositories/admin.repository";
+import { IAdminRepository } from "../repositories/interfaces/IAdminRepository";
 import { IAdmin } from "../models/admin.model";
 import { IAdminService } from "./interfaces/IAdminService";
 import { MESSAGES, STATUS_CODES } from "../utils/constants";
-import userRepository from "../repositories/user.repository";
-import vendorRepository from "../repositories/vendor.repository";
+import { IUserRepository } from "../repositories/interfaces/IUserRepository";
+import { IVendorRepository } from "../repositories/interfaces/IVendorRepository";
 import { isValidEmail } from "../utils/validators";
 import { IVenue } from "../models/venue.model";
-import venueRepository from "../repositories/venue.repository";
+import { IVenueRepository } from "../repositories/interfaces/IVenueRepository";
 import { IVendor } from "../models/vendor.model";
-import bookingRepository from "../repositories/booking.repository";
+import { IBookingRepository } from "../repositories/interfaces/IBookingRepository";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../config/tokens";
 
-class AdminService implements IAdminService {
+@injectable()
+export class AdminService implements IAdminService {
   private sanitizeAdmin(admin: IAdmin) {
     const { password, __v, ...sanitizedAdmin } = admin.toObject();
     return sanitizedAdmin;
   }
+  constructor(
+    @inject(TOKENS.IAdminRepository) private adminRepo: IAdminRepository,
+    @inject(TOKENS.IUserRepository) private userRepo: IUserRepository,
+    @inject(TOKENS.IVendorRepository) private vendorRepo: IVendorRepository,
+    @inject(TOKENS.IVenueRepository) private venueRepo: IVenueRepository,
+    @inject(TOKENS.IBookingRepository) private bookingRepo: IBookingRepository
+  ) {}
+
   async loginAdmin(
     email: string,
     password: string
@@ -32,7 +43,7 @@ class AdminService implements IAdminService {
     if (!password) {
       throw new Error("Password is required");
     }
-    const admin = await adminRepository.findByEmail(email);
+    const admin = await this.adminRepo.findByEmail(email);
     if (!admin) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
     }
@@ -62,9 +73,9 @@ class AdminService implements IAdminService {
     totalBookings: number;
     status: number;
   }> {
-    const totalUsers = await userRepository.countDocuments({});
-    const totalVendors = await vendorRepository.countDocuments({});
-    const totalBookings = await bookingRepository.countDocuments({});
+    const totalUsers = await this.userRepo.countDocuments({});
+    const totalVendors = await this.vendorRepo.countDocuments({});
+    const totalBookings = await this.bookingRepo.countDocuments({});
 
     return {
       totalUsers,
@@ -75,7 +86,7 @@ class AdminService implements IAdminService {
   }
 
   async listUsers(search = ""): Promise<{ users: any[]; status: number }> {
-    const users = await userRepository.findBySearchTerm(search);
+    const users = await this.userRepo.findBySearchTerm(search);
     return {
       users,
       status: STATUS_CODES.OK,
@@ -96,7 +107,7 @@ class AdminService implements IAdminService {
       ];
     }
 
-    const vendors = await vendorRepository.find(filter);
+    const vendors = await this.vendorRepo.find(filter);
 
     return {
       vendors,
@@ -120,7 +131,7 @@ class AdminService implements IAdminService {
       };
     }
 
-    const vendors = await vendorRepository.find(query);
+    const vendors = await this.vendorRepo.find(query);
     return {
       vendors,
       status: STATUS_CODES.OK,
@@ -139,7 +150,7 @@ class AdminService implements IAdminService {
       ];
     }
 
-    const venues = await venueRepository.find(searchCondition);
+    const venues = await this.venueRepo.find(searchCondition);
     return {
       venues,
       status: STATUS_CODES.OK,
@@ -159,7 +170,7 @@ class AdminService implements IAdminService {
       ];
     }
 
-    const venues = await venueRepository.find(query);
+    const venues = await this.venueRepo.find(query);
     return {
       venues,
       status: STATUS_CODES.OK,
@@ -168,14 +179,14 @@ class AdminService implements IAdminService {
   async approveVendor(
     vendorId: string
   ): Promise<{ message: string; status: number; vendor: any }> {
-    const vendor = await vendorRepository.findById(vendorId);
+    const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error("Vendor not found");
     }
     if (vendor.status !== "pending") {
       throw new Error("this vendor is not pending for approval");
     }
-    const updatedVendor = await vendorRepository.update(vendorId, {
+    const updatedVendor = await this.vendorRepo.update(vendorId, {
       status: "active",
     });
     if (!updatedVendor) {
@@ -191,7 +202,7 @@ class AdminService implements IAdminService {
     vendorId: string,
     rejectionReason?: string
   ): Promise<{ message: string; status: number; vendor: any }> {
-    const vendor = await vendorRepository.findById(vendorId);
+    const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error("Vendor not found");
     }
@@ -205,7 +216,7 @@ class AdminService implements IAdminService {
       updateData.rejectionReason = rejectionReason;
     }
 
-    const updatedVendor = await vendorRepository.update(vendorId, updateData);
+    const updatedVendor = await this.vendorRepo.update(vendorId, updateData);
     if (!updatedVendor) {
       throw new Error("could not reject vendor");
     }
@@ -218,14 +229,14 @@ class AdminService implements IAdminService {
   async blockVendor(
     vendorId: string
   ): Promise<{ message: string; status: number; vendor: any }> {
-    const vendor = await vendorRepository.findById(vendorId);
+    const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error("vendor not found");
     }
     if (vendor.status === "blocked") {
       throw new Error("vendor is already blocked");
     }
-    const updatedVendor = await vendorRepository.update(vendorId, {
+    const updatedVendor = await this.vendorRepo.update(vendorId, {
       status: "blocked",
     });
     if (!updatedVendor) {
@@ -240,14 +251,14 @@ class AdminService implements IAdminService {
   async unblockVendor(
     vendorId: string
   ): Promise<{ message: string; status: number; vendor: any }> {
-    const vendor = await vendorRepository.findById(vendorId);
+    const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error("vendor not found");
     }
     if (vendor.status === "active") {
       throw new Error("vendor is already active");
     }
-    const updatedVendor = await vendorRepository.update(vendorId, {
+    const updatedVendor = await this.vendorRepo.update(vendorId, {
       status: "active",
     });
     if (!updatedVendor) {
@@ -262,14 +273,14 @@ class AdminService implements IAdminService {
   async blockUser(
     userId: string
   ): Promise<{ message: string; status: number; user: any }> {
-    const user = await userRepository.findById(userId);
+    const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new Error("user not found");
     }
     if (user.status === "blocked") {
       throw new Error("user is already blocked");
     }
-    const updatedUser = await userRepository.update(userId, {
+    const updatedUser = await this.userRepo.update(userId, {
       status: "blocked",
     });
     if (!updatedUser) {
@@ -284,14 +295,14 @@ class AdminService implements IAdminService {
   async unblockUser(
     userId: string
   ): Promise<{ message: string; status: number; user: any }> {
-    const user = await userRepository.findById(userId);
+    const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new Error("user not found");
     }
     if (user.status === "active") {
       throw new Error("user is already active");
     }
-    const updatedUser = await userRepository.update(userId, {
+    const updatedUser = await this.userRepo.update(userId, {
       status: "active",
     });
     if (!updatedUser) {
@@ -306,14 +317,14 @@ class AdminService implements IAdminService {
   async approveVenue(
     venueId: string
   ): Promise<{ message: string; status: number; venue: IVenue }> {
-    const venue = await venueRepository.findById(venueId);
+    const venue = await this.venueRepo.findById(venueId);
     if (!venue) {
       throw new Error("venue not found");
     }
     if (venue.verificationStatus !== "pending") {
       throw new Error("venue is not pending approval");
     }
-    const updatedVenue = await venueRepository.update(venueId, {
+    const updatedVenue = await this.venueRepo.update(venueId, {
       verificationStatus: "approved",
     });
     if (!updatedVenue) {
@@ -329,7 +340,7 @@ class AdminService implements IAdminService {
     venueId: string,
     rejectionReason?: string
   ): Promise<{ message: string; status: number; venue: IVenue }> {
-    const venue = await venueRepository.findById(venueId);
+    const venue = await this.venueRepo.findById(venueId);
     if (!venue) {
       throw new Error("venue not found");
     }
@@ -344,7 +355,7 @@ class AdminService implements IAdminService {
       updateData.rejectionReason = rejectionReason;
     }
 
-    const updatedVenue = await venueRepository.update(venueId, updateData);
+    const updatedVenue = await this.venueRepo.update(venueId, updateData);
     if (!updatedVenue) {
       throw new Error("could not reject venue");
     }
@@ -355,5 +366,3 @@ class AdminService implements IAdminService {
     };
   }
 }
-
-export default new AdminService();
