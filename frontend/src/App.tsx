@@ -231,10 +231,6 @@ const App = () => {
               </Suspense>
             }
           />
-        </Route>
-
-        {/* Protected user routes */}
-        <Route element={<ProtectedRoute allowedTypes={["user"]} />}>
           <Route element={<UserLayout />}>
             <Route
               path="/user/home"
@@ -260,6 +256,12 @@ const App = () => {
                 </Suspense>
               }
             />
+          </Route>
+        </Route>
+
+        {/* Protected user routes */}
+        <Route element={<ProtectedRoute allowedTypes={["user"]} />}>
+          <Route element={<UserLayout />}>
             <Route
               path="/user/profile"
               element={

@@ -62,12 +62,12 @@ export class ChatController implements IChatController {
   getConversation = async (req: Request, res: Response): Promise<void> => {
     try {
       const { sender, receiver } = req.query;
-      if (!sender || !receiver) {
-        throw new Error("Sender and receiver are required");
-      }
+      const currentUserId = (req as any).userId;
+
       const result = await this.chatService.getConversation(
         String(sender),
-        String(receiver)
+        String(receiver),
+        currentUserId
       );
       res.status(result.status).json({
         message: result.message,

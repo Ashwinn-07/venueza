@@ -107,4 +107,19 @@ export class MessageRepository
     ]);
     return result;
   }
+  async markMessagesAsRead(
+    senderId: string,
+    receiverId: string
+  ): Promise<void> {
+    await Message.updateMany(
+      {
+        sender: senderId,
+        receiver: receiverId,
+        readAt: null,
+      },
+      {
+        $set: { readAt: new Date() },
+      }
+    ).exec();
+  }
 }

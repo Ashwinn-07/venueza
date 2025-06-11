@@ -80,10 +80,6 @@ export const createVenueSlice: StateCreator<
 
   getUserVenues: async (params = {}) => {
     try {
-      const { authType } = get();
-      if (authType !== "user") {
-        throw new Error("Not authorized as user");
-      }
       return await userService.getVenues(params);
     } catch (error) {
       console.error("Failed to get user venues", error);
@@ -93,10 +89,6 @@ export const createVenueSlice: StateCreator<
 
   getFeaturedVenues: async () => {
     try {
-      const { authType } = get();
-      if (authType !== "user") {
-        throw new Error("Not authorized as user");
-      }
       return await userService.getFeaturedVenues();
     } catch (error) {
       console.error("Failed to get featured venues", error);
@@ -106,10 +98,6 @@ export const createVenueSlice: StateCreator<
 
   getUserVenue: async (venueId: string) => {
     try {
-      const { authType } = get();
-      if (authType !== "user") {
-        throw new Error("Not authorized as user");
-      }
       return await userService.getVenue(venueId);
     } catch (error) {
       console.error("Failed to get user venue", error);

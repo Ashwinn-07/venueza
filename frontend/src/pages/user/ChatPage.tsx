@@ -15,6 +15,7 @@ interface Message {
   receiver: string;
   receiverModel: string;
   images?: string[];
+  readAt: string;
   createdAt: string;
 }
 
@@ -67,6 +68,35 @@ const ChatPage = () => {
 
     return () => {
       socket.off("receiveMessage");
+    };
+  }, [socket, user, vendorId]);
+
+  useEffect(() => {
+    if (!socket || !user || !vendorId) return;
+
+    const currentUserId = user.userId || user.id;
+
+    socket.on("messagesRead", ({ conversation }) => {
+      console.log("Messages read event received:", conversation);
+
+      setMessages((prev) =>
+        prev.map((msg) => {
+          const messageSenderId =
+            typeof msg.sender === "object" ? msg.sender._id : msg.sender;
+
+          if (
+            messageSenderId === currentUserId &&
+            msg.receiver === conversation.sender
+          ) {
+            return { ...msg, readAt: new Date().toISOString() };
+          }
+          return msg;
+        })
+      );
+    });
+
+    return () => {
+      socket.off("messagesRead");
     };
   }, [socket, user, vendorId]);
 
@@ -305,7 +335,20 @@ const ChatPage = () => {
                               isCurrentUser ? "text-gray-200" : "text-gray-500"
                             }`}
                           >
-                            {formatTime(message.createdAt)}
+                            <div
+                              className={`text-xs mt-1 text-right ${
+                                isCurrentUser
+                                  ? "text-gray-200"
+                                  : "text-gray-500"
+                              }`}
+                            >
+                              {formatTime(message.createdAt)}
+                              {isCurrentUser && (
+                                <span className="ml-1">
+                                  {message.readAt ? "✓✓" : "✓"}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

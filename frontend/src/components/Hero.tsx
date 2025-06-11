@@ -22,7 +22,7 @@ const Hero = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
           <Link
-            to="/user/signup"
+            to="/user/home"
             className="w-full sm:w-auto bg-[#F4A261] text-white px-8 py-3 rounded-md text-lg hover:bg-[#E76F51] transition duration-300"
           >
             Book a venue

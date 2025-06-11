@@ -15,7 +15,8 @@ export interface IChatService {
   ): Promise<{ message: string; status: number; data: IMessage }>;
   getConversation(
     sender: string,
-    receiver: string
+    receiver: string,
+    currentUserId: string
   ): Promise<{ message: string; status: number; data: IMessage[] }>;
   getConversations(
     userId: string

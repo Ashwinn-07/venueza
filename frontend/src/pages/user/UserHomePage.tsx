@@ -5,7 +5,7 @@ import VenueCard from "../../components/user/VenueCard";
 import BannerCarousel from "../../components/BannerCarousel";
 
 const UserHomePage = () => {
-  const { getFeaturedVenues, isAuthenticated } = useAuthStore();
+  const { getFeaturedVenues } = useAuthStore();
   const [venues, setVenues] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,10 +23,8 @@ const UserHomePage = () => {
       }
     };
 
-    if (isAuthenticated) {
-      fetchFeaturedVenues();
-    }
-  }, [getFeaturedVenues, isAuthenticated]);
+    fetchFeaturedVenues();
+  }, [getFeaturedVenues]);
 
   if (loading) {
     return (

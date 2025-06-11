@@ -24,6 +24,13 @@ export const initializeSocket = (server: HttpServer): void => {
       console.log("Message sent to room", data.room, data);
     });
 
+    socket.on("markMessagesAsRead", ({ sender, receiver }) => {
+      const room = [sender, receiver].sort().join("-");
+      io.to(room).emit("messagesRead", {
+        conversation: { sender, receiver, room },
+      });
+    });
+
     socket.on("disconnect", () => {
       console.log("Socket disconnected:", socket.id);
     });

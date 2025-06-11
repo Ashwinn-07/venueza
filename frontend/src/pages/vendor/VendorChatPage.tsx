@@ -9,11 +9,14 @@ import { notifyError, notifySuccess } from "../../utils/notifications";
 
 interface Message {
   _id: string;
-  sender: string | { _id: string; [key: string]: any };
   content: string;
-  createdAt: string;
-  read: boolean;
+  sender: string | { _id: string; [key: string]: any };
+  senderModel: string;
+  receiver: string;
+  receiverModel: string;
   images?: string[];
+  readAt: string;
+  createdAt: string;
 }
 
 interface Partner {
@@ -62,6 +65,33 @@ const VendorChatPage = () => {
 
     return () => {
       socket.off("receiveMessage");
+    };
+  }, [socket, user?.id, userId]);
+
+  useEffect(() => {
+    if (!socket || !user?.id || !userId) return;
+
+    socket.on("messagesRead", ({ conversation }) => {
+      console.log("Messages read event received:", conversation);
+
+      setMessages((prev) =>
+        prev.map((msg) => {
+          const messageSenderId =
+            typeof msg.sender === "object" ? msg.sender._id : msg.sender;
+
+          if (
+            messageSenderId === user.id &&
+            msg.receiver === conversation.sender
+          ) {
+            return { ...msg, readAt: new Date().toISOString() };
+          }
+          return msg;
+        })
+      );
+    });
+
+    return () => {
+      socket.off("messagesRead");
     };
   }, [socket, user?.id, userId]);
 
@@ -298,7 +328,18 @@ const VendorChatPage = () => {
                                 isVendor ? "text-blue-100" : "text-gray-500"
                               }`}
                             >
-                              {formatTime(message.createdAt)}
+                              <p
+                                className={`text-xs mt-1 text-right ${
+                                  isVendor ? "text-blue-100" : "text-gray-500"
+                                }`}
+                              >
+                                {formatTime(message.createdAt)}
+                                {isVendor && (
+                                  <span className="ml-1">
+                                    {message.readAt ? "✓✓" : "✓"}
+                                  </span>
+                                )}
+                              </p>
                             </p>
                           </div>
                         </div>

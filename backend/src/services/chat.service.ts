@@ -1,4 +1,5 @@
 import { inject, injectable } from "tsyringe";
+import { io } from "../config/socket";
 import mongoose from "mongoose";
 import { IMessage } from "../models/message.model";
 import { IChatService, SendMessageInput } from "./interfaces/IChatService";
@@ -33,8 +34,22 @@ export class ChatService implements IChatService {
   }
   async getConversation(
     sender: string,
-    receiver: string
+    receiver: string,
+    currentUserId: string
   ): Promise<{ message: string; status: number; data: IMessage[] }> {
+    const otherUserId = currentUserId === sender ? receiver : sender;
+    await this.messageRepo.markMessagesAsRead(otherUserId, currentUserId);
+
+    const room = [currentUserId, otherUserId].sort().join("-");
+
+    io.to(room).emit("messagesRead", {
+      conversation: {
+        sender: currentUserId,
+        receiver: otherUserId,
+        room: room,
+      },
+    });
+
     const messages = await this.messageRepo.findConversation(sender, receiver);
     return {
       message: MESSAGES.SUCCESS.CONVERSATION_FETCHED,

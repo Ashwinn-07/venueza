@@ -9,7 +9,7 @@ const CallToAction = () => {
         </h2>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch">
           <Link
-            to="/user/signup"
+            to="/user/home"
             className="w-full sm:w-auto bg-white text-[#E76F51] px-6 md:px-8 py-3 rounded-md text-base md:text-lg hover:bg-gray-50 transition duration-300 sm:min-w-[200px]"
           >
             Find a venue

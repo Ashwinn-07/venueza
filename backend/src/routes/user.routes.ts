@@ -48,9 +48,9 @@ userRoutes
   .patch("/security", userAuth, userController.changeUserPassword);
 
 userRoutes
-  .get("/home", userAuth, venueController.getFeaturedVenues)
-  .get("/venues", userAuth, venueController.getAllVenues)
-  .get("/venues/:id", userAuth, venueController.getVenue)
+  .get("/home", venueController.getFeaturedVenues)
+  .get("/venues", venueController.getAllVenues)
+  .get("/venues/:id", venueController.getVenue)
   .get(
     "/venues/:venueId/booked-dates",
     userAuth,

@@ -7,6 +7,7 @@ export interface IMessage extends Document {
   receiverModel: string;
   content: string;
   images?: string[];
+  readAt?: Date;
   createdAt: Date;
 }
 
@@ -26,6 +27,7 @@ const messageSchema: Schema = new Schema(
     receiverModel: { type: String, required: true, enum: ["User", "Vendor"] },
     content: { type: String, required: true },
     images: { type: [String], default: [] },
+    readAt: { type: Date, default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
