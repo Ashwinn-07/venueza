@@ -13,12 +13,13 @@ export class VendorController implements IVendorController {
     @inject(TOKENS.IBookingService)
     private bookingService: IBookingService
   ) {}
+
   register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await this.vendorService.registerVendor(req.body);
-      res.status(result.status).json({
-        message: result.message,
-      });
+      const { response, status } = await this.vendorService.registerVendor(
+        req.body
+      );
+      res.status(status).json(response);
     } catch (error) {
       console.error("Registration error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -26,13 +27,15 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   verifyOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp } = req.body;
-      const result = await this.vendorService.verifyOTP(email, otp);
-      res.status(result.status).json({
-        message: result.message,
-      });
+      const { response, status } = await this.vendorService.verifyOTP(
+        email,
+        otp
+      );
+      res.status(status).json(response);
     } catch (error) {
       console.error("OTP verification error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -41,6 +44,7 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   resendOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
@@ -52,10 +56,8 @@ export class VendorController implements IVendorController {
         return;
       }
 
-      const result = await this.vendorService.resendOTP(email);
-      res.status(result.status).json({
-        message: result.message,
-      });
+      const { response, status } = await this.vendorService.resendOTP(email);
+      res.status(status).json(response);
     } catch (error) {
       console.error("OTP resend error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -63,11 +65,14 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
-      const result = await this.vendorService.forgotPassword(email);
-      res.status(result.status).json({ message: result.message });
+      const { response, status } = await this.vendorService.forgotPassword(
+        email
+      );
+      res.status(status).json(response);
     } catch (error) {
       console.error("Forgot password error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -78,16 +83,17 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp, password, confirmPassword } = req.body;
-      const result = await this.vendorService.resetPassword(
+      const { response, status } = await this.vendorService.resetPassword(
         email,
         otp,
         password,
         confirmPassword
       );
-      res.status(result.status).json({ message: result.message });
+      res.status(status).json(response);
     } catch (error) {
       console.error("Reset password error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -96,28 +102,34 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
-      const result = await this.vendorService.loginVendor(email, password);
-      res.cookie("auth-token", result.token, {
+      const { response, status } = await this.vendorService.loginVendor(
+        email,
+        password
+      );
+
+      res.cookie("auth-token", response.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 3600000,
         path: "/",
       });
-      res.status(result.status).json({
-        message: result.message,
+
+      res.status(status).json({
+        message: response.message,
         user: {
-          id: result.vendor._id,
-          name: result.vendor.name,
-          email: result.vendor.email,
-          phone: result.vendor.phone,
-          profileImage: result.vendor.profileImage,
-          businessName: result.vendor.businessName,
-          businessAddress: result.vendor.businessAddress,
-          status: result.vendor.status,
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          phone: response.phone,
+          profileImage: response.profileImage,
+          businessName: response.businessName,
+          businessAddress: response.businessAddress,
+          status: response.status,
         },
       });
     } catch (error) {
@@ -127,6 +139,7 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie("auth-token", {
       httpOnly: true,
@@ -139,25 +152,27 @@ export class VendorController implements IVendorController {
       message: "Logged out successfully",
     });
   };
+
   updateVendorProfile = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const updatedData = req.body;
-      const result = await this.vendorService.updateVendorProfile(
+      const { response, status } = await this.vendorService.updateVendorProfile(
         userId,
         updatedData
       );
-      res.status(result.status).json({
-        message: result.message,
+
+      res.status(status).json({
+        message: "Profile updated successfully",
         user: {
-          id: result.vendor._id,
-          name: result.vendor.name,
-          email: result.vendor.email,
-          phone: result.vendor.phone,
-          profileImage: result.vendor.profileImage,
-          businessName: result.vendor.businessName,
-          businessAddress: result.vendor.businessAddress,
-          status: result.vendor.status,
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          phone: response.phone,
+          profileImage: response.profileImage,
+          businessName: response.businessName,
+          businessAddress: response.businessAddress,
+          status: response.status,
         },
       });
     } catch (error) {
@@ -168,10 +183,12 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   changeVendorPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
       if (!currentPassword || !newPassword || !confirmNewPassword) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
           error: "All password fields are required",
@@ -179,13 +196,14 @@ export class VendorController implements IVendorController {
         return;
       }
 
-      const result = await this.vendorService.changeVendorPassword(
-        userId,
-        currentPassword,
-        newPassword,
-        confirmNewPassword
-      );
-      res.status(result.status).json({ message: result.message });
+      const { response, status } =
+        await this.vendorService.changeVendorPassword(
+          userId,
+          currentPassword,
+          newPassword,
+          confirmNewPassword
+        );
+      res.status(status).json(response);
     } catch (error) {
       console.error("Password change error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -194,10 +212,12 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   uploadDocuments = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const { documentUrls } = req.body;
+
       if (
         !documentUrls ||
         !Array.isArray(documentUrls) ||
@@ -208,22 +228,25 @@ export class VendorController implements IVendorController {
           .json({ error: "Documents are required." });
         return;
       }
-      const result = await this.vendorService.uploadDocuments(
+
+      const { response, status } = await this.vendorService.uploadDocuments(
         vendorId,
         documentUrls
       );
-      res.status(result.status).json({
-        message: result.message,
+
+      res.status(status).json({
+        message:
+          "Documents uploaded successfully and pending verification from admin",
         user: {
-          id: result.vendor._id,
-          name: result.vendor.name,
-          email: result.vendor.email,
-          phone: result.vendor.phone,
-          profileImage: result.vendor.profileImage,
-          businessName: result.vendor.businessName,
-          businessAddress: result.vendor.businessAddress,
-          status: result.vendor.status,
-          documents: result.vendor.documents,
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          phone: response.phone,
+          profileImage: response.profileImage,
+          businessName: response.businessName,
+          businessAddress: response.businessAddress,
+          status: response.status,
+          documents: response.documents,
         },
       });
     } catch (error) {
@@ -234,18 +257,22 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   addBlockedDate = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const { venueId, startDate, endDate, reason } = req.body;
+
       if (!venueId || !startDate || !endDate) {
         throw new Error("Missing required fields");
       }
+
       const result = await this.bookingService.addBlockedDateForVenue(venueId, {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         reason,
       });
+
       res.status(STATUS_CODES.OK).json({
         message: result.message,
         blockedDate: result.blockedDate,
@@ -258,12 +285,14 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   getVendorRevenue = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       if (!vendorId) {
         throw new Error("Vendor ID is missing");
       }
+
       const result = await this.bookingService.getVendorRevenue(vendorId);
       res.status(result.status).json({
         message: result.message,
@@ -277,12 +306,14 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   getDashboardData = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       if (!vendorId) {
         throw new Error("Vendor ID is missing");
       }
+
       const result = await this.bookingService.getDashboardDataForVendor(
         vendorId
       );
@@ -300,6 +331,7 @@ export class VendorController implements IVendorController {
       });
     }
   };
+
   getTransactionHistory = async (
     req: Request,
     res: Response

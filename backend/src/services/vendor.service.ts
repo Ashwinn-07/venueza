@@ -13,6 +13,13 @@ import {
   isValidOTP,
 } from "../utils/validators";
 import { TOKENS } from "../config/tokens";
+import { VendorMapper } from "../mappers/vendor.mapper";
+import {
+  VendorLoginResponseDto,
+  VendorProfileResponseDto,
+  VendorDocumentUploadResponseDto,
+  MessageResponseDto,
+} from "../dto/vendor.dto";
 
 @injectable()
 export class VendorService implements IVendorService {
@@ -20,36 +27,37 @@ export class VendorService implements IVendorService {
     @inject(TOKENS.IVendorRepository)
     private vendorRepo: IVendorRepository
   ) {}
-  private sanitizeVendor(vendor: IVendor) {
-    const { password, otp, __v, ...sanitizedVendor } = vendor.toObject();
-    return sanitizedVendor;
-  }
+
   async registerVendor(
     vendorData: Partial<IVendor>
-  ): Promise<{ message: string; status: number }> {
+  ): Promise<{ response: MessageResponseDto; status: number }> {
     const { name, email, phone, password, businessName, businessAddress } =
       vendorData;
+
     if (!name || !email || !password || !businessName || !businessAddress) {
       throw new Error(MESSAGES.ERROR.INVALID_INPUT);
     }
+
     if (!isValidEmail(email)) {
       throw new Error("Invalid email format");
     }
+
     if (!isValidPassword(password)) {
       throw new Error(
         "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
       );
     }
+
     if (phone && !isValidPhone(phone)) {
       throw new Error("Invalid phone number format");
     }
+
     const existingVendor = await this.vendorRepo.findByEmail(email);
     if (existingVendor) {
       throw new Error(MESSAGES.ERROR.EMAIL_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const otp = OTPService.generateOTP();
     await OTPService.sendOTP(email, otp);
 
@@ -61,29 +69,43 @@ export class VendorService implements IVendorService {
       isVerified: false,
       otp,
     });
-    return { message: MESSAGES.SUCCESS.SIGNUP, status: STATUS_CODES.CREATED };
+
+    return {
+      response: { message: MESSAGES.SUCCESS.SIGNUP },
+      status: STATUS_CODES.CREATED,
+    };
   }
+
   async verifyOTP(
     email: string,
     otp: string
-  ): Promise<{ message: string; status: number }> {
+  ): Promise<{ response: MessageResponseDto; status: number }> {
     if (!isValidOTP(otp)) {
       throw new Error("OTP must be a 6-digit number");
     }
+
     const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
+
     if (vendor.otp !== otp) {
       throw new Error(MESSAGES.ERROR.OTP_INVALID);
     }
+
     vendor.isVerified = true;
     vendor.otp = undefined;
     await this.vendorRepo.update(vendor._id.toString(), vendor);
 
-    return { message: MESSAGES.SUCCESS.OTP_VERIFIED, status: STATUS_CODES.OK };
+    return {
+      response: { message: MESSAGES.SUCCESS.OTP_VERIFIED },
+      status: STATUS_CODES.OK,
+    };
   }
-  async resendOTP(email: string): Promise<{ message: string; status: number }> {
+
+  async resendOTP(
+    email: string
+  ): Promise<{ response: MessageResponseDto; status: number }> {
     const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
@@ -94,7 +116,6 @@ export class VendorService implements IVendorService {
     }
 
     const newOtp = OTPService.generateOTP();
-
     await OTPService.sendOTP(email, newOtp);
 
     console.log(newOtp);
@@ -102,23 +123,24 @@ export class VendorService implements IVendorService {
     vendor.otp = newOtp;
     await this.vendorRepo.update(vendor._id.toString(), vendor);
 
-    return { message: MESSAGES.SUCCESS.OTP_RESENT, status: STATUS_CODES.OK };
+    return {
+      response: { message: MESSAGES.SUCCESS.OTP_RESENT },
+      status: STATUS_CODES.OK,
+    };
   }
+
   async loginVendor(
     email: string,
     password: string
-  ): Promise<{
-    vendor: IVendor;
-    token: string;
-    message: string;
-    status: number;
-  }> {
+  ): Promise<{ response: VendorLoginResponseDto; status: number }> {
     if (!isValidEmail(email)) {
       throw new Error("Invalid email format");
     }
+
     if (!password) {
       throw new Error("Password is required");
     }
+
     const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
@@ -127,6 +149,7 @@ export class VendorService implements IVendorService {
     if (!vendor.isVerified) {
       throw new Error(MESSAGES.ERROR.OTP_INVALID);
     }
+
     if (vendor.status === "blocked") {
       throw new Error(MESSAGES.ERROR.BLOCKED);
     }
@@ -135,66 +158,83 @@ export class VendorService implements IVendorService {
     if (!isPasswordValid) {
       throw new Error(MESSAGES.ERROR.INVALID_CREDENTIALS);
     }
+
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       throw new Error(MESSAGES.ERROR.JWT_SECRET_MISSING);
     }
+
     const token = jwt.sign({ userId: vendor._id, type: "vendor" }, jwtSecret, {
       expiresIn: "1h",
     });
 
     return {
-      vendor: this.sanitizeVendor(vendor),
-      token,
-      message: MESSAGES.SUCCESS.LOGIN,
+      response: VendorMapper.toLoginResponse(
+        vendor,
+        token,
+        MESSAGES.SUCCESS.LOGIN
+      ),
       status: STATUS_CODES.OK,
     };
   }
+
   async forgotPassword(
     email: string
-  ): Promise<{ message: string; status: number }> {
+  ): Promise<{ response: MessageResponseDto; status: number }> {
     const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
+
     const otp = OTPService.generateOTP();
     vendor.otp = otp;
     await this.vendorRepo.update(vendor._id.toString(), vendor);
     await OTPService.sendOTP(email, otp);
+
     console.log(otp);
-    return { message: MESSAGES.SUCCESS.OTP_SENT, status: STATUS_CODES.OK };
+
+    return {
+      response: { message: MESSAGES.SUCCESS.OTP_SENT },
+      status: STATUS_CODES.OK,
+    };
   }
+
   async resetPassword(
     email: string,
     otp: string,
     password: string,
     confirmPassword: string
-  ): Promise<{ message: string; status: number }> {
+  ): Promise<{ response: MessageResponseDto; status: number }> {
     if (!isValidOTP(otp)) {
       throw new Error("OTP must be a 6-digit number");
     }
+
     if (!isValidPassword(password)) {
       throw new Error(
         "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
       );
     }
+
     if (password != confirmPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
+
     const vendor = await this.vendorRepo.findByEmail(email);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
+
     if (vendor.otp !== otp) {
       throw new Error(MESSAGES.ERROR.OTP_INVALID);
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     vendor.password = hashedPassword;
     vendor.otp = undefined;
     await this.vendorRepo.update(vendor._id.toString(), vendor);
 
     return {
-      message: MESSAGES.SUCCESS.PASSWORD_RESET,
+      response: { message: MESSAGES.SUCCESS.PASSWORD_RESET },
       status: STATUS_CODES.OK,
     };
   }
@@ -202,7 +242,7 @@ export class VendorService implements IVendorService {
   async updateVendorProfile(
     vendorId: string,
     updatedData: Partial<IVendor>
-  ): Promise<{ message: string; status: number; vendor: IVendor }> {
+  ): Promise<{ response: VendorProfileResponseDto; status: number }> {
     const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
@@ -267,9 +307,8 @@ export class VendorService implements IVendorService {
     }
 
     return {
-      message: MESSAGES.SUCCESS.PROFILE_UPDATED,
+      response: VendorMapper.toProfileResponse(updatedVendor),
       status: STATUS_CODES.OK,
-      vendor: this.sanitizeVendor(updatedVendor),
     };
   }
 
@@ -278,12 +317,13 @@ export class VendorService implements IVendorService {
     currentPassword: string,
     newPassword: string,
     confirmNewPassword: string
-  ): Promise<{ message: string; status: number }> {
+  ): Promise<{ response: MessageResponseDto; status: number }> {
     if (!isValidPassword(newPassword)) {
       throw new Error(
         "New password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
       );
     }
+
     if (newPassword !== confirmNewPassword) {
       throw new Error(MESSAGES.ERROR.PASSWORD_MISMATCH);
     }
@@ -305,36 +345,40 @@ export class VendorService implements IVendorService {
     await this.vendorRepo.update(vendorId, { password: hashedPassword });
 
     return {
-      message: MESSAGES.SUCCESS.PASSWORD_UPDATED,
+      response: { message: MESSAGES.SUCCESS.PASSWORD_UPDATED },
       status: STATUS_CODES.OK,
     };
   }
+
   async uploadDocuments(
     vendorId: string,
     documentUrls: string[]
-  ): Promise<{ message: string; status: number; vendor: IVendor }> {
+  ): Promise<{ response: VendorDocumentUploadResponseDto; status: number }> {
     const vendor = await this.vendorRepo.findById(vendorId);
     if (!vendor) {
       throw new Error(MESSAGES.ERROR.USER_NOT_FOUND);
     }
+
     vendor.documents = [...vendor.documents, ...documentUrls];
+
     if (vendor.status === "blocked") {
       throw new Error("Your account is blocked, please contact admin");
     }
+
     vendor.status = "pending";
 
     const updatedVendor = await this.vendorRepo.update(vendorId, {
       documents: vendor.documents,
       status: vendor.status,
     });
+
     if (!updatedVendor) {
       throw new Error("Failed to upload documents");
     }
+
     return {
-      message:
-        "Documents uploaded successfully and pending verification from admin",
+      response: VendorMapper.toDocumentUploadResponse(updatedVendor),
       status: STATUS_CODES.OK,
-      vendor: this.sanitizeVendor(updatedVendor),
     };
   }
 }
