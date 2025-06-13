@@ -8,12 +8,13 @@ import { TOKENS } from "../config/tokens";
 @injectable()
 export class UserController implements IUserController {
   constructor(@inject(TOKENS.IUserService) private userService: IUserService) {}
+
   register = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await this.userService.registerUser(req.body);
-      res.status(result.status).json({
-        message: result.message,
-      });
+      const { response, status } = await this.userService.registerUser(
+        req.body
+      );
+      res.status(status).json(response);
     } catch (error) {
       console.error("Registration error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -21,13 +22,12 @@ export class UserController implements IUserController {
       });
     }
   };
+
   verifyOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp } = req.body;
-      const result = await this.userService.verifyOTP(email, otp);
-      res.status(result.status).json({
-        message: result.message,
-      });
+      const { response, status } = await this.userService.verifyOTP(email, otp);
+      res.status(status).json(response);
     } catch (error) {
       console.error("OTP verification error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -36,6 +36,7 @@ export class UserController implements IUserController {
       });
     }
   };
+
   resendOTP = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
@@ -47,10 +48,8 @@ export class UserController implements IUserController {
         return;
       }
 
-      const result = await this.userService.resendOTP(email);
-      res.status(result.status).json({
-        message: result.message,
-      });
+      const { response, status } = await this.userService.resendOTP(email);
+      res.status(status).json(response);
     } catch (error) {
       console.error("OTP resend error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -58,26 +57,32 @@ export class UserController implements IUserController {
       });
     }
   };
+
   login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
-      const result = await this.userService.loginUser(email, password);
-      res.cookie("auth-token", result.token, {
+      const { response, status } = await this.userService.loginUser(
+        email,
+        password
+      );
+
+      res.cookie("auth-token", response.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 3600000,
         path: "/",
       });
-      res.status(result.status).json({
-        message: result.message,
+
+      res.status(status).json({
+        message: response.message,
         user: {
-          id: result.user._id,
-          name: result.user.name,
-          email: result.user.email,
-          phone: result.user.phone,
-          profileImage: result.user.profileImage,
-          status: result.user.status,
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          phone: response.phone,
+          profileImage: response.profileImage,
+          status: response.status,
         },
       });
     } catch (error) {
@@ -87,11 +92,15 @@ export class UserController implements IUserController {
       });
     }
   };
+
   googleCallback = async (req: Request, res: Response): Promise<void> => {
     try {
       const user = req.user as any;
-      const result = await this.userService.processGoogleAuth(user);
-      res.cookie("auth-token", result.token, {
+      const { response, status } = await this.userService.processGoogleAuth(
+        user
+      );
+
+      res.cookie("auth-token", response.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -100,7 +109,7 @@ export class UserController implements IUserController {
       });
 
       res.redirect(
-        `${process.env.FRONTEND_URL}/auth/google/callback?token=${result.token}`
+        `${process.env.FRONTEND_URL}/auth/google/callback?token=${response.token}`
       );
     } catch (error) {
       console.error("Google auth error:", error);
@@ -109,11 +118,12 @@ export class UserController implements IUserController {
       );
     }
   };
+
   forgotPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email } = req.body;
-      const result = await this.userService.forgotPassword(email);
-      res.status(result.status).json({ message: result.message });
+      const { response, status } = await this.userService.forgotPassword(email);
+      res.status(status).json(response);
     } catch (error) {
       console.error("Forgot password error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -124,16 +134,17 @@ export class UserController implements IUserController {
       });
     }
   };
+
   resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, otp, password, confirmPassword } = req.body;
-      const result = await this.userService.resetPassword(
+      const { response, status } = await this.userService.resetPassword(
         email,
         otp,
         password,
         confirmPassword
       );
-      res.status(result.status).json({ message: result.message });
+      res.status(status).json(response);
     } catch (error) {
       console.error("Reset password error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -142,6 +153,7 @@ export class UserController implements IUserController {
       });
     }
   };
+
   logout = async (req: Request, res: Response): Promise<void> => {
     res.clearCookie("auth-token", {
       httpOnly: true,
@@ -154,23 +166,23 @@ export class UserController implements IUserController {
       message: "Logged out successfully",
     });
   };
+
   updateUserProfile = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const updatedData = req.body;
-      const result = await this.userService.updateUserProfile(
-        userId,
-        updatedData
-      );
-      res.status(result.status).json({
-        message: result.message,
+      const { response, message, status } =
+        await this.userService.updateUserProfile(userId, updatedData);
+
+      res.status(status).json({
+        message,
         user: {
-          id: result.user._id,
-          name: result.user.name,
-          email: result.user.email,
-          phone: result.user.phone,
-          profileImage: result.user.profileImage,
-          status: result.user.status,
+          id: response.id,
+          name: response.name,
+          email: response.email,
+          phone: response.phone,
+          profileImage: response.profileImage,
+          status: response.status,
         },
       });
     } catch (error) {
@@ -181,10 +193,12 @@ export class UserController implements IUserController {
       });
     }
   };
+
   changeUserPassword = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
       if (!currentPassword || !newPassword || !confirmNewPassword) {
         res.status(STATUS_CODES.BAD_REQUEST).json({
           error: "All password fields are required",
@@ -192,13 +206,14 @@ export class UserController implements IUserController {
         return;
       }
 
-      const result = await this.userService.changeUserPassword(
+      const { response, status } = await this.userService.changeUserPassword(
         userId,
         currentPassword,
         newPassword,
         confirmNewPassword
       );
-      res.status(result.status).json({ message: result.message });
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Password change error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
