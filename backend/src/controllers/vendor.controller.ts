@@ -289,15 +289,11 @@ export class VendorController implements IVendorController {
   getVendorRevenue = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
-      if (!vendorId) {
-        throw new Error("Vendor ID is missing");
-      }
-
-      const result = await this.bookingService.getVendorRevenue(vendorId);
-      res.status(result.status).json({
-        message: result.message,
-        revenue: result.revenue,
-      });
+      if (!vendorId) throw new Error("Vendor ID is missing");
+      const { response, status } = await this.bookingService.getVendorRevenue(
+        vendorId
+      );
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching vendor revenue:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -310,17 +306,10 @@ export class VendorController implements IVendorController {
   getDashboardData = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
-      if (!vendorId) {
-        throw new Error("Vendor ID is missing");
-      }
-
-      const result = await this.bookingService.getDashboardDataForVendor(
-        vendorId
-      );
-      res.status(result.status).json({
-        message: result.message,
-        dashboardData: result.dashboardData,
-      });
+      if (!vendorId) throw new Error("Vendor ID is missing");
+      const { response, status } =
+        await this.bookingService.getDashboardDataForVendor(vendorId);
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching vendor dashboard data:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -338,13 +327,10 @@ export class VendorController implements IVendorController {
   ): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
-      const result = await this.bookingService.getVendorTransactionHistory(
-        vendorId
-      );
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-      });
+      if (!vendorId) throw new Error("Vendor ID is missing");
+      const { response, status } =
+        await this.bookingService.getVendorTransactionHistory(vendorId);
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching vendor transaction history:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({

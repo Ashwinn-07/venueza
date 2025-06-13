@@ -1,3 +1,12 @@
+import {
+  BookingResponseDto,
+  BookingsListResponseDto,
+  CreateBookingResponseDto,
+  DashboardDataResponseDto,
+  RevenueResponseDto,
+  TransactionHistoryResponseDto,
+  VerifyPaymentResponseDto,
+} from "../../dto/booking.dto";
 import { IBooking } from "../../models/booking.model";
 
 export interface IBookingService {
@@ -6,34 +15,30 @@ export interface IBookingService {
     venueId: string,
     bookingData: { startDate: Date; endDate: Date; totalPrice: number }
   ): Promise<{
-    message: string;
+    response: CreateBookingResponseDto;
     status: number;
-    booking: IBooking;
-    razorpayOrder: any;
   }>;
   verifyPayment(
     bookingId: string,
     paymentId: string,
     razorpaySignature: string
-  ): Promise<{ message: string; status: number; booking: IBooking }>;
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }>;
   createBalancePaymentOrder(bookingId: string): Promise<{
-    message: string;
+    response: CreateBookingResponseDto;
     status: number;
-    booking: IBooking;
-    razorpayOrder: any;
   }>;
   verifyBalancePayment(
     bookingId: string,
     paymentId: string,
     razorpaySignature: string
-  ): Promise<{ message: string; status: number; booking: IBooking }>;
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }>;
   getBookingById(
     bookingId: string
-  ): Promise<{ message: string; status: number; booking: IBooking }>;
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }>;
   getBookingsByUserId(
     userId: string,
     filterType: string
-  ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
+  ): Promise<{ response: BookingsListResponseDto; status: number }>;
   getBookedDatesForVenue(
     venueId: string
   ): Promise<{ startDate: Date; endDate: Date }[]>;
@@ -44,50 +49,38 @@ export interface IBookingService {
   getBookingsByVendorId(
     vendorId: string,
     filter: string
-  ): Promise<{ message: string; status: number; bookings: IBooking[] }>;
+  ): Promise<{ response: BookingsListResponseDto; status: number }>;
   getAllBookings(search: string): Promise<{
-    message: string;
+    response: BookingsListResponseDto;
     status: number;
-    bookings: IBooking[];
   }>;
   getAdminRevenue(): Promise<{
-    message: string;
+    response: { message: string; revenue: RevenueResponseDto[] };
     status: number;
-    revenue: { month: number; revenue: number }[];
   }>;
   getVendorRevenue(vendorId: string): Promise<{
-    message: string;
+    response: { message: string; revenue: RevenueResponseDto[] };
     status: number;
-    revenue: { month: number; revenue: number }[];
   }>;
   getDashboardDataForVendor(vendorId: string): Promise<{
-    message: string;
+    response: { message: string; dashboardData: DashboardDataResponseDto };
     status: number;
-    dashboardData: {
-      totalBookings: number;
-      vendorRevenue: number;
-      upcomingBookings: number;
-      monthlyRevenue: { month: number; revenue: number }[];
-    };
   }>;
   cancelBookingByUser(
     bookingId: string
-  ): Promise<{ message: string; status: number; booking: IBooking }>;
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }>;
   cancelBookingByVendor(
     bookingId: string,
     cancellationReason: string
   ): Promise<{
-    message: string;
+    response: { message: string; booking: BookingResponseDto; refund?: any };
     status: number;
-    booking: IBooking;
-    refund?: any;
   }>;
   getTransactionHistory(): Promise<{
-    message: string;
+    response: TransactionHistoryResponseDto;
     status: number;
-    data: any[];
   }>;
   getVendorTransactionHistory(
     vendorId: string
-  ): Promise<{ message: string; status: number; data: any[] }>;
+  ): Promise<{ response: TransactionHistoryResponseDto; status: number }>;
 }

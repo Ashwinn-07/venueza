@@ -11,4 +11,7 @@ export interface IBookingController {
   getBookingsByVendor(req: Request, res: Response): Promise<void>;
   userCancelBooking(req: Request, res: Response): Promise<void>;
   vendorCancelBooking(req: Request, res: Response): Promise<void>;
+  getVendorRevenue(req: Request, res: Response): Promise<void>;
+  getVendorDashboard(req: Request, res: Response): Promise<void>;
+  getVendorTransactionHistory(req: Request, res: Response): Promise<void>;
 }

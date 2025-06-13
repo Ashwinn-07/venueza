@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { inject, injectable } from "tsyringe";
 import mongoose from "mongoose";
-import { IBooking } from "../models/booking.model";
 import { IBookingService } from "./interfaces/IBookingService";
 import { STATUS_CODES, MESSAGES } from "../utils/constants";
 import razorpayInstance from "../utils/razorpay";
@@ -9,6 +8,18 @@ import { issueRefund } from "../utils/issueRefund";
 import { IBookingRepository } from "../repositories/interfaces/IBookingRepository";
 import { IBlockedDateRepository } from "../repositories/interfaces/IBlockedDateRepository";
 import { TOKENS } from "../config/tokens";
+import { BookingMapper } from "../mappers/booking.mapper";
+import {
+  CreateBookingResponseDto,
+  VerifyPaymentResponseDto,
+  BookingsListResponseDto,
+  BookingResponseDto,
+  BookedDatesResponseDto,
+  AddBlockedDateResponseDto,
+  RevenueResponseDto,
+  DashboardDataResponseDto,
+  TransactionHistoryResponseDto,
+} from "../dto/booking.dto";
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -17,15 +28,14 @@ export class BookingService implements IBookingService {
     @inject(TOKENS.IBlockedDateRepository)
     private blockedDateRepo: IBlockedDateRepository
   ) {}
+
   async createBooking(
     userId: string,
     venueId: string,
     bookingData: { startDate: Date; endDate: Date; totalPrice: number }
   ): Promise<{
-    message: string;
+    response: CreateBookingResponseDto;
     status: number;
-    booking: IBooking;
-    razorpayOrder: any;
   }> {
     const conflictBooking = await this.bookingRepo.findOne({
       venue: venueId,
@@ -62,19 +72,26 @@ export class BookingService implements IBookingService {
     };
     const order = await razorpayInstance.orders.create(options);
     booking.razorpayOrderId = order.id;
-    await this.bookingRepo.update(booking._id.toString(), booking);
+    const updatedBooking = await this.bookingRepo.update(
+      booking._id.toString(),
+      booking
+    );
+
     return {
-      message: MESSAGES.SUCCESS.BOOKING_CREATED,
+      response: {
+        message: MESSAGES.SUCCESS.BOOKING_CREATED,
+        booking: BookingMapper.toResponseDto(updatedBooking!),
+        razorpayOrder: order,
+      },
       status: STATUS_CODES.CREATED,
-      booking,
-      razorpayOrder: order,
     };
   }
+
   async verifyPayment(
     bookingId: string,
     paymentId: string,
     razorpaySignature: string
-  ): Promise<{ message: string; status: number; booking: IBooking }> {
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }> {
     const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
@@ -99,16 +116,17 @@ export class BookingService implements IBookingService {
       throw new Error("Failed to update booking after payment");
     }
     return {
-      message: MESSAGES.SUCCESS.PAYMENT_VERIFIED,
+      response: {
+        message: MESSAGES.SUCCESS.PAYMENT_VERIFIED,
+        booking: BookingMapper.toResponseDto(updatedBooking),
+      },
       status: STATUS_CODES.OK,
-      booking: updatedBooking,
     };
   }
+
   async createBalancePaymentOrder(bookingId: string): Promise<{
-    message: string;
+    response: CreateBookingResponseDto;
     status: number;
-    booking: IBooking;
-    razorpayOrder: any;
   }> {
     const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
@@ -127,19 +145,26 @@ export class BookingService implements IBookingService {
     const order = await razorpayInstance.orders.create(options);
     booking.razorpayBalanceOrderId = order.id;
     booking.status = "balance_pending" as any;
-    await this.bookingRepo.update(booking._id.toString(), booking);
+    const updatedBooking = await this.bookingRepo.update(
+      booking._id.toString(),
+      booking
+    );
+
     return {
-      message: "Balance payment order created successfully",
+      response: {
+        message: "Balance payment order created successfully",
+        booking: BookingMapper.toResponseDto(updatedBooking!),
+        razorpayOrder: order,
+      },
       status: STATUS_CODES.OK,
-      booking,
-      razorpayOrder: order,
     };
   }
+
   async verifyBalancePayment(
     bookingId: string,
     paymentId: string,
     razorpaySignature: string
-  ): Promise<{ message: string; status: number; booking: IBooking }> {
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }> {
     const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
@@ -165,7 +190,6 @@ export class BookingService implements IBookingService {
 
     booking.commissionAmount = commissionAmount;
     booking.vendorReceives = vendorReceives;
-
     booking.balanceDue = 0;
     booking.status = "fully_paid" as any;
     booking.balancePaymentId = paymentId;
@@ -174,35 +198,43 @@ export class BookingService implements IBookingService {
       throw new Error("Failed to update booking after balance payment");
     }
     return {
-      message: "Balance payment verified successfully",
+      response: {
+        message: "Balance payment verified successfully",
+        booking: BookingMapper.toResponseDto(updatedBooking),
+      },
       status: STATUS_CODES.OK,
-      booking: updatedBooking,
     };
   }
+
   async getBookingById(
     bookingId: string
-  ): Promise<{ message: string; status: number; booking: IBooking }> {
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }> {
     const booking = await this.bookingRepo.findByIdPopulated(bookingId);
     if (!booking) {
       throw new Error("No booking found");
     }
     return {
-      message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+        booking: BookingMapper.toResponseDto(booking),
+      },
       status: STATUS_CODES.OK,
-      booking,
     };
   }
+
   async getBookingsByUserId(
     userId: string,
     filterType: string = "all"
-  ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
+  ): Promise<{ response: BookingsListResponseDto; status: number }> {
     const allBookings = await this.bookingRepo.findByUser(userId);
 
     if (!allBookings || allBookings.length === 0) {
       return {
-        message: "No bookings found for this user",
+        response: {
+          message: "No bookings found for this user",
+          bookings: [],
+        },
         status: STATUS_CODES.OK,
-        bookings: [],
       };
     }
 
@@ -231,14 +263,19 @@ export class BookingService implements IBookingService {
     }
 
     return {
-      message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+        bookings: filteredBookings.map((booking) =>
+          BookingMapper.toResponseDto(booking)
+        ),
+      },
       status: STATUS_CODES.OK,
-      bookings: filteredBookings,
     };
   }
+
   async getBookedDatesForVenue(
     venueId: string
-  ): Promise<{ startDate: Date; endDate: Date }[]> {
+  ): Promise<BookedDatesResponseDto[]> {
     const bookings = await this.bookingRepo.findByVenue(venueId);
     const onlineDates = bookings.map((booking) => ({
       startDate: booking.startDate,
@@ -254,10 +291,11 @@ export class BookingService implements IBookingService {
 
     return [...onlineDates, ...offlineDates];
   }
+
   async addBlockedDateForVenue(
     venueId: string,
     data: { startDate: Date; endDate: Date; reason?: string }
-  ): Promise<{ message: string; blockedDate: any }> {
+  ): Promise<AddBlockedDateResponseDto> {
     const blockedDate = await this.blockedDateRepo.createBlockedDate({
       venue: venueId,
       ...data,
@@ -267,10 +305,11 @@ export class BookingService implements IBookingService {
       blockedDate,
     };
   }
+
   async getBookingsByVendorId(
     vendorId: string,
     filter: string = "all"
-  ): Promise<{ message: string; status: number; bookings: IBooking[] }> {
+  ): Promise<{ response: BookingsListResponseDto; status: number }> {
     let bookings = await this.bookingRepo.findByVendor(vendorId);
     if (!bookings) {
       throw new Error("No bookings found");
@@ -298,65 +337,74 @@ export class BookingService implements IBookingService {
       }
     }
     return {
-      message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+        bookings: bookings.map((booking) =>
+          BookingMapper.toResponseDto(booking)
+        ),
+      },
       status: STATUS_CODES.OK,
-      bookings,
     };
   }
+
   async getAllBookings(search = ""): Promise<{
-    message: string;
+    response: BookingsListResponseDto;
     status: number;
-    bookings: IBooking[];
   }> {
     const bookings = await this.bookingRepo.findAllWithSearch(search);
     if (!bookings || bookings.length === 0) {
       return {
-        message: search
-          ? "No bookings found matching your search"
-          : "No bookings found",
+        response: {
+          message: search
+            ? "No bookings found matching your search"
+            : "No bookings found",
+          bookings: [],
+        },
         status: STATUS_CODES.OK,
-        bookings: [],
       };
     }
     return {
-      message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.BOOKING_FETCHED,
+        bookings: bookings.map((booking) =>
+          BookingMapper.toResponseDto(booking)
+        ),
+      },
       status: STATUS_CODES.OK,
-      bookings,
     };
   }
+
   async getAdminRevenue(): Promise<{
-    message: string;
+    response: { message: string; revenue: RevenueResponseDto[] };
     status: number;
-    revenue: { month: number; revenue: number }[];
   }> {
     const revenue = await this.bookingRepo.getTotalCommission();
     return {
-      message: MESSAGES.SUCCESS.REVENUE_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.REVENUE_FETCHED,
+        revenue: BookingMapper.toRevenueResponse(revenue),
+      },
       status: STATUS_CODES.OK,
-      revenue,
     };
   }
+
   async getVendorRevenue(vendorId: string): Promise<{
-    message: string;
+    response: { message: string; revenue: RevenueResponseDto[] };
     status: number;
-    revenue: { month: number; revenue: number }[];
   }> {
     const revenue = await this.bookingRepo.getVendorRevenue(vendorId);
     return {
-      message: MESSAGES.SUCCESS.REVENUE_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.REVENUE_FETCHED,
+        revenue: BookingMapper.toRevenueResponse(revenue),
+      },
       status: STATUS_CODES.OK,
-      revenue,
     };
   }
+
   async getDashboardDataForVendor(vendorId: string): Promise<{
-    message: string;
+    response: { message: string; dashboardData: DashboardDataResponseDto };
     status: number;
-    dashboardData: {
-      totalBookings: number;
-      vendorRevenue: number;
-      upcomingBookings: number;
-      monthlyRevenue: { month: number; revenue: number }[];
-    };
   }> {
     const bookings = await this.bookingRepo.findByVendor(vendorId);
     const totalBookings = bookings.length;
@@ -368,20 +416,26 @@ export class BookingService implements IBookingService {
       (booking: any) => new Date(booking.startDate) > now
     ).length;
     const monthlyRevenue = await this.bookingRepo.getVendorRevenue(vendorId);
+
+    const dashboardData = {
+      totalBookings,
+      vendorRevenue,
+      upcomingBookings,
+      monthlyRevenue: BookingMapper.toRevenueResponse(monthlyRevenue),
+    };
+
     return {
-      message: "Vendor dashboard data fetched successfully",
-      status: STATUS_CODES.OK,
-      dashboardData: {
-        totalBookings,
-        vendorRevenue,
-        upcomingBookings,
-        monthlyRevenue,
+      response: {
+        message: "Vendor dashboard data fetched successfully",
+        dashboardData: BookingMapper.toDashboardResponse(dashboardData),
       },
+      status: STATUS_CODES.OK,
     };
   }
+
   async cancelBookingByUser(
     bookingId: string
-  ): Promise<{ message: string; status: number; booking: IBooking }> {
+  ): Promise<{ response: VerifyPaymentResponseDto; status: number }> {
     const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
       throw new Error("No booking found");
@@ -395,19 +449,20 @@ export class BookingService implements IBookingService {
       throw new Error("Bookings status update failed");
     }
     return {
-      message: MESSAGES.SUCCESS.BOOKING_CANCELLED,
+      response: {
+        message: MESSAGES.SUCCESS.BOOKING_CANCELLED,
+        booking: BookingMapper.toResponseDto(updatedBooking),
+      },
       status: STATUS_CODES.OK,
-      booking: updatedBooking,
     };
   }
+
   async cancelBookingByVendor(
     bookingId: string,
     cancellationReason: string
   ): Promise<{
-    message: string;
+    response: { message: string; booking: BookingResponseDto; refund?: any };
     status: number;
-    booking: IBooking;
-    refund?: any;
   }> {
     const booking = await this.bookingRepo.findById(bookingId);
     if (!booking) {
@@ -423,41 +478,51 @@ export class BookingService implements IBookingService {
     booking.status = "cancelled_by_vendor" as any;
     booking.cancellationReason = cancellationReason;
     booking.balanceDue = booking.totalPrice;
-
     booking.refundId = refundResult.id;
     const updatedBooking = await this.bookingRepo.update(bookingId, booking);
     if (!updatedBooking) {
       throw new Error("Bookings status update failed");
     }
     return {
-      message: MESSAGES.SUCCESS.BOOKING_CANCELLED,
+      response: {
+        message: MESSAGES.SUCCESS.BOOKING_CANCELLED,
+        booking: BookingMapper.toResponseDto(updatedBooking),
+        refund: refundResult,
+      },
       status: STATUS_CODES.OK,
-      booking: updatedBooking,
-      refund: refundResult,
     };
   }
+
   async getTransactionHistory(): Promise<{
-    message: string;
+    response: TransactionHistoryResponseDto;
     status: number;
-    data: any[];
   }> {
     const transactions = await this.bookingRepo.getTransactionHistory();
     return {
-      message: MESSAGES.SUCCESS.TRANSACTION_HISTORY_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.TRANSACTION_HISTORY_FETCHED,
+        data: transactions.map((transaction) =>
+          BookingMapper.toTransactionHistoryDto(transaction)
+        ),
+      },
       status: STATUS_CODES.OK,
-      data: transactions,
     };
   }
+
   async getVendorTransactionHistory(
     vendorId: string
-  ): Promise<{ message: string; status: number; data: any[] }> {
+  ): Promise<{ response: TransactionHistoryResponseDto; status: number }> {
     const transactions = await this.bookingRepo.getVendorTransactionHistory(
       vendorId
     );
     return {
-      message: MESSAGES.SUCCESS.TRANSACTION_HISTORY_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.TRANSACTION_HISTORY_FETCHED,
+        data: transactions.map((transaction) =>
+          BookingMapper.toTransactionHistoryDto(transaction)
+        ),
+      },
       status: STATUS_CODES.OK,
-      data: transactions,
     };
   }
 }

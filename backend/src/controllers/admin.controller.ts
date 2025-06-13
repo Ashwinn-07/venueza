@@ -250,11 +250,10 @@ export class AdminController implements IAdminController {
   getAllBookings = async (req: Request, res: Response): Promise<void> => {
     try {
       const search = (req.query.search as string) || "";
-      const result = await this.bookingService.getAllBookings(search);
-      res.status(result.status).json({
-        message: result.message,
-        bookings: result.bookings,
-      });
+      const { response, status } = await this.bookingService.getAllBookings(
+        search
+      );
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching all bookings:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -265,11 +264,8 @@ export class AdminController implements IAdminController {
   };
   getAdminRevenue = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await this.bookingService.getAdminRevenue();
-      res.status(result.status).json({
-        message: result.message,
-        revenue: result.revenue,
-      });
+      const { response, status } = await this.bookingService.getAdminRevenue();
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching admin revenue:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -283,11 +279,9 @@ export class AdminController implements IAdminController {
     res: Response
   ): Promise<void> => {
     try {
-      const result = await this.bookingService.getTransactionHistory();
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-      });
+      const { response, status } =
+        await this.bookingService.getTransactionHistory();
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching transaction history:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
