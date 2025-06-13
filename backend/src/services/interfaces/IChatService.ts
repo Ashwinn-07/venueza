@@ -1,4 +1,8 @@
-import { IMessage } from "../../models/message.model";
+import {
+  ConversationListResponseDto,
+  ConversationsListResponseDto,
+  SendMessageResponseDto,
+} from "../../dto/chat.dto";
 
 export interface SendMessageInput {
   sender: string;
@@ -12,13 +16,13 @@ export interface SendMessageInput {
 export interface IChatService {
   sendMessage(
     input: SendMessageInput
-  ): Promise<{ message: string; status: number; data: IMessage }>;
+  ): Promise<{ response: SendMessageResponseDto; status: number }>;
   getConversation(
     sender: string,
     receiver: string,
     currentUserId: string
-  ): Promise<{ message: string; status: number; data: IMessage[] }>;
+  ): Promise<{ response: ConversationListResponseDto; status: number }>;
   getConversations(
     userId: string
-  ): Promise<{ message: string; status: number; data: any[] }>;
+  ): Promise<{ response: ConversationsListResponseDto; status: number }>;
 }

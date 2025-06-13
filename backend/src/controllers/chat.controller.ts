@@ -14,6 +14,7 @@ export class ChatController implements IChatController {
     @inject(TOKENS.INotificationService)
     private notificationService: INotificationService
   ) {}
+
   sendMessage = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
@@ -25,7 +26,8 @@ export class ChatController implements IChatController {
         images,
         room,
       } = req.body;
-      const result = await this.chatService.sendMessage({
+
+      const { response, status } = await this.chatService.sendMessage({
         sender,
         senderModel,
         receiver,
@@ -33,10 +35,11 @@ export class ChatController implements IChatController {
         content,
         images,
       });
+
       if (room) {
-        io.to(room).emit("receiveMessage", { ...result.data.toObject(), room });
+        io.to(room).emit("receiveMessage", { ...response.data, room });
       } else {
-        io.emit("receiveMessage", { ...result.data.toObject(), room: "all" });
+        io.emit("receiveMessage", { ...response.data, room: "all" });
       }
 
       const notification = await this.notificationService.createNotification(
@@ -47,34 +50,30 @@ export class ChatController implements IChatController {
       );
       io.to(receiver).emit("newNotification", notification);
 
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-      });
+      res.status(status).json(response);
     } catch (error) {
-      console.error("error sending message:", error);
+      console.error("Error sending message:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error ? error.message : "Failed to send message",
       });
     }
   };
+
   getConversation = async (req: Request, res: Response): Promise<void> => {
     try {
       const { sender, receiver } = req.query;
       const currentUserId = (req as any).userId;
 
-      const result = await this.chatService.getConversation(
+      const { response, status } = await this.chatService.getConversation(
         String(sender),
         String(receiver),
         currentUserId
       );
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-      });
+
+      res.status(status).json(response);
     } catch (error) {
-      console.error("error fetching conversation:", error);
+      console.error("Error fetching conversation:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error
@@ -83,16 +82,18 @@ export class ChatController implements IChatController {
       });
     }
   };
+
   getConversations = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
-      const result = await this.chatService.getConversations(userId);
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-      });
+
+      const { response, status } = await this.chatService.getConversations(
+        userId
+      );
+
+      res.status(status).json(response);
     } catch (error) {
-      console.error("error fetching conversations", error);
+      console.error("Error fetching conversations:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error
