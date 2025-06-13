@@ -1,3 +1,11 @@
+import {
+  AdminDashboardStatsResponseDto,
+  AdminLoginResponseDto,
+  ListResponseDto,
+  UserDto,
+  VendorDto,
+  VenueDto,
+} from "../../dto/admin.dto";
 import { IAdmin } from "../../models/admin.model";
 import { IVenue } from "../../models/venue.model";
 
@@ -5,52 +13,52 @@ export interface IAdminService {
   loginAdmin(
     email: string,
     password: string
-  ): Promise<{ admin: IAdmin; token: string; message: string; status: number }>;
+  ): Promise<{ response: AdminLoginResponseDto; status: number }>;
   getAdminDashboardStats(): Promise<{
-    totalUsers: number;
-    totalVendors: number;
-    totalBookings: number;
+    response: AdminDashboardStatsResponseDto;
     status: number;
   }>;
-  listUsers(search: string): Promise<{ users: any[]; status: number }>;
+  listUsers(
+    search: string
+  ): Promise<{ response: ListResponseDto<UserDto>; status: number }>;
   listAllVendors(
     searchQuery: string
-  ): Promise<{ vendors: any[]; status: number }>;
+  ): Promise<{ response: ListResponseDto<VendorDto>; status: number }>;
   listPendingVendors(
     search: string
-  ): Promise<{ vendors: any[]; status: number }>;
+  ): Promise<{ response: ListResponseDto<VendorDto>; status: number }>;
   listPendingVenues(searchTerm: string): Promise<{
+    response: ListResponseDto<VenueDto>;
     status: number;
-    venues: IVenue[];
   }>;
   listApprovedVenues(searchTerm: string): Promise<{
+    response: ListResponseDto<VenueDto>;
     status: number;
-    venues: IVenue[];
   }>;
   approveVendor(
     vendorId: string
-  ): Promise<{ message: string; status: number; vendor: any }>;
+  ): Promise<{ response: VendorDto; message: string; status: number }>;
   rejectVendor(
     vendorId: string,
     rejectionReason?: string
-  ): Promise<{ message: string; status: number; vendor: any }>;
+  ): Promise<{ response: VendorDto; message: string; status: number }>;
   blockVendor(
     vendorId: string
-  ): Promise<{ message: string; status: number; vendor: any }>;
+  ): Promise<{ response: VendorDto; message: string; status: number }>;
   unblockVendor(
     vendorId: string
-  ): Promise<{ message: string; status: number; vendor: any }>;
+  ): Promise<{ response: VendorDto; message: string; status: number }>;
   blockUser(
     userId: string
-  ): Promise<{ message: string; status: number; user: any }>;
+  ): Promise<{ response: UserDto; message: string; status: number }>;
   unblockUser(
     userId: string
-  ): Promise<{ message: string; status: number; user: any }>;
+  ): Promise<{ response: UserDto; message: string; status: number }>;
   approveVenue(
     venueId: string
-  ): Promise<{ message: string; status: number; venue: IVenue }>;
+  ): Promise<{ response: VenueDto; message: string; status: number }>;
   rejectVenue(
     venueId: string,
     rejectionReason?: string
-  ): Promise<{ message: string; status: number; venue: IVenue }>;
+  ): Promise<{ response: VenueDto; message: string; status: number }>;
 }

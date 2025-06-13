@@ -22,7 +22,7 @@ const AdminUsers = () => {
     setIsLoading(true);
     try {
       const response = await listAllUsers(search);
-      setUsers(response.users);
+      setUsers(response.data);
     } catch (error) {
       console.error("Failed to load users:", error);
       notifyError("Failed to load users.");
@@ -153,7 +153,7 @@ const AdminUsers = () => {
                 <tbody className="bg-white divide-y divide-gray-100">
                   {currentUsers.map((user) => (
                     <tr
-                      key={user._id}
+                      key={user.id}
                       className="hover:bg-gray-50 transition duration-150"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -190,11 +190,11 @@ const AdminUsers = () => {
                               : "bg-green-500 text-white hover:bg-green-600 focus:ring-green-500"
                           }`}
                           onClick={() =>
-                            handleToggleBlock(user._id, user.status)
+                            handleToggleBlock(user.id, user.status)
                           }
                           disabled={processingUserId === user._id}
                         >
-                          {processingUserId === user._id ? (
+                          {processingUserId === user.id ? (
                             <span>Processing...</span>
                           ) : user.status === "active" ? (
                             <>
