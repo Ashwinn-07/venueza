@@ -10,14 +10,19 @@ export class VenueController implements IVenueController {
   constructor(
     @inject(TOKENS.IVenueService) private venueService: IVenueService
   ) {}
+
   createVenue = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const venueData = req.body;
-      const result = await this.venueService.createVenue(vendorId, venueData);
-      res.status(result.status).json({
-        message: result.message,
-        result,
+      const { response, message, status } = await this.venueService.createVenue(
+        vendorId,
+        venueData
+      );
+
+      res.status(status).json({
+        message,
+        venue: response,
       });
     } catch (error) {
       console.error("Add venue error:", error);
@@ -26,19 +31,21 @@ export class VenueController implements IVenueController {
       });
     }
   };
+
   updateVenue = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const { id: venueId } = req.params;
       const updateData = req.body;
-      const result = await this.venueService.updateVenue(
+      const { response, message, status } = await this.venueService.updateVenue(
         vendorId,
         venueId,
         updateData
       );
-      res.status(result.status).json({
-        message: result.message,
-        result,
+
+      res.status(status).json({
+        message,
+        venue: response,
       });
     } catch (error) {
       console.error("Update venue error:", error);
@@ -48,18 +55,17 @@ export class VenueController implements IVenueController {
       });
     }
   };
+
   getVenuesByVendor = async (req: Request, res: Response): Promise<void> => {
     try {
       const vendorId = (req as any).userId;
       const filter = (req.query.filter as string) || "all";
-      const result = await this.venueService.getVenuesByVendor(
+      const { response, status } = await this.venueService.getVenuesByVendor(
         vendorId,
         filter
       );
-      res.status(result.status).json({
-        message: result.message,
-        result,
-      });
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Get venues error:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -68,13 +74,16 @@ export class VenueController implements IVenueController {
       });
     }
   };
+
   getVenue = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id: venueId } = req.params;
-      const result = await this.venueService.getVenueById(venueId);
-      res.status(result.status).json({
-        message: result.message,
-        result,
+      const { response, message, status } =
+        await this.venueService.getVenueById(venueId);
+
+      res.status(status).json({
+        message,
+        venue: response,
       });
     } catch (error) {
       console.error("failed to fetch venue", error);
@@ -83,6 +92,7 @@ export class VenueController implements IVenueController {
       });
     }
   };
+
   getAllVenues = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
@@ -93,21 +103,21 @@ export class VenueController implements IVenueController {
         capacity,
         price,
       } = req.query;
+
       const searchParams = {
         query: typeof query === "string" ? query : undefined,
         location: typeof location === "string" ? location : undefined,
         capacity: capacity ? Number(capacity) : undefined,
         price: price ? Number(price) : undefined,
       };
-      const result = await this.venueService.getAllVenues(
+
+      const { response, status } = await this.venueService.getAllVenues(
         Number(page),
         Number(limit),
         searchParams
       );
-      res.status(result.status).json({
-        message: result.message,
-        result,
-      });
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching venues", error);
       res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
@@ -116,13 +126,12 @@ export class VenueController implements IVenueController {
       });
     }
   };
+
   getFeaturedVenues = async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await this.venueService.getFeaturedVenues();
-      res.status(result.status).json({
-        message: result.message,
-        result,
-      });
+      const { response, status } = await this.venueService.getFeaturedVenues();
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching featured venues", error);
       res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({

@@ -1,22 +1,27 @@
 import { IVenue } from "../../models/venue.model";
+import { VenueResponseDto, VenueListResponseDto } from "../../dto/venue.dto";
 
 export interface IVenueService {
   createVenue(
     vendorId: string,
     venueData: Partial<IVenue>
-  ): Promise<{ message: string; status: number; venue: IVenue }>;
+  ): Promise<{ response: VenueResponseDto; message: string; status: number }>;
+
   updateVenue(
     vendorId: string,
     venueId: string,
     updateData: Partial<IVenue>
-  ): Promise<{ message: string; status: number; venue: IVenue }>;
+  ): Promise<{ response: VenueResponseDto; message: string; status: number }>;
+
   getVenuesByVendor(
     vendorId: string,
-    filter: string
-  ): Promise<{ message: string; status: number; venues: IVenue[] }>;
+    filter?: string
+  ): Promise<{ response: VenueListResponseDto; status: number }>;
+
   getVenueById(
     venueId: string
-  ): Promise<{ message: string; status: number; venue: IVenue }>;
+  ): Promise<{ response: VenueResponseDto; message: string; status: number }>;
+
   getAllVenues(
     page?: number,
     limit?: number,
@@ -27,14 +32,12 @@ export interface IVenueService {
       price?: number;
     }
   ): Promise<{
-    message: string;
+    response: VenueListResponseDto;
     status: number;
-    venues: IVenue[];
-    totalCount: number;
   }>;
+
   getFeaturedVenues(): Promise<{
-    message: string;
+    response: VenueListResponseDto;
     status: number;
-    venues: IVenue[];
   }>;
 }
