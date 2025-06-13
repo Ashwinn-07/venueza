@@ -6,8 +6,6 @@ import {
   VendorDto,
   VenueDto,
 } from "../../dto/admin.dto";
-import { IAdmin } from "../../models/admin.model";
-import { IVenue } from "../../models/venue.model";
 
 export interface IAdminService {
   loginAdmin(

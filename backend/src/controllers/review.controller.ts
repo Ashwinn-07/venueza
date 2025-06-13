@@ -10,21 +10,21 @@ export class ReviewController implements IReviewController {
   constructor(
     @inject(TOKENS.IReviewService) private reviewService: IReviewService
   ) {}
+
   createReview = async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).userId;
       const { venueId, rating, reviewText, images } = req.body;
-      const result = await this.reviewService.createReview(
+
+      const { response, status } = await this.reviewService.createReview(
         userId,
         venueId,
         rating,
         reviewText,
         images
       );
-      res.status(result.status).json({
-        message: result.message,
-        review: result.review,
-      });
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error creating review:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -33,14 +33,16 @@ export class ReviewController implements IReviewController {
       });
     }
   };
+
   getReviews = async (req: Request, res: Response): Promise<void> => {
     try {
       const { venueId } = req.params;
-      const result = await this.reviewService.getReviewsForVenue(venueId);
-      res.status(result.status).json({
-        message: result.message,
-        reviews: result.reviews,
-      });
+
+      const { response, status } = await this.reviewService.getReviewsForVenue(
+        venueId
+      );
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error fetching reviews:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -49,18 +51,18 @@ export class ReviewController implements IReviewController {
       });
     }
   };
+
   vendorReplyReview = async (req: Request, res: Response): Promise<void> => {
     try {
       const reviewId = req.params.reviewId;
       const { reply } = req.body;
-      const result = await this.reviewService.vendorReplyReview(
+
+      const { response, status } = await this.reviewService.vendorReplyReview(
         reviewId,
         reply
       );
-      res.status(result.status).json({
-        message: result.message,
-        review: result.review,
-      });
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error adding vendor reply:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -69,17 +71,18 @@ export class ReviewController implements IReviewController {
       });
     }
   };
+
   deleteReview = async (req: Request, res: Response): Promise<void> => {
     try {
       const reviewId = req.params.reviewId;
       const currentUserRole = (req as any).userType;
-      const result = await this.reviewService.deleteReview(
+
+      const { response, status } = await this.reviewService.deleteReview(
         reviewId,
         currentUserRole
       );
-      res.status(result.status).json({
-        message: result.message,
-      });
+
+      res.status(status).json(response);
     } catch (error) {
       console.error("Error deleting review:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({

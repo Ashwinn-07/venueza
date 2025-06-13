@@ -7,7 +7,6 @@ import {
   TransactionHistoryResponseDto,
   VerifyPaymentResponseDto,
 } from "../../dto/booking.dto";
-import { IBooking } from "../../models/booking.model";
 
 export interface IBookingService {
   createBooking(

@@ -6,6 +6,13 @@ import { IReviewService } from "./interfaces/IReviewService";
 import { IReviewRepository } from "../repositories/interfaces/IReviewRepository";
 import { IBookingRepository } from "../repositories/interfaces/IBookingRepository";
 import { TOKENS } from "../config/tokens";
+import { ReviewMapper } from "../mappers/review.mapper";
+import {
+  CreateReviewResponseDto,
+  ReviewsListResponseDto,
+  VendorReplyResponseDto,
+  DeleteReviewResponseDto,
+} from "../dto/review.dto";
 
 @injectable()
 export class ReviewService implements IReviewService {
@@ -15,13 +22,14 @@ export class ReviewService implements IReviewService {
     @inject(TOKENS.IBookingRepository)
     private bookingRepo: IBookingRepository
   ) {}
+
   async createReview(
     userId: string,
     venueId: string,
     rating: number,
     reviewText: string,
     images: string[]
-  ): Promise<{ message: string; status: number; review: IReview }> {
+  ): Promise<{ response: CreateReviewResponseDto; status: number }> {
     const booking = await this.bookingRepo.findOne({
       user: userId,
       venue: venueId,
@@ -32,6 +40,7 @@ export class ReviewService implements IReviewService {
         "You have not booked this venue or your booking is not confirmed."
       );
     }
+
     const existingReview = await this.reviewRepo.findByUserAndVenue(
       userId,
       venueId
@@ -39,6 +48,7 @@ export class ReviewService implements IReviewService {
     if (existingReview) {
       throw new Error("You have already posted a review for this venue");
     }
+
     const review = await this.reviewRepo.create({
       user: new mongoose.Types.ObjectId(userId),
       venue: new mongoose.Types.ObjectId(venueId),
@@ -46,51 +56,69 @@ export class ReviewService implements IReviewService {
       reviewText,
       images,
     });
+
     return {
-      message: MESSAGES.SUCCESS.REVIEW_CREATED,
+      response: {
+        message: MESSAGES.SUCCESS.REVIEW_CREATED,
+        review: ReviewMapper.toResponseDto(review),
+      },
       status: STATUS_CODES.CREATED,
-      review,
     };
   }
+
   async getReviewsForVenue(
     venueId: string
-  ): Promise<{ message: string; status: number; reviews: IReview[] }> {
+  ): Promise<{ response: ReviewsListResponseDto; status: number }> {
     const reviews = await this.reviewRepo.findByVenue(venueId);
+
     return {
-      message: MESSAGES.SUCCESS.REVIEW_FETCHED,
+      response: {
+        message: MESSAGES.SUCCESS.REVIEW_FETCHED,
+        reviews: ReviewMapper.toResponseDtoArray(reviews),
+      },
       status: STATUS_CODES.OK,
-      reviews,
     };
   }
+
   async vendorReplyReview(
     reviewId: string,
     reply: string
-  ): Promise<{ message: string; status: number; review: IReview }> {
+  ): Promise<{ response: VendorReplyResponseDto; status: number }> {
     const review = await this.reviewRepo.findById(reviewId);
     if (!review) {
       throw new Error("No Review found");
     }
+
     const updatedReview = await this.reviewRepo.updateReply(reviewId, reply);
+
     return {
-      message: MESSAGES.SUCCESS.REPLY_ADDED,
+      response: {
+        message: MESSAGES.SUCCESS.REPLY_ADDED,
+        review: ReviewMapper.toResponseDto(updatedReview as IReview),
+      },
       status: STATUS_CODES.OK,
-      review: updatedReview as IReview,
     };
   }
+
   async deleteReview(
     reviewId: string,
     currentUserRole: string
-  ): Promise<{ message: string; status: number }> {
+  ): Promise<{ response: DeleteReviewResponseDto; status: number }> {
     const review = await this.reviewRepo.findById(reviewId);
     if (!review) {
       throw new Error("Review not found");
     }
+
     if (currentUserRole !== "admin") {
       throw new Error("Unauthorized: Only admins can delete reviews");
     }
+
     await this.reviewRepo.delete(reviewId);
+
     return {
-      message: MESSAGES.SUCCESS.REVIEW_DELETED,
+      response: {
+        message: MESSAGES.SUCCESS.REVIEW_DELETED,
+      },
       status: STATUS_CODES.OK,
     };
   }

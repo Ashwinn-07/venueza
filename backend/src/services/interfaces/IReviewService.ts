@@ -1,4 +1,9 @@
-import { IReview } from "../../models/review.model";
+import {
+  CreateReviewResponseDto,
+  DeleteReviewResponseDto,
+  ReviewsListResponseDto,
+  VendorReplyResponseDto,
+} from "../../dto/review.dto";
 
 export interface IReviewService {
   createReview(
@@ -7,16 +12,16 @@ export interface IReviewService {
     rating: number,
     reviewText: string,
     images: string[]
-  ): Promise<{ message: string; status: number; review: IReview }>;
+  ): Promise<{ response: CreateReviewResponseDto; status: number }>;
   getReviewsForVenue(
     venueId: string
-  ): Promise<{ message: string; status: number; reviews: IReview[] }>;
+  ): Promise<{ response: ReviewsListResponseDto; status: number }>;
   vendorReplyReview(
     reviewId: string,
     reply: string
-  ): Promise<{ message: string; status: number; review: IReview }>;
+  ): Promise<{ response: VendorReplyResponseDto; status: number }>;
   deleteReview(
     reviewId: string,
     currentUserRole: string
-  ): Promise<{ message: string; status: number }>;
+  ): Promise<{ response: DeleteReviewResponseDto; status: number }>;
 }
