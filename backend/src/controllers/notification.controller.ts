@@ -11,16 +11,17 @@ export class NotificationController implements INotificationController {
     @inject(TOKENS.INotificationService)
     private notificationService: INotificationService
   ) {}
+
   getNotifications = async (req: Request, res: Response): Promise<void> => {
     try {
       const recipient = (req as any).userId;
-      const result = await this.notificationService.getNotifications(recipient);
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-      });
+
+      const { response, status } =
+        await this.notificationService.getNotifications(recipient);
+
+      res.status(status).json(response);
     } catch (error) {
-      console.error("error fetching notifications:", error);
+      console.error("Error fetching notifications:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error
@@ -29,19 +30,21 @@ export class NotificationController implements INotificationController {
       });
     }
   };
+
   markNotificationAsRead = async (
     req: Request,
     res: Response
   ): Promise<void> => {
     try {
       const { notificationId } = req.params;
-      const result = await this.notificationService.markAsRead(notificationId);
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-      });
+
+      const { response, status } = await this.notificationService.markAsRead(
+        notificationId
+      );
+
+      res.status(status).json(response);
     } catch (error) {
-      console.error("error updating notification read status:", error);
+      console.error("Error updating notification read status:", error);
       res.status(STATUS_CODES.BAD_REQUEST).json({
         error:
           error instanceof Error

@@ -1,4 +1,8 @@
-import { INotification } from "../../models/notification.model";
+import {
+  CreateNotificationResponseDto,
+  MarkAsReadResponseDto,
+  NotificationsListResponseDto,
+} from "../../dto/notification.dto";
 
 export interface INotificationService {
   createNotification(
@@ -6,11 +10,11 @@ export interface INotificationService {
     recipientModel: string,
     type: string,
     message: string
-  ): Promise<{ message: string; status: number; data: INotification }>;
+  ): Promise<{ response: CreateNotificationResponseDto; status: number }>;
   getNotifications(
     recipientId: string
-  ): Promise<{ message: string; status: number; data: INotification[] }>;
+  ): Promise<{ response: NotificationsListResponseDto; status: number }>;
   markAsRead(
     notificationId: string
-  ): Promise<{ message: string; status: number; data: INotification | null }>;
+  ): Promise<{ response: MarkAsReadResponseDto; status: number }>;
 }
