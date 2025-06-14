@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import routes from "./routes";
 import cookieParser from "cookie-parser";
+import { requestLogger } from "./middlewares/logger.middleware";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(requestLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
