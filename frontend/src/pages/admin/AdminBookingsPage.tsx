@@ -131,11 +131,11 @@ const AdminBookingsPage = () => {
                 <tbody className="bg-white divide-y divide-gray-100">
                   {currentBookings.map((booking) => (
                     <tr
-                      key={booking._id}
+                      key={booking.id}
                       className="hover:bg-gray-50 transition duration-150"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {booking._id.substring(0, 8)}...
+                        {booking.id.substring(0, 8)}...
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {booking.user?.name || "N/A"}

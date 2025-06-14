@@ -26,7 +26,7 @@ const AdminVendorsPending = () => {
     setIsLoading(true);
     try {
       const response = await listPendingVendors(search);
-      setPendingVendors(response.vendors);
+      setPendingVendors(response.data);
     } catch (error) {
       console.error("Failed to load pending vendors:", error);
       notifyError("Failed to load pending vendors.");

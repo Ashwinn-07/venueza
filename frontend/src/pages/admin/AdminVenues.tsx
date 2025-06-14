@@ -22,10 +22,11 @@ const AdminVenues = () => {
       setLoading(true);
       const response = await listApprovedVenues(search);
 
-      const mappedVenues = response.venues.map((venue: any) => ({
+      const mappedVenues = response.data.map((venue: any) => ({
         ...venue,
         status: venue.status || "open",
       }));
+      console.log(mappedVenues);
       setVenues(mappedVenues);
     } catch (err) {
       setError("Failed to load venues. Please try again later.");

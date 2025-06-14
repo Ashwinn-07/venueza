@@ -59,6 +59,7 @@ export class AdminMapper {
       status: vendor.status,
       businessAddress: vendor.businessAddress,
       rejectionReason: vendor.rejectionReason,
+      documents: vendor.documents,
       createdAt: vendor.createdAt,
     };
   }
@@ -74,6 +75,9 @@ export class AdminMapper {
       address: venue.address,
       verificationStatus: venue.verificationStatus,
       rejectionReason: venue.rejectionReason,
+      images: venue.images,
+      services: venue.services,
+      documents: venue.documents,
       createdAt: venue.createdAt,
     };
   }

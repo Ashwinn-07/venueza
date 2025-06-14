@@ -32,6 +32,7 @@ export class VendorDto {
   status!: string;
   businessAddress?: string;
   rejectionReason?: string;
+  documents?: string[];
   createdAt!: Date;
 }
 
@@ -41,6 +42,9 @@ export class VenueDto {
   address!: string;
   verificationStatus!: string;
   rejectionReason?: string;
+  images?: string[];
+  services?: string[];
+  documents?: string[];
   createdAt!: Date;
 }
 

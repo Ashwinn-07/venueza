@@ -33,6 +33,14 @@ export class BookingResponseDto {
   vendorReceives?: number;
   refundId?: number;
   cancellationReason?: string;
+  user?: {
+    name: string;
+    email?: string;
+  };
+  venue?: {
+    name: string;
+    location?: string;
+  };
 }
 
 export class CreateBookingResponseDto {
@@ -87,9 +95,11 @@ export class DashboardDataResponseDto {
 
 export class TransactionHistoryDto {
   bookingId!: string;
-  amount!: number;
-  type!: "advance" | "balance" | "refund";
-  date!: Date;
+  totalPrice!: number;
+  advanceAmount!: number;
+  balanceDue!: number;
+  commission!: number;
+  bookingDate!: Date;
 }
 
 export class TransactionHistoryResponseDto {

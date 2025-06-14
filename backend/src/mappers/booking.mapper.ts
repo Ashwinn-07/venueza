@@ -26,6 +26,18 @@ export class BookingMapper {
       vendorReceives: booking.vendorReceives,
       refundId: booking.refundId,
       cancellationReason: booking.cancellationReason,
+      user: (booking.user as any)?.name
+        ? {
+            name: (booking.user as any).name,
+            email: (booking.user as any).email,
+          }
+        : undefined,
+      venue: (booking.venue as any)?.name
+        ? {
+            name: (booking.venue as any).name,
+            location: (booking.venue as any).location,
+          }
+        : undefined,
     };
   }
 
@@ -50,10 +62,12 @@ export class BookingMapper {
 
   static toTransactionHistoryDto(transaction: any): TransactionHistoryDto {
     return {
-      bookingId: transaction.bookingId,
-      amount: transaction.amount,
-      type: transaction.type,
-      date: transaction.date,
+      bookingId: transaction._id || transaction.bookingId,
+      totalPrice: transaction.totalPrice,
+      advanceAmount: transaction.advanceAmount,
+      balanceDue: transaction.balanceDue,
+      commission: transaction.commission,
+      bookingDate: transaction.createdAt || transaction.bookingDate,
     };
   }
 }

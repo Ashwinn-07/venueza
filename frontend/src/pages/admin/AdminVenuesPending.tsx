@@ -35,7 +35,7 @@ const AdminVenuesPending = () => {
     try {
       setLoading(true);
       const result = await listPendingVenues(search);
-      setVenues(result.venues || []);
+      setVenues(result.data || []);
     } catch (err: any) {
       setError(err.message);
       notifyError("Failed to fetch pending venues");
@@ -82,7 +82,7 @@ const AdminVenuesPending = () => {
 
       notifySuccess(result.message || "Venue approved successfully");
 
-      setVenues(venues.filter((venue: any) => venue._id !== venueId));
+      setVenues(venues.filter((venue: any) => venue.id !== venueId));
     } catch (err) {
       notifyError("Failed to approve venue");
     } finally {
@@ -91,7 +91,7 @@ const AdminVenuesPending = () => {
   };
 
   const openRejectionModal = (venue: any) => {
-    setVenueToReject(venue._id);
+    setVenueToReject(venue.id);
     setRejectionReason("");
     setIsRejectionModalOpen(true);
   };
@@ -110,7 +110,7 @@ const AdminVenuesPending = () => {
 
       notifySuccess(result.message || "Venue rejected successfully");
 
-      setVenues(venues.filter((venue: any) => venue._id !== venueToReject));
+      setVenues(venues.filter((venue: any) => venue.id !== venueToReject));
       setIsRejectionModalOpen(false);
       setVenueToReject(null);
       setRejectionReason("");
@@ -215,7 +215,7 @@ const AdminVenuesPending = () => {
                   <tbody className="bg-white divide-y divide-gray-100">
                     {currentVenues.map((venue: any) => (
                       <tr
-                        key={venue._id}
+                        key={venue.id}
                         className="hover:bg-gray-50 transition duration-150"
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -279,28 +279,28 @@ const AdminVenuesPending = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex space-x-2">
                             <button
-                              onClick={() => handleApprove(venue._id)}
-                              disabled={processingVenueId === venue._id}
+                              onClick={() => handleApprove(venue.id)}
+                              disabled={processingVenueId === venue.id}
                               className={`px-3 py-1.5 ${
-                                processingVenueId === venue._id
+                                processingVenueId === venue.id
                                   ? "bg-gray-400"
                                   : "bg-green-500 hover:bg-green-600"
                               } text-white rounded-lg flex items-center text-sm transition duration-150 cursor-pointer`}
                             >
-                              {processingVenueId === venue._id
+                              {processingVenueId === venue.id
                                 ? "Processing..."
                                 : "Accept"}
                             </button>
                             <button
                               onClick={() => openRejectionModal(venue)}
-                              disabled={processingVenueId === venue._id}
+                              disabled={processingVenueId === venue.id}
                               className={`px-3 py-1.5 ${
-                                processingVenueId === venue._id
+                                processingVenueId === venue.id
                                   ? "bg-gray-400"
                                   : "bg-red-500 hover:bg-red-600"
                               } text-white rounded-lg flex items-center text-sm transition duration-150 cursor-pointer`}
                             >
-                              {processingVenueId === venue._id
+                              {processingVenueId === venue.id
                                 ? "Processing..."
                                 : "Reject"}
                             </button>

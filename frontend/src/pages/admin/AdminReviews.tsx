@@ -26,7 +26,7 @@ const AdminReviews = () => {
     const loadVenues = async () => {
       try {
         const response = await listApprovedVenues("");
-        setVenues(response.venues);
+        setVenues(response.data);
       } catch (error) {
         console.error("Failed to load venues:", error);
         notifyError("Failed to load venues.");
@@ -42,7 +42,7 @@ const AdminReviews = () => {
       if (selectedVenue) {
         try {
           setIsLoading(true);
-          const response = await getReviewsAdmin(selectedVenue._id);
+          const response = await getReviewsAdmin(selectedVenue.id);
           setReviews(response.reviews);
         } catch (error) {
           console.error("Failed to load reviews:", error);
@@ -111,13 +111,13 @@ const AdminReviews = () => {
               setIsDeleting(true);
               await adminDeleteReview(reviewId);
               setReviews(
-                reviews.filter((review: any) => review._id !== reviewId)
+                reviews.filter((review: any) => review.id !== reviewId)
               );
 
               if (
                 isReviewModalOpen &&
                 selectedReview &&
-                selectedReview._id === reviewId
+                selectedReview.id === reviewId
               ) {
                 setIsReviewModalOpen(false);
               }
@@ -205,9 +205,9 @@ const AdminReviews = () => {
                 <tbody className="bg-white divide-y divide-gray-100">
                   {filteredVenues.map((venue: any) => (
                     <tr
-                      key={venue._id}
+                      key={venue.id}
                       className={`hover:bg-gray-50 transition duration-150 ${
-                        selectedVenue && selectedVenue._id === venue._id
+                        selectedVenue && selectedVenue.id === venue.id
                           ? "bg-blue-50"
                           : ""
                       }`}
@@ -292,7 +292,7 @@ const AdminReviews = () => {
                         {currentReviews.length > 0 ? (
                           currentReviews.map((review: any) => (
                             <tr
-                              key={review._id}
+                              key={review.id}
                               className="hover:bg-gray-50 transition duration-150"
                             >
                               <td className="px-6 py-4 whitespace-nowrap">
@@ -330,7 +330,7 @@ const AdminReviews = () => {
                                   </button>
                                   <button
                                     onClick={() =>
-                                      handleDeleteReview(review._id)
+                                      handleDeleteReview(review.id)
                                     }
                                     className="px-3 py-1 text-red-600 hover:text-red-800 text-sm font-medium transition duration-150 cursor-pointer"
                                     disabled={isDeleting}
@@ -467,7 +467,7 @@ const AdminReviews = () => {
                     )}
                   <div className="pt-4 border-t border-gray-200">
                     <button
-                      onClick={() => handleDeleteReview(selectedReview._id)}
+                      onClick={() => handleDeleteReview(selectedReview.id)}
                       className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
                       disabled={isDeleting}
                     >

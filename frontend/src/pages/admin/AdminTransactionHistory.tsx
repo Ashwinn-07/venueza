@@ -24,6 +24,7 @@ const AdminTransactionHistory = () => {
       try {
         setLoading(true);
         const response = await getTransactionHistory();
+        console.log(response);
         setTransactions(response.data);
       } catch (err: any) {
         console.error("Error fetching transaction history:", err);

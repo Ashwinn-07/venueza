@@ -26,7 +26,7 @@ const AdminVendors = () => {
     setIsLoading(true);
     try {
       const response = await listAllVendors(searchQuery);
-      setVendors(response.vendors);
+      setVendors(response.data);
     } catch (error) {
       console.error("Failed to load vendors:", error);
       notifyError("Failed to load vendors.");
@@ -178,7 +178,7 @@ const AdminVendors = () => {
                 <tbody className="bg-white divide-y divide-gray-100">
                   {currentVendors.map((vendor) => (
                     <tr
-                      key={vendor._id}
+                      key={vendor.id}
                       className="hover:bg-gray-50 transition duration-150"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -237,11 +237,11 @@ const AdminVendors = () => {
                               : "bg-green-500 text-white hover:bg-green-600 focus:ring-green-500"
                           }`}
                           onClick={() =>
-                            handleToggleBlock(vendor._id, vendor.status)
+                            handleToggleBlock(vendor.id, vendor.status)
                           }
-                          disabled={processingVendorId === vendor._id}
+                          disabled={processingVendorId === vendor.id}
                         >
-                          {processingVendorId === vendor._id ? (
+                          {processingVendorId === vendor.id ? (
                             <span>Processing...</span>
                           ) : vendor.status === "active" ? (
                             <>
