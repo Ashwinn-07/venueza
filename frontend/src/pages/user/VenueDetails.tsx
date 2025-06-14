@@ -46,7 +46,7 @@ const VenueDetails = () => {
       try {
         setLoadingVenue(true);
         const response = await getUserVenue(id);
-        setVenue(response.result?.venue);
+        setVenue(response.venue);
       } catch (err) {
         console.error("Error fetching venue:", err);
         setError("Failed to load venue details. Please try again later.");
@@ -63,7 +63,7 @@ const VenueDetails = () => {
 
         if (user && response.reviews) {
           const hasReviewed = response.reviews.some(
-            (review: any) => review.user._id === user._id
+            (review: any) => review.user.id === user.id
           );
           setUserHasReviewed(hasReviewed);
         }
@@ -150,6 +150,36 @@ const VenueDetails = () => {
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+  const handleChatClick = () => {
+    try {
+      let vendorId;
+
+      if (typeof venue.vendor === "string") {
+        const objectIdMatch = venue.vendor.match(/new ObjectId\('([^']+)'\)/);
+        if (objectIdMatch && objectIdMatch[1]) {
+          vendorId = objectIdMatch[1];
+        } else {
+          const idMatch = venue.vendor.match(
+            /_id:\s*new ObjectId\('([^']+)'\)/
+          );
+          vendorId = idMatch ? idMatch[1] : null;
+        }
+      } else if (venue.vendor?._id) {
+        vendorId = venue.vendor._id;
+      } else {
+        vendorId = venue.vendor;
+      }
+
+      if (!vendorId) {
+        console.error("Vendor ID not found");
+        return;
+      }
+
+      navigate(`/user/chat/${vendorId}`);
+    } catch (error) {
+      console.error("Error extracting vendor ID:", error);
     }
   };
 
@@ -322,7 +352,7 @@ const VenueDetails = () => {
             )}
             <div className="flex space-x-4 mt-8">
               <button
-                onClick={() => navigate(`/user/chat/${venue.vendor._id}`)}
+                onClick={handleChatClick}
                 className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-[#F4A261] text-white rounded-md hover:bg-[#E76F51] transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-5 h-5" />

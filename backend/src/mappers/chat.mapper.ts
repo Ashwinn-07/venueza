@@ -20,23 +20,35 @@ export class ChatMapper {
     return messages.map((message) => this.toMessageResponseDto(message));
   }
 
-  static toConversationResponseDto(conversation: any): ConversationResponseDto {
+  static toConversationResponseDto(
+    conversation: any,
+    currentUserId: string
+  ): ConversationResponseDto {
     return {
-      id: conversation._id?.toString() || "",
-      participants: conversation.participants || [],
-      lastMessage: conversation.lastMessage
-        ? this.toMessageResponseDto(conversation.lastMessage)
-        : ({} as MessageResponseDto),
-      unreadCount: conversation.unreadCount || 0,
-      updatedAt: conversation.updatedAt || new Date(),
+      _id: conversation._id?.toString() || "",
+      partner: {
+        _id: conversation.partner?._id?.toString() || "",
+        name: conversation.partner?.name || "Unknown User",
+        email: conversation.partner?.email || "",
+        profileImage: conversation.partner?.profileImage || undefined,
+      },
+      lastMessage: {
+        content: conversation.lastMessage?.content || "",
+        createdAt:
+          conversation.lastMessage?.createdAt?.toISOString() ||
+          new Date().toISOString(),
+        sender: conversation.lastMessage?.sender?.toString() || "",
+      },
+      unreadCount: 0,
     };
   }
 
   static toConversationResponseDtoArray(
-    conversations: any[]
+    conversations: any[],
+    currentUserId: string
   ): ConversationResponseDto[] {
     return conversations.map((conversation) =>
-      this.toConversationResponseDto(conversation)
+      this.toConversationResponseDto(conversation, currentUserId)
     );
   }
 }

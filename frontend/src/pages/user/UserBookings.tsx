@@ -261,7 +261,7 @@ const UserBookings = () => {
 
                             <div className="border-t pt-4 flex justify-between items-center">
                               <div>
-                                {!booking.advancePaid ? (
+                                {!booking.advanceAmount ? (
                                   <p className="text-red-500 text-sm">
                                     Advance payment pending
                                   </p>
@@ -288,7 +288,7 @@ const UserBookings = () => {
                                   booking.status === "advance_paid") && (
                                   <button
                                     onClick={() =>
-                                      handleCancelBookingConfirm(booking._id)
+                                      handleCancelBookingConfirm(booking.id)
                                     }
                                     className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 text-sm cursor-pointer"
                                   >
@@ -302,7 +302,7 @@ const UserBookings = () => {
                                     <button
                                       onClick={() =>
                                         navigate(
-                                          `/user/bookings/balance/${booking._id}`
+                                          `/user/bookings/balance/${booking.id}`
                                         )
                                       }
                                       className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"
@@ -315,7 +315,7 @@ const UserBookings = () => {
                                   <button
                                     onClick={() =>
                                       navigate(
-                                        `/user/bookings/details/${booking._id}`
+                                        `/user/bookings/details/${booking.id}`
                                       )
                                     }
                                     className="px-3 py-1 bg-[#F4A261] hover:bg-[#E76F51] text-white rounded-md text-sm cursor-pointer"

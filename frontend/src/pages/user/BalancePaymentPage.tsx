@@ -48,7 +48,7 @@ const BalancePaymentPage = () => {
 
       if (!booking.razorpayBalanceOrderId) {
         try {
-          const response = await createBalancePaymentOrder(booking._id);
+          const response = await createBalancePaymentOrder(booking.id);
           setBooking(response.booking);
         } catch (err) {
           console.error("Error creating balance payment order:", err);

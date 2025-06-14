@@ -83,10 +83,7 @@ const PaymentPage = () => {
 
       setPaymentDetails(paymentData);
 
-      const verificationResponse = await verifyPayment(
-        booking._id,
-        paymentData
-      );
+      const verificationResponse = await verifyPayment(booking.id, paymentData);
 
       if (verificationResponse.booking) {
         setPaymentStatus("success");
@@ -159,7 +156,7 @@ const PaymentPage = () => {
                     <span className="text-gray-600">Payment ID:</span>
                     <span>{paymentDetails?.paymentId || "N/A"}</span>
                     <span className="text-gray-600">Booking ID:</span>
-                    <span>{booking?._id || "N/A"}</span>
+                    <span>{booking?.id || "N/A"}</span>
                     <span className="text-gray-600">Amount Paid:</span>
                     <span>₹{booking?.advanceAmount || "0"}</span>
                   </div>

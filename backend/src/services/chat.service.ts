@@ -76,11 +76,12 @@ export class ChatService implements IChatService {
     userId: string
   ): Promise<{ response: ConversationsListResponseDto; status: number }> {
     const conversations = await this.messageRepo.aggregateConversations(userId);
+    console.log(conversations);
 
     return {
       response: {
         message: MESSAGES.SUCCESS.CONVERSATIONS_FETCHED,
-        data: ChatMapper.toConversationResponseDtoArray(conversations),
+        data: ChatMapper.toConversationResponseDtoArray(conversations, userId),
       },
       status: STATUS_CODES.OK,
     };

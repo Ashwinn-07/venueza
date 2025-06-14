@@ -34,7 +34,7 @@ const ViewAllVenues = () => {
           price: criteria.price ? Number(criteria.price) : undefined,
         };
         const response = await getUserVenues(params);
-        setVenues(response.result?.venues || []);
+        setVenues(response.venues || []);
         setTotalCount(response.result?.totalCount || 0);
         setCurrentPage(page);
       } catch (err) {
@@ -92,7 +92,7 @@ const ViewAllVenues = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           {venues.map((venue: any) => (
-            <VenueCard key={venue._id} venue={venue} />
+            <VenueCard key={venue.id} venue={venue} />
           ))}
         </div>
 

@@ -40,6 +40,8 @@ export class BookingResponseDto {
   venue?: {
     name: string;
     location?: string;
+    images?: string[];
+    address?: string;
   };
 }
 

@@ -46,7 +46,7 @@ const TransactionHistoryPage = () => {
       headers.join(","),
       ...bookings.map((booking) =>
         [
-          booking._id,
+          booking.id,
           booking.venue?.name || "N/A",
           format(new Date(booking.startDate), "MMM dd, yyyy"),
           format(new Date(booking.endDate), "MMM dd, yyyy"),
@@ -164,9 +164,9 @@ const TransactionHistoryPage = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {currentBookings.map((booking) => (
-                        <tr key={booking._id} className="hover:bg-gray-50">
+                        <tr key={booking.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                            {booking._id.substring(0, 8)}...
+                            {booking.id.substring(0, 8)}...
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                             {booking.venue?.name || "N/A"}

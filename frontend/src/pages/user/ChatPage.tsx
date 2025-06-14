@@ -43,6 +43,8 @@ const ChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  const currentUserId = user?.userId || user?.id;
+
   useEffect(() => {
     const socketInstance = io(
       import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"
@@ -56,7 +58,8 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (!socket || !user || !vendorId) return;
-    const senderId = user.userId || user.id;
+
+    const senderId = currentUserId;
 
     const room = [senderId, vendorId].sort().join("-");
 
@@ -69,20 +72,18 @@ const ChatPage = () => {
     return () => {
       socket.off("receiveMessage");
     };
-  }, [socket, user, vendorId]);
+  }, [socket, user, vendorId, currentUserId]);
 
   useEffect(() => {
     if (!socket || !user || !vendorId) return;
 
-    const currentUserId = user.userId || user.id;
-
     socket.on("messagesRead", ({ conversation }) => {
-      console.log("Messages read event received:", conversation);
-
       setMessages((prev) =>
         prev.map((msg) => {
           const messageSenderId =
-            typeof msg.sender === "object" ? msg.sender._id : msg.sender;
+            typeof msg.sender === "object"
+              ? msg.sender._id.toString()
+              : msg.sender;
 
           if (
             messageSenderId === currentUserId &&
@@ -98,7 +99,7 @@ const ChatPage = () => {
     return () => {
       socket.off("messagesRead");
     };
-  }, [socket, user, vendorId]);
+  }, [socket, user, vendorId, currentUserId]);
 
   useEffect(() => {
     if (!user || !vendorId) return;
@@ -106,7 +107,7 @@ const ChatPage = () => {
     const fetchConversation = async () => {
       try {
         setLoading(true);
-        const senderId = user.userId || user.id;
+        const senderId = currentUserId;
         const result = await getConversation(senderId, vendorId);
 
         if (result && result.data) {
@@ -125,7 +126,7 @@ const ChatPage = () => {
     };
 
     fetchConversation();
-  }, [user, vendorId, getConversation]);
+  }, [user, vendorId, getConversation, currentUserId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -166,7 +167,7 @@ const ChatPage = () => {
     try {
       setSending(true);
 
-      const senderId = user.userId || user.id;
+      const senderId = currentUserId;
 
       const room = [senderId, vendorId].sort().join("-");
 
@@ -224,6 +225,26 @@ const ChatPage = () => {
       .join("")
       .toUpperCase()
       .substring(0, 2);
+  };
+  const normalizeId = (id: any): string | null => {
+    if (!id) return null;
+
+    if (typeof id === "string") {
+      const objectIdMatch = id.match(/new ObjectId\('([^']+)'\)/);
+      if (objectIdMatch && objectIdMatch[1]) {
+        return objectIdMatch[1];
+      }
+      return id;
+    }
+
+    if (typeof id === "object") {
+      if (id._id) {
+        return id._id.toString();
+      }
+      return id.toString();
+    }
+
+    return id.toString();
   };
 
   const messageGroups = groupMessagesByDate();
@@ -289,13 +310,8 @@ const ChatPage = () => {
 
                 <div className="space-y-4">
                   {messagesForDate.map((message) => {
-                    const senderId =
-                      typeof message.sender === "object"
-                        ? message.sender._id
-                        : message.sender;
-
-                    const isCurrentUser =
-                      senderId === (user?.userId || user?.id);
+                    const senderId = normalizeId(message.sender);
+                    const isCurrentUser = senderId === currentUserId;
 
                     return (
                       <div
@@ -335,20 +351,12 @@ const ChatPage = () => {
                               isCurrentUser ? "text-gray-200" : "text-gray-500"
                             }`}
                           >
-                            <div
-                              className={`text-xs mt-1 text-right ${
-                                isCurrentUser
-                                  ? "text-gray-200"
-                                  : "text-gray-500"
-                              }`}
-                            >
-                              {formatTime(message.createdAt)}
-                              {isCurrentUser && (
-                                <span className="ml-1">
-                                  {message.readAt ? "✓✓" : "✓"}
-                                </span>
-                              )}
-                            </div>
+                            {formatTime(message.createdAt)}
+                            {isCurrentUser && (
+                              <span className="ml-1">
+                                {message.readAt ? "✓✓" : "✓"}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

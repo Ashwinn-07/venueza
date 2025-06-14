@@ -36,6 +36,8 @@ export class BookingMapper {
         ? {
             name: (booking.venue as any).name,
             location: (booking.venue as any).location,
+            images: (booking.venue as any).images,
+            address: (booking.venue as any).address,
           }
         : undefined,
     };

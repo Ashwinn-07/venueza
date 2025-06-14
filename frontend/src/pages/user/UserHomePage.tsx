@@ -14,7 +14,7 @@ const UserHomePage = () => {
     const fetchFeaturedVenues = async () => {
       try {
         const response = await getFeaturedVenues();
-        setVenues(response.result?.venues || []);
+        setVenues(response.venues || []);
       } catch (err) {
         setError("Failed to load venues");
         console.error("Venue fetch error:", err);
@@ -70,7 +70,7 @@ const UserHomePage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {venues.map((venue) => (
-                <VenueCard key={venue._id} venue={venue} />
+                <VenueCard key={venue.id} venue={venue} />
               ))}
             </div>
           </section>

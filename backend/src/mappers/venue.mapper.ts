@@ -17,6 +17,15 @@ export class VenueMapper {
       status: venue.status,
       verificationStatus: venue.verificationStatus,
       rejectionReason: venue.rejectionReason,
+      venue: venue.name
+        ? {
+            name: venue.name,
+            location: `${venue.location.coordinates[1]}, ${venue.location.coordinates[0]}`,
+            images: venue.images,
+            address: venue.address,
+            vendor: venue.vendor.toString(),
+          }
+        : undefined,
     };
   }
 

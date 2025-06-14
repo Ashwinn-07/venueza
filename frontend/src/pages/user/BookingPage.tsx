@@ -57,7 +57,7 @@ const BookingPage = () => {
       try {
         setLoading(true);
         const response = await getUserVenue(venueId);
-        const venueData = response.result?.venue;
+        const venueData = response.venue;
         setVenue(venueData);
       } catch (err) {
         console.error("Error fetching venue:", err);
@@ -179,10 +179,10 @@ const BookingPage = () => {
         totalPrice,
       };
       const response = await createBooking(venueId, bookingData);
-      if (!response?.booking?._id) {
+      if (!response?.booking?.id) {
         throw new Error("Invalid booking response from server");
       }
-      navigate(`/user/payment/${response.booking._id}`);
+      navigate(`/user/payment/${response.booking.id}`);
     } catch (err) {
       console.error("Error creating booking:", err);
       setError("Failed to create booking. Please try again later.");

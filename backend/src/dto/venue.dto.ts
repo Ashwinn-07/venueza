@@ -43,6 +43,13 @@ export class VenueResponseDto {
   status!: "open" | "closed";
   verificationStatus!: "pending" | "approved" | "rejected";
   rejectionReason?: string;
+  venue?: {
+    name: string;
+    location?: string;
+    images?: string[];
+    address?: string;
+    vendor?: string;
+  };
 }
 
 export class VenueListResponseDto {

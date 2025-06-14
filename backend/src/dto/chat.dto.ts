@@ -21,14 +21,19 @@ export class MessageResponseDto {
 }
 
 export class ConversationResponseDto {
-  id!: string;
-  participants!: {
-    user: string;
-    userModel: string;
-  }[];
-  lastMessage!: MessageResponseDto;
+  _id!: string;
+  partner!: {
+    _id: string;
+    name: string;
+    email: string;
+    profileImage?: string;
+  };
+  lastMessage!: {
+    content: string;
+    createdAt: string;
+    sender: string;
+  };
   unreadCount!: number;
-  updatedAt!: Date;
 }
 
 export class SendMessageResponseDto {

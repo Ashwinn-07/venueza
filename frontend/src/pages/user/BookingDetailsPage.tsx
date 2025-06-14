@@ -158,7 +158,7 @@ const BookingDetailsPage = () => {
                 {status.toUpperCase()}
               </span>
             </div>
-            <p className="text-teal-200 mt-1">Reference ID: {booking._id}</p>
+            <p className="text-teal-200 mt-1">Reference ID: {booking.id}</p>
           </div>
 
           <div className="p-6">
@@ -216,7 +216,7 @@ const BookingDetailsPage = () => {
                         : "text-red-600 font-medium"
                     }
                   >
-                    {booking.advancePaid ? "Completed" : "Pending"}
+                    {booking.advanceAmount ? "Completed" : "Pending"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">

@@ -5,7 +5,7 @@ const VenueCard = ({
   venue,
 }: {
   venue: {
-    _id: string;
+    id: string;
     name: string;
     address: string;
     capacity: number;
@@ -17,7 +17,7 @@ const VenueCard = ({
 
   return (
     <div
-      onClick={() => navigate(`/user/venues/${venue._id}`)}
+      onClick={() => navigate(`/user/venues/${venue.id}`)}
       className="flex flex-col rounded-lg overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-[#F4A261] bg-white cursor-pointer"
     >
       <div className="relative h-48 overflow-hidden group">
