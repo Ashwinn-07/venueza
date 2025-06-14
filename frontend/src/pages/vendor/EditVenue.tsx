@@ -56,38 +56,40 @@ const EditVenue = () => {
       try {
         const venueData = await getVenue(id);
 
-        if (venueData) {
+        if (venueData && venueData.venue) {
+          const venue = venueData.venue;
+
           setFormData({
-            name: venueData.name || "",
-            address: venueData.address || "",
-            pricing: venueData.price?.toString() || "",
-            capacity: venueData.capacity?.toString() || "",
-            status: venueData.status || "open",
+            name: venue.name || "",
+            address: venue.address || "",
+            pricing: venue.price?.toString() || "",
+            capacity: venue.capacity?.toString() || "",
+            status: venue.status || "open",
           });
 
-          if (venueData.services && Array.isArray(venueData.services)) {
-            setSelectedServices(venueData.services);
+          if (venue.services && Array.isArray(venue.services)) {
+            setSelectedServices(venue.services);
           }
 
-          if (venueData.location?.coordinates) {
+          if (venue.location?.coordinates) {
             setCoordinates({
-              lat: venueData.location.coordinates[1],
-              lng: venueData.location.coordinates[0],
+              lat: venue.location.coordinates[1],
+              lng: venue.location.coordinates[0],
             });
           }
 
-          if (venueData.images && venueData.images.length > 0) {
+          if (venue.images && venue.images.length > 0) {
             setExistingImages(
-              venueData.images.map((url: string, index: number) => ({
+              venue.images.map((url: string, index: number) => ({
                 id: `img-${index}`,
                 url,
               }))
             );
           }
 
-          if (venueData.documents && venueData.documents.length > 0) {
+          if (venue.documents && venue.documents.length > 0) {
             setExistingDocuments(
-              venueData.documents.map((url: string, index: number) => {
+              venue.documents.map((url: string, index: number) => {
                 const filename =
                   url.split("/").pop() || `Document ${index + 1}`;
                 return {

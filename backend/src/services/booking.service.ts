@@ -516,6 +516,7 @@ export class BookingService implements IBookingService {
     const transactions = await this.bookingRepo.getVendorTransactionHistory(
       vendorId
     );
+
     return {
       response: {
         message: MESSAGES.SUCCESS.TRANSACTION_HISTORY_FETCHED,

@@ -29,7 +29,7 @@ export const vendorService = {
   },
   getVenue: async (venueId: string) => {
     const response = await vendorApi.get(`/venues/${venueId}`);
-    return response.data.result.venue;
+    return response.data;
   },
   updateVenue: async (venueId: string, venueData: any) => {
     const response = await vendorApi.put(`/venues/${venueId}`, venueData);

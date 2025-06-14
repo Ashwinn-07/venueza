@@ -63,6 +63,9 @@ export class BookingMapper {
   }
 
   static toTransactionHistoryDto(transaction: any): TransactionHistoryDto {
+    if (transaction.vendorReceives) {
+      transaction.commission = transaction.vendorReceives;
+    }
     return {
       bookingId: transaction._id || transaction.bookingId,
       totalPrice: transaction.totalPrice,

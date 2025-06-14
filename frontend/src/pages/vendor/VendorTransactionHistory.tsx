@@ -5,7 +5,7 @@ import { useAuthStore } from "../../stores/authStore";
 interface Transaction {
   bookingId: string;
   totalPrice: number;
-  vendorReceives: number;
+  commission: number;
   bookingDate: string;
 }
 
@@ -21,7 +21,7 @@ const VendorTransactionHistory = () => {
     try {
       setLoading(true);
       const response = await getVendorTransactionHistory();
-      console.log(response);
+
       setTransactions(response.data);
     } catch (err: any) {
       console.error("Error fetching vendor transaction history:", err);
@@ -49,7 +49,7 @@ const VendorTransactionHistory = () => {
         [
           t.bookingId,
           t.totalPrice,
-          t.vendorReceives,
+          t.commission,
           new Date(t.bookingDate).toLocaleDateString(),
         ].join(",")
       ),
@@ -158,7 +158,7 @@ const VendorTransactionHistory = () => {
                         ₹{transaction.totalPrice}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
-                        ₹{transaction.vendorReceives.toFixed(2)}
+                        ₹{transaction.commission.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(transaction.bookingDate).toLocaleDateString()}
