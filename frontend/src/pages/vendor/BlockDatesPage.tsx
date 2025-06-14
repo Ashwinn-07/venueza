@@ -21,7 +21,7 @@ const BlockDatesPage = () => {
     const fetchVenues = async () => {
       try {
         const response = await getVenues("all");
-        const approvedVenues = (response.result?.venues || []).filter(
+        const approvedVenues = (response.venues || []).filter(
           (venue: any) => venue.verificationStatus === "approved"
         );
         setVenues(approvedVenues);
@@ -89,7 +89,7 @@ const BlockDatesPage = () => {
             >
               <option value="">Select a Venue</option>
               {venues.map((venue) => (
-                <option key={venue._id} value={venue._id}>
+                <option key={venue.id} value={venue.id}>
                   {venue.name}
                 </option>
               ))}

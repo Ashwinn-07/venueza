@@ -32,7 +32,7 @@ const VendorReviews = () => {
     const loadVenues = async () => {
       try {
         const response = await getVenues("all");
-        setVenues(response.result?.venues);
+        setVenues(response.venues);
         if (response.venues && response.venues.length > 0) {
           setSelectedVenue(response.venues[0]);
         }
@@ -51,7 +51,7 @@ const VendorReviews = () => {
       if (selectedVenue) {
         try {
           setIsLoading(true);
-          const response = await getReviewsVendor(selectedVenue._id);
+          const response = await getReviewsVendor(selectedVenue.id);
           setReviews(response.reviews);
         } catch (error) {
           console.error("Failed to load reviews:", error);
@@ -122,10 +122,10 @@ const VendorReviews = () => {
 
     try {
       setIsSubmitting(true);
-      await vendorReplyReview(selectedReview._id, replyText);
+      await vendorReplyReview(selectedReview.id, replyText);
 
       const updatedReviews = reviews.map((review: any) =>
-        review._id === selectedReview._id
+        review.id === selectedReview.id
           ? { ...review, vendorReply: replyText }
           : review
       );
@@ -232,7 +232,7 @@ const VendorReviews = () => {
                   {filteredVenues.length > 0 ? (
                     filteredVenues.map((venue: any) => (
                       <tr
-                        key={venue._id}
+                        key={venue.id}
                         className={`hover:bg-gray-50 transition duration-150 ${
                           selectedVenue && selectedVenue._id === venue._id
                             ? "bg-teal-50"
@@ -385,7 +385,7 @@ const VendorReviews = () => {
                           {currentReviews.length > 0 ? (
                             currentReviews.map((review: any) => (
                               <tr
-                                key={review._id}
+                                key={review.id}
                                 className="hover:bg-gray-50 transition duration-150"
                               >
                                 <td className="px-6 py-4 whitespace-nowrap">

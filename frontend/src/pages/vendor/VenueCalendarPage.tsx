@@ -103,12 +103,12 @@ const VenueCalendarPage = () => {
       try {
         setLoading(true);
         const response = await getVenues("all");
-        const approvedVenues = (response.result?.venues || []).filter(
+        const approvedVenues = (response.venues || []).filter(
           (venue: any) => venue.verificationStatus === "approved"
         );
         setVenues(approvedVenues);
         if (approvedVenues.length > 0) {
-          setSelectedVenueId(approvedVenues[0]._id);
+          setSelectedVenueId(approvedVenues[0].id);
         }
       } catch (err: any) {
         setError(err.message || "Failed to fetch venues.");
@@ -128,7 +128,7 @@ const VenueCalendarPage = () => {
       try {
         setLoading(true);
         const selectedVenue = venues.find(
-          (venue) => venue._id === selectedVenueId
+          (venue) => venue.id === selectedVenueId
         );
 
         const venueData: VenueBookingData = {
@@ -174,7 +174,7 @@ const VenueCalendarPage = () => {
 
         if (selectedVenueId) {
           const selectedVenue = venues.find(
-            (venue) => venue._id === selectedVenueId
+            (venue) => venue.id === selectedVenueId
           );
           setCalendarData([
             {
@@ -282,7 +282,7 @@ const VenueCalendarPage = () => {
             >
               {venues.length > 0 ? (
                 venues.map((venue) => (
-                  <option key={venue._id} value={venue._id}>
+                  <option key={venue.id} value={venue.id}>
                     {venue.name}
                   </option>
                 ))

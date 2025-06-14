@@ -21,6 +21,7 @@ const VendorTransactionHistory = () => {
     try {
       setLoading(true);
       const response = await getVendorTransactionHistory();
+      console.log(response);
       setTransactions(response.data);
     } catch (err: any) {
       console.error("Error fetching vendor transaction history:", err);

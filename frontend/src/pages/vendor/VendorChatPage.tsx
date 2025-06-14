@@ -42,6 +42,8 @@ const VendorChatPage = () => {
   const [imageUploadLoading, setImageUploadLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const currentUserId = user?.userId || user?.id;
+
   useEffect(() => {
     const socketInstance = io(
       import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"
@@ -214,6 +216,27 @@ const VendorChatPage = () => {
       .substring(0, 2);
   };
 
+  const normalizeId = (id: any): string | null => {
+    if (!id) return null;
+
+    if (typeof id === "string") {
+      const objectIdMatch = id.match(/new ObjectId\('([^']+)'\)/);
+      if (objectIdMatch && objectIdMatch[1]) {
+        return objectIdMatch[1];
+      }
+      return id;
+    }
+
+    if (typeof id === "object") {
+      if (id._id) {
+        return id._id.toString();
+      }
+      return id.toString();
+    }
+
+    return id.toString();
+  };
+
   const messageGroups = groupMessagesByDate();
 
   if (loading && messages.length === 0) {
@@ -282,12 +305,8 @@ const VendorChatPage = () => {
 
                   <div className="space-y-4">
                     {messagesForDate.map((message) => {
-                      const senderId =
-                        typeof message.sender === "object"
-                          ? message.sender._id
-                          : message.sender;
-
-                      const isVendor = senderId === user?.id;
+                      const senderId = normalizeId(message.sender);
+                      const isVendor = senderId === currentUserId;
                       return (
                         <div
                           key={message._id}

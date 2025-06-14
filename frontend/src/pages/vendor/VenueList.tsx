@@ -19,7 +19,8 @@ const VenueList = () => {
     const fetchVenues = async () => {
       try {
         const response = await getVenues(filter);
-        setVenues(response.result?.venues || []);
+        setVenues(response.venues || []);
+        console.log(response.venues);
       } catch (err: any) {
         setError(err.message || "Failed to fetch venues.");
         console.error("Fetch error:", err);
@@ -113,7 +114,7 @@ const VenueList = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {currentVenues.map((venue) => (
               <div
-                key={venue._id}
+                key={venue.id}
                 className="bg-white rounded-lg shadow-sm overflow-hidden"
               >
                 <img
@@ -161,9 +162,7 @@ const VenueList = () => {
                       {venue.verificationStatus !== "rejected" && (
                         <button
                           className="text-blue-600 hover:text-blue-700 cursor-pointer"
-                          onClick={() =>
-                            navigate(`/vendor/venues/${venue._id}`)
-                          }
+                          onClick={() => navigate(`/vendor/venues/${venue.id}`)}
                         >
                           Edit Venue
                         </button>
