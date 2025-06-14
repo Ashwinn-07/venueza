@@ -188,7 +188,7 @@ const UserBookings = () => {
                   <div className="space-y-6">
                     {currentBookings.map((booking) => (
                       <div
-                        key={booking._id}
+                        key={booking.id}
                         className="border border-gray-200 rounded-lg overflow-hidden shadow-sm"
                       >
                         <div className="md:flex">
@@ -295,7 +295,7 @@ const UserBookings = () => {
                                     Cancel
                                   </button>
                                 )}
-                                {booking.advancePaid &&
+                                {booking.advanceAmount &&
                                   booking.balanceDue > 0 &&
                                   booking.status !== "cancelled_by_user" &&
                                   booking.status !== "cancelled_by_vendor" && (

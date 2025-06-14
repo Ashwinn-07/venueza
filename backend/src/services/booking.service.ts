@@ -93,10 +93,12 @@ export class BookingService implements IBookingService {
     razorpaySignature: string
   ): Promise<{ response: VerifyPaymentResponseDto; status: number }> {
     const booking = await this.bookingRepo.findById(bookingId);
+
     if (!booking) {
       throw new Error("No booking found");
     }
     const orderId = booking.razorpayOrderId;
+
     if (!orderId) {
       throw new Error("Order Id is missing");
     }
@@ -112,6 +114,7 @@ export class BookingService implements IBookingService {
     booking.advancePaid = true;
     booking.paymentId = paymentId;
     const updatedBooking = await this.bookingRepo.update(bookingId, booking);
+    console.log(updatedBooking);
     if (!updatedBooking) {
       throw new Error("Failed to update booking after payment");
     }
