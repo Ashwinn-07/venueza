@@ -17,7 +17,13 @@ const UserProfile = () => {
     phone: "",
     profileImage: "",
   });
+  const [originalFormData, setOriginalFormData] = useState({
+    name: "",
+    phone: "",
+    profileImage: "",
+  });
   const [imagePreview, setImagePreview] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -25,14 +31,40 @@ const UserProfile = () => {
       return;
     }
     if (user) {
-      setFormData({
+      const userData = {
         name: user.name || "",
         phone: user.phone || "",
         profileImage: user.profileImage || "",
-      });
+      };
+      setFormData(userData);
+      setOriginalFormData(userData);
       setImagePreview(user.profileImage || "");
+      setHasUnsavedChanges(false);
     }
   }, [user, isAuthenticated, navigate]);
+
+  useEffect(() => {
+    const hasChanges =
+      formData.name !== originalFormData.name ||
+      formData.phone !== originalFormData.phone ||
+      formData.profileImage !== originalFormData.profileImage;
+
+    setHasUnsavedChanges(hasChanges);
+  }, [formData, originalFormData]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,6 +87,10 @@ const UserProfile = () => {
   };
 
   const handleSave = async () => {
+    if (!hasUnsavedChanges) {
+      notifyError("No changes to save");
+      return;
+    }
     if (!formData.name.trim()) {
       notifyError("Name cannot be empty");
       return;
@@ -66,6 +102,8 @@ const UserProfile = () => {
     setIsLoading(true);
     try {
       await updateProfile(formData);
+      setOriginalFormData(formData);
+      setHasUnsavedChanges(false);
       notifySuccess("Profile updated successfully!");
     } catch (err: any) {
       const errMsg =
@@ -105,6 +143,10 @@ const UserProfile = () => {
     });
   };
   const handleSaveConfirm = () => {
+    if (!hasUnsavedChanges) {
+      notifyError("No changes to save");
+      return;
+    }
     confirmAlert({
       title: "Confirm Updates",
       message: "Are you sure you want to update your details?",
@@ -115,6 +157,27 @@ const UserProfile = () => {
         },
         {
           label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
+  };
+  const handleDiscardChanges = () => {
+    confirmAlert({
+      title: "Discard Changes",
+      message: "Are you sure you want to discard all unsaved changes?",
+      buttons: [
+        {
+          label: "Discard",
+          onClick: () => {
+            setFormData(originalFormData);
+            setImagePreview(originalFormData.profileImage);
+            setHasUnsavedChanges(false);
+            notifySuccess("Changes discarded");
+          },
+        },
+        {
+          label: "Cancel",
           onClick: () => {},
         },
       ],
@@ -131,6 +194,34 @@ const UserProfile = () => {
             </div>
 
             <div className="p-6">
+              {hasUnsavedChanges && (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <svg
+                        className="w-5 h-5 text-amber-600 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span className="text-amber-800 font-medium">
+                        You have unsaved changes
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleDiscardChanges}
+                      className="text-amber-700 hover:text-amber-900 text-sm font-medium underline"
+                    >
+                      Discard Changes
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="space-y-6">
                 <div>
                   <label
