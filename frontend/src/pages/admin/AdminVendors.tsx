@@ -71,7 +71,11 @@ const AdminVendors = () => {
     setProcessingVendorId(vendorId);
     try {
       await updateVendorStatus(vendorId, newStatus);
-      await loadVendors(searchTerm);
+      setVendors((prevVendors) =>
+        prevVendors.map((vendor) =>
+          vendor.id === vendorId ? { ...vendor, status: newStatus } : vendor
+        )
+      );
 
       if (newStatus === "blocked") {
         notifySuccess("Vendor blocked successfully");

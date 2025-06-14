@@ -45,7 +45,11 @@ const AdminUsers = () => {
     setProcessingUserId(userId);
     try {
       await updateUserStatus(userId, newStatus);
-      await loadUsers(searchTerm);
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, status: newStatus } : user
+        )
+      );
 
       if (newStatus === "blocked") {
         notifySuccess("User blocked successfully");
