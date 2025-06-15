@@ -17,6 +17,7 @@ const VendorReviews = () => {
   const [reviews, setReviews] = useState<any>([]);
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
@@ -27,6 +28,18 @@ const VendorReviews = () => {
   const itemsPerPage = 5;
 
   const [modalParent] = useAnimation();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
 
   useEffect(() => {
     const loadVenues = async () => {
@@ -76,15 +89,19 @@ const VendorReviews = () => {
 
   const filteredVenues = venues.filter(
     (venue: any) =>
-      venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      venue.address.toLowerCase().includes(searchTerm.toLowerCase())
+      venue.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      venue.address.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const filteredReviews = reviews.filter(
     (review: any) =>
-      review.reviewText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.reviewText
+        .toLowerCase()
+        .includes(debouncedSearchTerm.toLowerCase()) ||
       (review.user.name &&
-        review.user.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        review.user.name
+          .toLowerCase()
+          .includes(debouncedSearchTerm.toLowerCase()))
   );
 
   const indexOfLastItem = currentPage * itemsPerPage;
